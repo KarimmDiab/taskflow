@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
 use App\Models\CustomerSalesInvoice;
+use App\Models\SalesInvoice;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +20,8 @@ class CustomerSalesInvoiceFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'sales_invoice_id' => SalesInvoice::inRandomOrder()->value('id'),
+            'customer_id' => Customer::inRandomOrder()->value('id'),
         ];
     }
 }

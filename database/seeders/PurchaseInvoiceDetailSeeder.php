@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\PurchaseInvoiceDetail;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,6 @@ class PurchaseInvoiceDetailSeeder extends Seeder
      */
     public function run(): void
     {
-        //
+        PurchaseInvoiceDetail::factory(10)->create();
     }
 }

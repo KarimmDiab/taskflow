@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\ExpensesDetail;
+use App\Models\ExpensesItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,7 +19,10 @@ class ExpensesDetailFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'expenses_date' => fake()->date(),
+            'expenses_cost' => fake()->numberBetween(300 , 100),
+            'expenses_note' => fake()->sentence(10),
+            'expenses_item_id' => ExpensesItem::inRandomOrder()->first()->id,
         ];
     }
 }

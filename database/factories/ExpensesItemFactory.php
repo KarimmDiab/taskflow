@@ -18,7 +18,7 @@ class ExpensesItemFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'expenses_name' => fake()->name()
         ];
     }
 }

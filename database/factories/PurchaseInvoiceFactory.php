@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\PurchaseInvoice;
+use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,8 +18,17 @@ class PurchaseInvoiceFactory extends Factory
      */
     public function definition(): array
     {
+        $total = fake()->numberBetween(1000, 5000);
+        $paid = fake()->numberBetween(0, $total);
+
         return [
-            //
+            'purchase_invoice_date' => fake()->date(),
+            'total_amount' => $total,
+            'paid_amount' => $paid,
+            'payment_method' => fake()->randomElement(['visa', 'credit', 'cash', 'instapay']),
+            'remaining_amount' => $total - $paid,
+            'supplier_id' => Supplier::inRandomOrder()->first()->id,
+
         ];
     }
 }
