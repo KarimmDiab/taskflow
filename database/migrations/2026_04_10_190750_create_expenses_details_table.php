@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('expenses_details', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_name');
-            $table->string('contact_info');
+            $table->date('expenses_date');
+            $table->decimal('expenses_cost',10,2)->unsigned()->default(0);
+            $table->string('expenses_note');
+            $table->string('expenses_image')->nullable();
+            $table->foreignId('expenses_item_id')->constrained('expenses_items')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
             $table->softDeletes();
             $table->engine('InnoDB');
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('expenses_details');
     }
 };

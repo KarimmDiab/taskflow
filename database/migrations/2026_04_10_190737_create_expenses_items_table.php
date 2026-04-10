@@ -11,10 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customers', function (Blueprint $table) {
+        Schema::create('expenses_items', function (Blueprint $table) {
             $table->id();
-            $table->string('customer_name');
-            $table->string('contact_info');
+            $table->string('expenses_name');
             $table->timestamps();
             $table->softDeletes();
             $table->engine('InnoDB');
@@ -26,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customers');
+        Schema::dropIfExists('expenses_items');
     }
 };

@@ -13,7 +13,16 @@ return new class extends Migration
     {
         Schema::create('sales_invoices', function (Blueprint $table) {
             $table->id();
+            $table->decimal('total_amount', 10, 2)->unsigned()->default(0);
+            $table->decimal('deduction', 10, 2)->unsigned()->default(0);
+            $table->decimal('net_total', 10, 2)->unsigned()->default(0);
+            $table->decimal('paid_amount', 10, 2)->unsigned()->default(0);
+            $table->decimal('remaining_amount', 10, 2)->unsigned()->default(0);
+            $table->string('payment_method');
+            $table->foreignId('user_id')->constrained('users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
+            $table->softDeletes();
+            $table->engine('InnoDB');
         });
     }
 
