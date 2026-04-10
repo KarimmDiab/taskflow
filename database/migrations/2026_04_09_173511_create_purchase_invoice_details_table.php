@@ -13,7 +13,13 @@ return new class extends Migration
     {
         Schema::create('purchase_invoice_details', function (Blueprint $table) {
             $table->id();
+            $table->integer('product_quantity')->unsigned()->default(0);
+            $table->decimal('cost_per_pice')->unsigned()->default(0);
+            $table->foreignId('product_id')->constrained('products')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('purchase_invoice_id')->constrained('purchase_invoices')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
+            $table->softDeletes();
+            $table->engine('InnoDB');
         });
     }
 
