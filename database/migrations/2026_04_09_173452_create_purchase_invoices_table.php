@@ -20,6 +20,7 @@ return new class extends Migration
             $table->decimal('remaining_amount',10,2)->unsigned()->default(0);
             $table->string('product_image')->nullable();
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('branch_id')->constrained('branches')->onUpdate('cascade')->onDelete('restrict');
             $table->timestamps();
             $table->softDeletes();
             $table->engine('InnoDB');
