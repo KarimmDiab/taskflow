@@ -12,7 +12,7 @@ class UpdateBranchesRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,17 @@ class UpdateBranchesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'branch_name' => 'required|string|max:255|unique:branches,branch_name',
+
+            'branch_address' => 'nullable|string|max:500',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'branch_name.required' => 'اسم الفرع مطلوب',
+            'branch_name.unique' => 'اسم الفرع مستخدم بالفعل',
         ];
     }
 }

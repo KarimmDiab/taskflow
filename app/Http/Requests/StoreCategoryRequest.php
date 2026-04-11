@@ -12,7 +12,7 @@ class StoreCategoryRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,16 @@ class StoreCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'category_name' => 'required|string|max:255|unique:categories,category_name',
+            'category_description' => 'nullable|string|max:255',
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'category_name.required' => 'اسم التصنيف مطلوب',
+            'category_description.unique' => 'اسم التصنيف مستخدم بالفعل',
         ];
     }
 }
