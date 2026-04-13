@@ -33,6 +33,31 @@ class User extends Authenticatable
         ];
     }
 
+    public function purchase_invoices()
+    {
+        return $this->hasMany(PurchaseInvoice::class);
+    }
+
+    public function supplierPayments()
+    {
+        return $this->hasMany(SupplierPayment::class);
+    }
+
+    public function salesinvoices()
+    {
+        return $this->hasMany(SalesInvoice::class);
+    }
+
+    public function customerTransaction()
+    {
+        return $this->hasMany(CustomerTransaction::class);
+    }
+
+    public function expensesDetails()
+    {
+        return $this->hasMany(ExpensesDetail::class);
+    }
+
     /**
      * Get the user's initials
      */

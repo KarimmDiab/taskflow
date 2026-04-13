@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Branches;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -30,7 +31,7 @@ class PurchaseInvoiceFactory extends Factory
             'remaining_amount' => $total - $paid,
             'supplier_id' => Supplier::inRandomOrder()->first()->id,
             'branch_id' => Branches::inRandomOrder()->first()->id,
-
+            'user_id' => User::inRandomOrder()->first()->id,
         ];
     }
 }

@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\ExpensesDetail;
 use App\Models\ExpensesItem;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -23,6 +24,8 @@ class ExpensesDetailFactory extends Factory
             'expenses_cost' => fake()->numberBetween(300 , 100),
             'expenses_note' => fake()->sentence(10),
             'expenses_item_id' => ExpensesItem::inRandomOrder()->first()->id,
+            'user_id' => User::inRandomOrder()->first()->id,
+
         ];
     }
 }

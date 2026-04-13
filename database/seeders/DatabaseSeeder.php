@@ -18,11 +18,7 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'karim diab',
-            'email' => 'karim@karim.com',
-            'password' => '12345678'
-        ]);
+
 
         User::factory(10)->create();
 
@@ -40,7 +36,15 @@ class DatabaseSeeder extends Seeder
             CustomerSalesInvoiceSeeder::class,
             CustomerTransactionSeeder::class,
             ExpensesItemSeeder::class,
-            ExpensesDetailSeeder::class
+            ExpensesDetailSeeder::class,
+            RolePermissionSeeder::class
         ]);
+
+        $admin = User::factory()->create([
+            'name' => 'karim diab',
+            'email' => 'karim@karim.com',
+            'password' => '12345678'
+        ]);
+        $admin->assignRole('admin');
     }
 }
