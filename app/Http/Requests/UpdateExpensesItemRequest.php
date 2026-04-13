@@ -12,7 +12,7 @@ class UpdateExpensesItemRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,22 @@ class UpdateExpensesItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'expenses_name' => [
+                'required',
+                'string',
+                'max:200',
+                'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
+            ],        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'expenses_name.required' => 'بند المصاريف مطلوب',
+            'expenses_name.string' => 'بند المصاريف يجب ان يكون نص',
+            'expenses_name.max' => 'بند المصاريف يجب الا يتعدي 200 حرف',
+            'expenses_name.regex'    => 'اسم المصروف يقبل حروف عربي أو إنجليزي أو أرقام أو _ أو - أو مسافات فقط',
+
         ];
     }
 }

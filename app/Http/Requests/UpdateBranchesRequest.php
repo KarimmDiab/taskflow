@@ -23,9 +23,19 @@ class UpdateBranchesRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'branch_name' => 'required|string|max:255|unique:branches,branch_name',
-
-            'branch_address' => 'nullable|string|max:500',
+            'branch_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
+                'unique:branches,branch_name'
+            ],
+            'branch_address' => [
+                'nullable',
+                'string',
+                'max:500',
+                'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
+            ],
         ];
     }
 
@@ -33,7 +43,10 @@ class UpdateBranchesRequest extends FormRequest
     {
         return [
             'branch_name.required' => 'اسم الفرع مطلوب',
-            'branch_name.unique' => 'اسم الفرع مستخدم بالفعل',
+            'branch_name.unique'   => 'اسم الفرع مستخدم بالفعل',
+            'branch_name.regex'    => 'اسم الفرع يقبل حروف عربي أو إنجليزي أو أرقام أو _ أو - أو مسافات فقط',
+    
+            'branch_address.regex' => 'العنوان يقبل حروف عربي أو إنجليزي أو أرقام أو _ أو - أو مسافات فقط',
         ];
     }
 }

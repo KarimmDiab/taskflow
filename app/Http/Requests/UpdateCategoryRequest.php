@@ -23,8 +23,19 @@ class UpdateCategoryRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_name' => 'required|string|max:255',
-            'category_description' => 'nullable|string|max:255',
+            'category_name' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
+                'unique:categories,category_name'
+            ],
+            'category_description' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
+            ],
         ];
     }
 
@@ -32,7 +43,10 @@ class UpdateCategoryRequest extends FormRequest
     {
         return [
             'category_name.required' => 'اسم التصنيف مطلوب',
-            'category_description.unique' => 'اسم التصنيف مستخدم بالفعل',
+            'category_name.unique'   => 'اسم التصنيف مستخدم بالفعل',
+            'category_name.regex'    => 'اسم التصنيف يقبل حروف عربي أو إنجليزي أو أرقام أو _ أو - أو مسافات فقط',
+    
+            'category_description.regex' => 'الوصف يقبل حروف عربي أو إنجليزي أو أرقام أو _ أو - أو مسافات فقط',
         ];
     }
 }
