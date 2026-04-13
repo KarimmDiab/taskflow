@@ -19,9 +19,21 @@ class CustomerSalesInvoiceFactory extends Factory
      */
     public function definition(): array
     {
+        static $used = [];
+    
+        do {
+            $salesInvoiceId = SalesInvoice::inRandomOrder()->value('id');
+            $customerId = Customer::inRandomOrder()->value('id');
+    
+            $key = $salesInvoiceId . '-' . $customerId;
+    
+        } while (in_array($key, $used));
+    
+        $used[] = $key;
+    
         return [
-            'sales_invoice_id' => SalesInvoice::inRandomOrder()->value('id'),
-            'customer_id' => Customer::inRandomOrder()->value('id'),
+            'sales_invoice_id' => $salesInvoiceId,
+            'customer_id' => $customerId,
         ];
     }
 }
