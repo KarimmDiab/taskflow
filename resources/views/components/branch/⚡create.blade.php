@@ -9,6 +9,9 @@ new class extends Component {
     {
         $this->form->store();
         Flux::modal('add-branch')->close();
+
+        session()->flash('success', 'تم اضافة الفرع بنجاح');
+
         $this->redirectRoute('branches', navigate:true);
     }
 

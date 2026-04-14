@@ -41,13 +41,11 @@ class CreateBranch extends Form
         ];
     }
 
-
-    public function store() 
+    public function store()
     {
-        $this->validate();
-        Branches::create(
-            $this->only('branch_name', 'branch_address')
-        );
+        $data = $this->validate();
+
+        Branches::create($data);
         $this->reset();
     }
 }

@@ -8,6 +8,7 @@ new class extends Component {
 ?>
 
 <div class="space-y-4">
+    <x-flash-message />
     <flux:heading size="xl" class="text-zinc-900 dark:text-white">Branches</flux:heading>
     <flux:subheading class="text-zinc-600 dark:text-zinc-400">manage your branches</flux:subheading>
     <flux:separator variant="subtle" />
@@ -19,5 +20,7 @@ new class extends Component {
     </flux:modal.trigger>
 
     <livewire:branch.create />
-    
+
+
+
 </div>
