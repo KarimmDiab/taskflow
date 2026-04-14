@@ -14,8 +14,10 @@ new class extends Component {
 
 
     {{-- model button --}}
-    <flux:modal.trigger name="create-branch">
+    <flux:modal.trigger name="add-branch">
         <flux:button variant="primary" color="fuchsia">create branch</flux:button>
     </flux:modal.trigger>
+
+    <livewire:branch.create />
     
 </div>
