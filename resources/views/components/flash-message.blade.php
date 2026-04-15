@@ -16,7 +16,7 @@
             x-show = "show"
             x-init = "setTimeout(() => show =false, 4000)"
             x-transition
-            class="fixed rop-5 right-5 p-4 rounded-lg shadow-lg z-50 {{ $bgColor }}"
+            class="fixed top-5  p-4 rounded-lg shadow-lg z-50 {{ $bgColor }}"
             >
 
             {{ session($type) }}

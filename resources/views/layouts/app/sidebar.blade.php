@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl" dark">
 
 <head>
     @include('partials.head')
@@ -18,18 +18,18 @@
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('Dashboard') }}
+                    {{ __('لوحة التحكم') }}
                 </flux:sidebar.item>
                 <flux:sidebar.item icon="user" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('Users') }}
+                    {{ __('المستخدمين') }}
                 </flux:sidebar.item>
 
                 <flux:sidebar.item icon="building" :href="route('branches')" :current="request()->routeIs('branches')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('Branches') }}
+                    {{ __('الفروع') }}
                 </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>

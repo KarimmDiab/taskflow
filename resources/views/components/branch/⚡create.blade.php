@@ -12,9 +12,8 @@ new class extends Component {
 
         session()->flash('success', 'تم اضافة الفرع بنجاح');
 
-        $this->redirectRoute('branches', navigate:true);
+        $this->redirectRoute('branches', navigate: true);
     }
-
 };
 ?>
 
@@ -30,7 +29,8 @@ new class extends Component {
 
             <flux:input label="Branch Name" placeholder="branch name" wire:model="form.branch_name" />
 
-            <flux:input label="Branch Address" type="text" placeholder="branch address" wire:model="form.branch_address" />
+            <flux:input label="Branch Address" type="text" placeholder="branch address"
+                wire:model="form.branch_address" />
 
             <div class="flex grid grid-cols-3 justify-center">
 

@@ -3,10 +3,13 @@
 namespace App\Livewire\Forms;
 
 use App\Models\Branches;
+use Flux\Flux;
+use Illuminate\Validation\Rule;
 use Livewire\Form;
 
 class CreateBranch extends Form
 {
+    public ?Branches $branch = null;
     public string $branch_name = '';
 
     public string $branch_address = '';
@@ -19,7 +22,7 @@ class CreateBranch extends Form
                 'string',
                 'max:255',
                 'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
-                'unique:branches,branch_name',
+                Rule::unique('branches', 'branch_name')->ignore($this->branch?->id),
             ],
             'branch_address' => [
                 'nullable',
@@ -41,11 +44,30 @@ class CreateBranch extends Form
         ];
     }
 
+
+    public function setBranch(Branches $branch)
+    {
+        $this->branch = $branch;
+        $this->branch_name = $branch->branch_name;
+        $this->branch_address = $branch->branch_address ?? '';
+    }
+
+
     public function store()
     {
         $data = $this->validate();
 
         Branches::create($data);
         $this->reset();
+    }
+
+        public function update()
+    {
+        $this->validate();
+        $this->branch->update([
+            'branch_name' => $this->branch_name,
+            'branch_address' => $this->branch_address,
+        ]);
+;
     }
 }
