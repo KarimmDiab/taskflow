@@ -9,5 +9,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 });
 
 Route::livewire('branches', 'pages::branches.index')->middleware('auth')->name('branches');
+Route::livewire('users', 'pages::users.index')->middleware('auth')->name('users');
+
 
 require __DIR__.'/settings.php';

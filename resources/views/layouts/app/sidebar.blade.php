@@ -14,13 +14,20 @@
         </flux:sidebar.header>
 
         <flux:sidebar.nav class="px-3 pt-4">
-            <flux:sidebar.group :heading="__('Workspace')" class="grid gap-1">
+            <flux:sidebar.group :heading="__('الصفحة الرئيسية')" class="grid gap-1">
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('لوحة التحكم') }}
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="user" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+
+            </flux:sidebar.group>
+        </flux:sidebar.nav>
+
+        <flux:sidebar.nav class="px-3 pt-4">
+            <flux:sidebar.group :heading="__('الاعدادات')" class="grid gap-1">
+
+                <flux:sidebar.item icon="user" :href="route('users')" :current="request()->routeIs('users')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('المستخدمين') }}

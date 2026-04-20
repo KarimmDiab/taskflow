@@ -10,7 +10,7 @@ new class extends Component
     public CreateBranch $form;
 
     #[On('editBranch')]
-    public function editPost($id)
+    public function editBranch($id)
     {
         //return dd($id);
         $branch = Branches::findOrFail($id);

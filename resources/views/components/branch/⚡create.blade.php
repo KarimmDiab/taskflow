@@ -23,25 +23,25 @@ new class extends Component {
     <flux:modal name="add-branch" class="md:w-150">
         <form class="space-y-8" wire:submit.prevent="save">
             <div>
-                <flux:heading size="lg">add branch</flux:heading>
-                <flux:text class="mt-2">create a new branch with all details</flux:text>
+                <flux:heading size="lg">اضافة فرع جديد</flux:heading>
+                <flux:text class="mt-2">إنشاء فرع جديد مع جميع التفاصيل</flux:text>
             </div>
 
-            <flux:input label="Branch Name" placeholder="branch name" wire:model="form.branch_name" />
+            <flux:input label="اسم الفرع" placeholder="اسم الفرع" wire:model="form.branch_name" />
 
-            <flux:input label="Branch Address" type="text" placeholder="branch address"
+            <flux:input label="عنوان الفرع" type="text" placeholder="عنوان الفرع"
                 wire:model="form.branch_address" />
 
             <div class="flex grid grid-cols-3 justify-center">
 
                 <div>
                     <flux:modal.close>
-                        <flux:button type="submit" variant="primary" color="red">Cancel</flux:button>
+                        <flux:button type="submit" variant="primary" color="red">الغاء</flux:button>
                     </flux:modal.close>
                 </div>
                 <div></div>
                 <div>
-                    <flux:button class="float-right" type="submit" variant="primary" color="green">Add Branch
+                    <flux:button class="float-right" type="submit" variant="primary" color="green">اضافة الفرع
                     </flux:button>
                 </div>
 
