@@ -69,7 +69,7 @@ public function getTotalBranchesProperty()
         <x-flash-message />
 
         {{-- Page Header with Gradient Accent --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4" wire:poll.visible.20s>
             <div class="space-y-1">
                 <div class="flex items-center gap-3">
                     <div class="w-1.5 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
@@ -106,7 +106,7 @@ public function getTotalBranchesProperty()
 
         {{-- Enhanced Table Card --}}
         <div
-            class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300">
+            class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300" wire:poll.visible.20s>
 
             {{-- Toolbar with Gradient Border --}}
             <div
