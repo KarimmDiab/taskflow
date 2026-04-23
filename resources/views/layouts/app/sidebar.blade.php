@@ -44,28 +44,17 @@
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('الموردين') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="building" :href="route('categories')"
+                    :current="request()->routeIs('categories')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('تصنيفات المنتجات') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
 
 
         <flux:spacer />
-
-        <flux:sidebar.nav class="border-t border-zinc-200/80 px-3 pb-4 pt-3 dark:border-zinc-800">
-            <flux:sidebar.group :heading="__('Resources')" class="grid gap-1">
-                <flux:sidebar.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit"
-                    target="_blank"
-                    class="rounded-lg px-3 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('Repository') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire"
-                    target="_blank"
-                    class="rounded-lg px-3 py-2.5 transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('Documentation') }}
-                </flux:sidebar.item>
-            </flux:sidebar.group>
-        </flux:sidebar.nav>
 
         <div class="hidden border-t border-zinc-200/80 px-3 py-3 dark:border-zinc-800 lg:block">
             <x-desktop-user-menu

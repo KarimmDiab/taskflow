@@ -53,24 +53,24 @@ new class extends Component
     <flux:modal name="edit-branch" class="md:w-150">
         <form class="space-y-8" wire:submit.prevent="updatebranch">
             <div>
-                <flux:heading size="lg">edit branch</flux:heading>
-                <flux:text class="mt-2">edit details of branch</flux:text>
+                <flux:heading size="lg">تعديل الفرع</flux:heading>
+                <flux:text class="mt-2">تعديل تفاصيل الفرع</flux:text>
             </div>
 
-            <flux:input label="Branch Name" placeholder="branch name" wire:model="form.branch_name" wire:dirty.class="rind-1 ring-yellow-400" />
+            <flux:input label="اسم الفرع" placeholder="اسم الفرع" wire:model="form.branch_name" wire:dirty.class="rind-1 ring-yellow-400" />
 
-            <flux:input label="Branch Address" type="text" placeholder="branch address" wire:model="form.branch_address" wire:dirty.class="rind-1 ring-yellow-400"/>
+            <flux:input label="عنوان الفرع" type="text" placeholder="عنوان الفرع" wire:model="form.branch_address" wire:dirty.class="rind-1 ring-yellow-400"/>
 
             <div class="flex grid grid-cols-3 justify-center">
 
                 <div>
                     <flux:modal.close>
-                        <flux:button type="submit" variant="primary" color="red">Cancel</flux:button>
+                        <flux:button type="submit" variant="primary" color="red">الغاء</flux:button>
                     </flux:modal.close>
                 </div>
                 <div></div>
                 <div>
-                    <flux:button class="float-right" type="submit" variant="primary" color="green">update Branch
+                    <flux:button class="float-right" type="submit" variant="primary" color="green">تحديث الفرع
                     </flux:button>
                 </div>
 

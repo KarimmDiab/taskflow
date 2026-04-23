@@ -68,6 +68,5 @@ class CreateBranch extends Form
             'branch_name' => $this->branch_name,
             'branch_address' => $this->branch_address,
         ]);
-;
     }
 }

@@ -19,7 +19,7 @@ new #[Title('إدارة الموردين')] class extends Component {
             ->orderBy($this->sortBy, $this->sortDirection)
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
-                    $query->where('name', 'like', "%{$this->search}%")->orWhere('email', 'like', "%{$this->search}%");
+                    $query->where('name', 'like', "%{$this->search}%")->orWhere('supplier_phone', 'like', "%{$this->search}%")->orWhere('supplier_address', 'like', "%{$this->search}%");
                 });
             })
             ->paginate(10);
@@ -82,7 +82,7 @@ new #[Title('إدارة الموردين')] class extends Component {
                     </span>
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400 pr-5">
-                    إدارة وتنظيم جميع المستخدمين بكفاءة عالية وإحصائيات دقيقة
+                    إدارة وتنظيم جميع الموردين بكفاءة عالية وإحصائيات دقيقة
                 </p>
             </div>
 
@@ -256,7 +256,7 @@ new #[Title('إدارة الموردين')] class extends Component {
                                         </button>
 
                                         <button wire:click="delete({{ $supplier->id }})"
-                                            wire:confirm="هل أنت متأكد من حذف هذا الفرع؟"
+                                            wire:confirm="هل أنت متأكد من حذف بيانات المورد ؟ "
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-all duration-150">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5"
                                                 fill="none" viewBox="0 0 24 24" stroke-width="2"

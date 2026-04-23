@@ -2,34 +2,34 @@
 
 use Livewire\Component;
 use Livewire\Attributes\Computed;
-use Livewire\WithPagination;
-use App\Models\User;
 use Livewire\Attributes\Title;
+use Livewire\WithPagination;
+use App\Models\Category;
 
-
-new #[Title('إدارة السمتخدمين')] class extends Component {
-
+new #[Title('إدارة تصنيفات المنتجات')] class extends Component {
     use WithPagination;
+
+
 
     public string $search = '';
     public string $sortBy = 'created_at';
     public string $sortDirection = 'desc';
 
-    public function getUsersProperty()
+    public function getCategoriesProperty()
     {
-        return User::query()
+        return Category::query()
             ->orderBy($this->sortBy, $this->sortDirection)
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
-                    $query->where('name', 'like', "%{$this->search}%")->orWhere('email', 'like', "%{$this->search}%");
+                    $query->where('category_name', 'like', "%{$this->search}%")->orWhere('category_description', 'like', "%{$this->search}%");
                 });
             })
             ->paginate(10);
     }
 
-    public function getTotalUsersProperty()
+    public function getTotalCategoriesProperty()
     {
-        return User::count();
+        return Category::count();
     }
 
     public function updatingSearch()
@@ -50,13 +50,13 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
 
     public function edit($id)
     {
-        $this->dispatch('editUser', id: $id);
+        $this->dispatch('editCategory', id: $id);
     }
 
     public function delete($id)
     {
-        User::findOrFail($id)->delete();
-        session()->flash('success', 'تم حذف المستخدم بنجاح');
+        Category::findOrFail($id)->delete();
+        session()->flash('success', 'تم حذف التصنيف بنجاح');
         $this->resetPage();
     }
 };
@@ -70,44 +70,44 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
         <x-flash-message />
 
         {{-- Page Header with Gradient Accent --}}
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4" wire:poll.visible.20s>
             <div class="space-y-1">
                 <div class="flex items-center gap-3">
                     <div class="w-1.5 h-8 bg-gradient-to-b from-blue-600 to-indigo-600 rounded-full"></div>
                     <h1
                         class="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300 bg-clip-text text-transparent">
-                        إدارة المستخدمين
+                        إدارة تصنيفات المنتجات
                     </h1>
                     <span
                         class="px-2.5 py-0.5 text-xs font-medium rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                        {{ $this->totalUsers }} إجمالي
+                        {{ $this->totalCategories }} إجمالي
                     </span>
                 </div>
                 <p class="text-sm text-gray-500 dark:text-gray-400 pr-5">
-                    إدارة وتنظيم جميع المستخدمين بكفاءة عالية وإحصائيات دقيقة
+                    إدارة وتنظيم جميع تصنيفاتالمنتجات بكفاءة عالية وإحصائيات دقيقة
                 </p>
             </div>
 
-            <flux:modal.trigger name="add-user">
+            <flux:modal.trigger name="add-category">
                 <button
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
                         stroke-width="2" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                     </svg>
-                    إضافة مستخدم جديد
+                    إضافة تصنيف جديد
                 </button>
             </flux:modal.trigger>
         </div>
 
 
         {{-- Modals --}}
-        <livewire:user.create />
-        <livewire:user.edit />
+        <livewire:category.create />
+        <livewire:category.edit />
 
         {{-- Enhanced Table Card --}}
-        <div
-            class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300">
+        <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300"
+            wire:poll.visible.20s>
 
             {{-- Toolbar with Gradient Border --}}
             <div
@@ -116,13 +116,13 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                     <div>
                         <h3 class="text-base font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                             <span class="w-1.5 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></span>
-                            قائمة المستخدمين
+                            قائمة تصنيفات المنتجات
                         </h3>
                         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 mr-2.5">
-                            عرض {{ $this->users->firstItem() ?? 0 }} - {{ $this->users->lastItem() ?? 0 }}
+                            عرض {{ $this->categories->firstItem() ?? 0 }} - {{ $this->categories->lastItem() ?? 0 }}
                             من أصل <span
-                                class="font-medium text-gray-600 dark:text-gray-300">{{ $this->users->total() }}</span>
-                            مستخدم
+                                class="font-medium text-gray-600 dark:text-gray-300">{{ $this->categories->total() }}</span>
+                            تصنيف
                         </p>
                     </div>
                     <div class="relative">
@@ -132,8 +132,7 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                         </svg>
-                        <input type="text" wire:model.live.debounce.300ms="search"
-                            placeholder="بحث في المستخدمين ..."
+                        <input type="text" wire:model.live.debounce.300ms="search" placeholder="بحث في التصنيفات..."
                             class="w-full sm:w-72 text-sm border border-gray-200 dark:border-gray-700 rounded-xl pr-9 pl-4 py-2.5 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200" />
                     </div>
                 </div>
@@ -158,10 +157,10 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                                 </div>
                             </th>
                             <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition"
-                                wire:click="sortByColumn('name')">
+                                wire:click="sortByColumn('category_name')">
                                 <div class="flex items-center gap-1">
-                                    اسم المستخدم
-                                    @if ($sortBy === 'name')
+                                    اسم التصنيف
+                                    @if ($sortBy === 'category_name')
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}">
@@ -170,20 +169,9 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                                     @endif
                                 </div>
                             </th>
-                            <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition"
-                                wire:click="sortByColumn('email')">
-                                <div class="flex items-center gap-1">
-                                    الايميل
-                                    @if ($sortBy === 'email')
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}">
-                                            </path>
-                                        </svg>
-                                    @endif
-                                </div>
-                            </th>
-
+                            <th
+                                class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                الوصف</th>
                             <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 dark:hover:text-gray-300 transition"
                                 wire:click="sortByColumn('created_at')">
                                 <div class="flex items-center gap-1">
@@ -204,8 +192,8 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                     </thead>
 
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-800/50">
-                        @forelse ($this->users as $user)
-                            <tr wire:key="user-{{ $user->id }}"
+                        @forelse ($this->categories as $category)
+                            <tr wire:key="category-{{ $category->id }}"
                                 class="hover:bg-gradient-to-r hover:from-blue-50/30 hover:to-transparent dark:hover:from-blue-900/10 dark:hover:to-transparent transition-all duration-200 group">
                                 <td class="px-6 py-4 text-gray-400 dark:text-gray-600 text-xs font-mono font-medium">
                                     {{ $loop->iteration }}
@@ -215,14 +203,14 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                                     <div class="flex items-center gap-3">
                                         <div
                                             class="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-indigo-100 dark:from-blue-900/30 dark:to-indigo-900/30 flex items-center justify-center text-sm font-bold text-blue-700 dark:text-blue-300 shadow-sm">
-                                            {{ mb_substr($user->name, 0, 2) }}
+                                            {{ mb_substr($category->category_name, 0, 2) }}
                                         </div>
                                         <div>
                                             <p class="font-semibold text-gray-900 dark:text-white text-sm">
-                                                {{ $user->name }}
+                                                {{ $category->category_name }}
                                             </p>
                                             <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">
-                                                كود السمتخدم: {{ $user->id }}
+                                                كود التصنيف: {{ $category->id }}
                                             </p>
                                         </div>
                                     </div>
@@ -232,24 +220,23 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                                     <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
 
                                         <span
-                                            class="text-sm truncate max-w-[220px]">{{ $user->email }}</span>
+                                            class="text-sm truncate max-w-[220px]">{{ $category->category_description }}</span>
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col gap-0.5">
                                         <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $user->created_at->translatedFormat('d F Y') }}
-                                        </span>
+                                            {{ $category->created_at->translatedFormat('d F Y') }} </span>
                                         <span class="text-xs text-gray-400 dark:text-gray-500">
-                                            {{ $user->created_at->diffForHumans() }}
+                                            {{ $category->created_at->diffForHumans() }}
                                         </span>
                                     </div>
                                 </td>
 
                                 <td class="px-6 py-4">
                                     <div class="flex justify-end items-center gap-2">
-                                        <button wire:click="edit({{ $user->id }})"
+                                        <button wire:click="edit({{ $category->id }})"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-800 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-150">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5"
                                                 fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -260,8 +247,8 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                                             تعديل
                                         </button>
 
-                                        <button wire:click="delete({{ $user->id }})"
-                                            wire:confirm="هل أنت متأكد من حذف هذا بيانات المستخدم ؟"
+                                        <button wire:click="delete({{ $category->id }})"
+                                            wire:confirm="هل أنت متأكد من حذف هذا التصنيف ؟"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-all duration-150">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5"
                                                 fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -288,9 +275,9 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
                                             </svg>
                                         </div>
                                         <div class="text-center">
-                                            <p class="text-base font-semibold text-gray-700 dark:text-gray-300">لا يوجد
-                                                مستخدمين</p>
-                                            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">ابدأ بإضافة مستخدم
+                                            <p class="text-base font-semibold text-gray-700 dark:text-gray-300">لا توجد
+                                                تصنيفات</p>
+                                            <p class="text-sm text-gray-400 dark:text-gray-500 mt-1">ابدأ بإضافة تصنيف
                                                 جديد من الزر أعلاه</p>
                                         </div>
                                     </div>
@@ -302,10 +289,10 @@ new #[Title('إدارة السمتخدمين')] class extends Component {
             </div>
 
             {{-- Enhanced Pagination Footer --}}
-            @if ($this->users->hasPages())
+            @if ($this->categories->hasPages())
                 <div
                     class="px-6 py-4 border-t border-gray-100 dark:border-gray-800 bg-gradient-to-r from-gray-50/30 to-transparent dark:from-gray-800/20 dark:to-transparent">
-                    {{ $this->users->links() }}
+                    {{ $this->categories->links() }}
                 </div>
             @endif
         </div>
