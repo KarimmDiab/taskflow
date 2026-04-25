@@ -28,8 +28,8 @@ new class extends Component {
     public function confirmDelete($id)
     {
         //return dd($id);
-        $user = Supplier::findOrFail($id);
-        $this->form->setSupplier($user);
+        $supplier = Supplier::findOrFail($id);
+        $this->form->setSupplier($supplier);
         Flux::modal('edit-supplier')->show();
     }
 

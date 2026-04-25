@@ -49,6 +49,11 @@
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('تصنيفات المنتجات') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="building" :href="route('customers')"
+                    :current="request()->routeIs('customers')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('العملاء') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
