@@ -116,7 +116,7 @@ new #[Title('إدارة بنود المصروفات')] class extends Component {
                     <div>
                         <h3 class="text-base font-semibold text-gray-800 dark:text-white flex items-center gap-2">
                             <span class="w-1.5 h-5 bg-gradient-to-b from-blue-500 to-indigo-600 rounded-full"></span>
-                            قائمة الفروع
+                            قائمة بنود المصروفات
                         </h3>
                         <p class="text-xs text-gray-400 dark:text-gray-500 mt-1.5 mr-2.5">
                             عرض {{ $this->expenses_items->firstItem() ?? 0 }} - {{ $this->expenses_items->lastItem() ?? 0 }}
