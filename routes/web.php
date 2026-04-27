@@ -14,5 +14,6 @@ Route::livewire('suppliers', 'pages::suppliers.index')->middleware('auth')->name
 Route::livewire('categories', 'pages::categories.index')->middleware('auth')->name('categories');
 Route::livewire('customers', 'pages::customers.index')->middleware('auth')->name('customers');
 Route::livewire('expenses_items', 'pages::expenses_item.index')->middleware('auth')->name('expenses_items');
+Route::livewire('products', 'pages::products.index')->middleware('auth')->name('products');
 
 require __DIR__.'/settings.php';
