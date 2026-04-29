@@ -1,13 +1,13 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateCategory;
+use App\Livewire\Forms\CategoryForm;
 use Livewire\Attributes\On;
 use App\Models\Category;
 
 new class extends Component
 {
-    public CreateCategory $form;
+    public CategoryForm $form;
 
     #[On('editCategory')]
     public function editCategory($id)

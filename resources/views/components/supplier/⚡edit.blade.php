@@ -1,12 +1,12 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateSupplier;
+use App\Livewire\Forms\SupplierForm;
 use Livewire\Attributes\On;
 use App\Models\Supplier;
 
 new class extends Component {
-    public CreateSupplier $form;
+    public SupplierForm $form;
 
     #[On('editSupplier')]
     public function editSupplier($id)

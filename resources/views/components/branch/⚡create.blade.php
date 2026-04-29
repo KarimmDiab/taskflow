@@ -1,10 +1,10 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateBranch;
+use App\Livewire\Forms\BranchForm;
 
 new class extends Component {
-    public CreateBranch $form;
+    public BranchForm $form;
     public function save()
     {
         $this->form->store();

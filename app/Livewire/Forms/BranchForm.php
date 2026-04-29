@@ -7,7 +7,7 @@ use Flux\Flux;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
-class CreateBranch extends Form
+class BranchForm extends Form
 {
     public ?Branches $branch = null;
     public string $branch_name = '';
@@ -22,7 +22,7 @@ class CreateBranch extends Form
                 'string',
                 'max:255',
                 'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
-                Rule::unique('branches', 'branch_name')->ignore($this->branch?->id),
+                Rule::unique('branches', 'branch_name')->ignore($this->branch?->id)->whereNull('deleted_at'),
             ],
             'branch_address' => [
                 'nullable',

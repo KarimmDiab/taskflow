@@ -1,12 +1,12 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateCustomer;
+use App\Livewire\Forms\CustomersForm;
 use Livewire\Attributes\On;
 use App\Models\Customer;
 
 new class extends Component {
-    public CreateCustomer $form;
+    public CustomersForm $form;
 
     #[On('editCustomer')]
     public function editCustomer($id)

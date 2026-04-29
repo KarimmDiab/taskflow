@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
-class CreateUser extends Form
+class UserForm extends Form
 {
     public ?User $user = null;
 
@@ -32,7 +32,7 @@ class CreateUser extends Form
                 'required',
                 'email',
                 'max:255',
-                Rule::unique('users', 'email')->ignore($this->user?->id),
+                Rule::unique('users', 'email')->ignore($this->user?->id)->whereNull('deleted_at'),
             ],
             'password' => [
                 'required',

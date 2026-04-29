@@ -1,10 +1,10 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateExpensesItem;
+use App\Livewire\Forms\ExpensesItemForm;
 
 new class extends Component {
-    public CreateExpensesItem $form;
+    public ExpensesItemForm $form;
     public function save()
     {
         $this->form->store();

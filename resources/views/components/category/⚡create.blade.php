@@ -1,10 +1,10 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateCategory;
+use App\Livewire\Forms\CategoryForm;
 
 new class extends Component {
-    public CreateCategory $form;
+    public CategoryForm $form;
     public function save()
     {
         $this->form->store();

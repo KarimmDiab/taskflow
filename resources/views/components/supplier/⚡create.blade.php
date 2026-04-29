@@ -1,10 +1,10 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateSupplier;
+use App\Livewire\Forms\SupplierForm;
 
 new class extends Component {
-    public CreateSupplier $form;
+    public SupplierForm $form;
     public function save()
     {
         $this->form->store();

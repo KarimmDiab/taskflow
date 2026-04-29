@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->date('expenses_date');
             $table->decimal('expenses_cost',10,2)->unsigned()->default(0);
-            $table->string('expenses_note');
+            $table->string('expenses_note')->nullable();
             $table->string('expenses_image')->nullable();
             $table->foreignId('expenses_item_id')->constrained('expenses_items')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();

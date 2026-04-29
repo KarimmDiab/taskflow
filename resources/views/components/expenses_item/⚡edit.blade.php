@@ -1,13 +1,13 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateExpensesItem;
+use App\Livewire\Forms\ExpensesItemForm;
 use Livewire\Attributes\On;
 use App\Models\ExpensesItem;
 
 new class extends Component
 {
-    public CreateExpensesItem $form;
+    public ExpensesItemForm $form;
 
     #[On('editExpensesItem')]
     public function editExpensesItem($id)

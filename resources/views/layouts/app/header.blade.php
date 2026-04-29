@@ -3,6 +3,8 @@
 
 <head>
     @include('partials.head')
+    @livewireStyles
+
 </head>
 
 <body class="min-h-screen bg-white dark:bg-zinc-800">
@@ -81,6 +83,7 @@
 
     @fluxScripts
     <script src="https://cdn.jsdelivr.net/npm/flowbite@4.0.1/dist/flowbite.min.js"></script>
+    @livewireScripts
 
 </body>
 

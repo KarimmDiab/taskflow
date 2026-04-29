@@ -1,10 +1,10 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateCustomer;
+use App\Livewire\Forms\CustomersForm;
 
 new class extends Component {
-    public CreateCustomer $form;
+    public CustomersForm $form;
     public function save()
     {
         $this->form->store();

@@ -1,10 +1,10 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateUser;
+use App\Livewire\Forms\UserForm;
 
 new class extends Component {
-    public CreateUser $form;
+    public UserForm $form;
     public function save()
     {
         $this->form->store();
@@ -33,7 +33,7 @@ new class extends Component {
 
             <div x-data="{ show: false }" class="relative">
 
-                <flux:input label="كلمة المرور" placeholder="كلمة المرور" wire:model="form.password" 
+                <flux:input label="كلمة المرور" placeholder="كلمة المرور" wire:model="form.password"
                     x-bind:type="show ? 'text' : 'password'" />
 
                 <button type="button" class="absolute left-3 top-9 text-gray-500 hover:text-gray-700"

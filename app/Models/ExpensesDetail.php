@@ -16,18 +16,24 @@ class ExpensesDetail extends Model
         'expenses_cost',
         'expenses_note',
         'expenses_image',
-        'expenses_item_id'
+        'expenses_item_id',
+        'user_id'
     ];
 
     protected $casts = [
-        'expenses_date' => 'datetime', 
+        'expenses_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
 
-    public function expensesItem() 
+    public function expensesItem()
     {
         return $this->belongsTo(ExpensesItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

@@ -9,7 +9,7 @@ use App\Models\ExpensesItem;
 
 
 
-class CreateExpensesItem extends Form
+class ExpensesItemForm extends Form
 {
     public ?ExpensesItem $expenses_item = null;
 
@@ -24,7 +24,7 @@ class CreateExpensesItem extends Form
                 'string',
                 'max:255',
                 'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
-                Rule::unique('expenses_items', 'expenses_name')->ignore($this->expenses_item?->id),
+                Rule::unique('expenses_items', 'expenses_name')->ignore($this->expenses_item?->id)->whereNull('deleted_at'),
             ]
         ];
     }

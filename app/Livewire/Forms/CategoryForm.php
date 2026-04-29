@@ -6,7 +6,7 @@ use App\Models\Category;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
-class CreateCategory extends Form
+class CategoryForm extends Form
 {
     public ?Category $category = null;
 
@@ -22,7 +22,7 @@ class CreateCategory extends Form
                 'string',
                 'max:255',
                 'regex:/^[\p{Arabic}A-Za-z0-9 _-]+$/u',
-                Rule::unique('categories', 'category_name')->ignore($this->category?->id),
+                Rule::unique('categories', 'category_name')->ignore($this->category?->id)->whereNull('deleted_at'),
             ],
 
             'category_description' => [

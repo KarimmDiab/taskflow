@@ -6,7 +6,7 @@ use App\Models\Customer;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
-class CreateCustomer extends Form
+class CustomersForm extends Form
 {
     public ?Customer $customer = null;
 
@@ -28,7 +28,7 @@ class CreateCustomer extends Form
                 'string',
                 'max:11',
                 'regex:/^01[0-2,5]{1}[0-9]{8}$/', // رقم موبايل مصري
-                Rule::unique('customers', 'contact_info')->ignore($this->customer?->id),
+                Rule::unique('customers', 'contact_info')->ignore($this->customer?->id)->whereNull('deleted_at'),
             ],
         ];
     }

@@ -6,7 +6,7 @@ use App\Models\Supplier;
 use Illuminate\Validation\Rule;
 use Livewire\Form;
 
-class CreateSupplier extends Form
+class SupplierForm extends Form
 {
     public ?Supplier $supplier = null;
 
@@ -30,7 +30,7 @@ class CreateSupplier extends Form
                 'string',
                 'max:20',
                 'regex:/^01[0-2,5]{1}[0-9]{8}$/', // رقم موبايل مصري
-                Rule::unique('suppliers', 'supplier_phone')->ignore($this->supplier?->id),
+                Rule::unique('suppliers', 'supplier_phone')->ignore($this->supplier?->id)->whereNull('deleted_at'),
             ],
             'supplier_address' => [
                 'string',

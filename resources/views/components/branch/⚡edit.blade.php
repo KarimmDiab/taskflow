@@ -1,13 +1,13 @@
 <?php
 
 use Livewire\Component;
-use App\Livewire\Forms\CreateBranch;
+use App\Livewire\Forms\BranchForm;
 use Livewire\Attributes\On;
 use App\Models\Branches;
 
 new class extends Component
 {
-    public CreateBranch $form;
+    public BranchForm $form;
 
     #[On('editBranch')]
     public function editBranch($id)
