@@ -21,12 +21,11 @@ class ProductFactory extends Factory
     {
         return [
             'product_name' => fake()->name(),
-            'product_quantity' => fake()->numberBetween(5 , 15),
-            'product_price' => fake()->numberBetween(400 , 900),
+            'product_quantity' => fake()->numberBetween(5, 15),
+            'product_price' => fake()->numberBetween(400, 900),
+            'product_cost' => fake()->numberBetween(400, 900),
             'category_id' => Category::inRandomOrder()->first()->id,
             'branch_id' => Branches::inRandomOrder()->first()->id,
-
-
 
         ];
     }

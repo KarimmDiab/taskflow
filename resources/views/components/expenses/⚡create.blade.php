@@ -68,6 +68,8 @@ new class extends Component {
 
             <!-- 🔥 Select (Search شغال + مربوط) -->
             <flux:select searchable placeholder="اختر بند المصروف" wire:model="form.expenses_item_id">
+                <flux:select.option value=""> اختر اختر بند المصروف </flux:select.option>
+
                 @foreach ($this->expensesItems as $item)
                     <flux:select.option value="{{ $item->id }}"> {{ $item->expenses_name }} </flux:select.option>
                 @endforeach
@@ -87,7 +89,7 @@ new class extends Component {
 
                 <div>
                     <flux:modal.close>
-                        <flux:button type="button" color="red">
+                        <flux:button type="button" variant="danger">
                             الغاء
                         </flux:button>
                     </flux:modal.close>
@@ -96,7 +98,7 @@ new class extends Component {
                 <div></div>
 
                 <div class="text-right">
-                    <flux:button type="submit" color="green">
+                    <flux:button type="submit" variant="primary" color="green">
                         اضافة مصروف
                     </flux:button>
                 </div>

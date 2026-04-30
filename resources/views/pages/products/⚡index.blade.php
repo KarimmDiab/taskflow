@@ -262,7 +262,10 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                 الكمية</th>
                             <th
                                 class="p-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                السعر</th>
+                                سعر التكلفة</th>
+                            <th
+                                class="p-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                                سعر البيع</th>
                             <th
                                 class="p-4 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 التصنيف</th>
@@ -322,6 +325,13 @@ new #[Title('إدارة المنتجات')] class extends Component {
 
                                 <td class="p-4">
                                     <div class="font-bold text-green-600 dark:text-green-400">
+                                        {{ number_format($product->product_cost, 2) }}
+                                        <span class="text-xs font-normal text-gray-500">ج.م</span>
+                                    </div>
+                                </td>
+
+                                <td class="p-4">
+                                    <div class="font-bold text-green-600 dark:text-green-400">
                                         {{ number_format($product->product_price, 2) }}
                                         <span class="text-xs font-normal text-gray-500">ج.م</span>
                                     </div>
@@ -352,7 +362,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
 
                                 <td class="p-4">
                                     <div class="flex items-center justify-center gap-2">
-                                        <button wire:click="edit({{ $product->id }})"
+                                        <button wire:click="editProduct({{ $product->id }})"
                                             class="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all duration-200 group-hover:scale-105">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
@@ -362,7 +372,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                             </svg>
                                         </button>
 
-                                        <button wire:click="delete({{ $product->id }})"
+                                        <button wire:click="deleteProduct({{ $product->id }})"
                                             wire:confirm="هل أنت متأكد من حذف المنتج '{{ $product->product_name }}'؟"
                                             class="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all duration-200 group-hover:scale-105">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
