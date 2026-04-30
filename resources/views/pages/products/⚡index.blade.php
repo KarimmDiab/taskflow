@@ -20,11 +20,9 @@ new #[Title('إدارة المنتجات')] class extends Component {
                 $q->where(function ($query) {
                     $query
                         ->where('product_name', 'like', "%{$this->search}%")
-
                         ->orWhereHas('category', function ($q) {
                             $q->where('category_name', 'like', "%{$this->search}%");
                         })
-
                         ->orWhereHas('branch', function ($q) {
                             $q->where('branch_name', 'like', "%{$this->search}%");
                         });
@@ -74,12 +72,15 @@ new #[Title('إدارة المنتجات')] class extends Component {
         return $this->sortDirection === 'asc' ? '↑' : '↓';
     }
 
-    public function edit($id)
+    // Fixed: Changed from edit() to editProduct() to match the view
+    #[On('editProduct')]
+    public function editProduct($id)
     {
-        $this->dispatch('editProduct', id: $id);
+        $this->dispatch('openEditModal', id: $id);
     }
 
-    public function delete($id)
+    // Fixed: Changed from delete() to deleteProduct() to match the view
+    public function deleteProduct($id)
     {
         $product = Product::findOrFail($id);
         $productName = $product->product_name;
