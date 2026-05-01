@@ -15,7 +15,7 @@ class ExpensesForm extends Form
 
     public string $expenses_note = '';
 
-    public string $expenses_image = '';
+    public $expenses_image = null;
 
     public $expenses_item_id = null;
 
@@ -43,9 +43,6 @@ class ExpensesForm extends Form
 
             'expenses_image' => [
                 'nullable',
-                'string',
-                'max:255',
-                'regex:/^[a-zA-Z0-9\/\.\-_]+$/', // يمنع injection في path
             ],
 
             'expenses_item_id' => [
@@ -88,7 +85,7 @@ class ExpensesForm extends Form
     public function setExpensesDetail(ExpensesDetail $expensesDetail)
     {
         $this->expensesDetail = $expensesDetail;
-        $this->expenses_date = $expensesDetail->expenses_date;
+        $this->expenses_date = $expensesDetail->expenses_date ? $expensesDetail->expenses_date->format('Y-m-d') : '';
         $this->expenses_cost = $expensesDetail->expenses_cost;
         $this->expenses_note = $expensesDetail->expenses_note;
         $this->expenses_image = $expensesDetail->expenses_image;
@@ -98,6 +95,9 @@ class ExpensesForm extends Form
     public function store()
     {
         $data = $this->validate();
+        if ($this->expenses_image instanceof \Livewire\TemporaryUploadedFile || $this->expenses_image instanceof \Illuminate\Http\UploadedFile) {
+            $data['expenses_image'] = $this->expenses_image->store('expenses_images', 'public');
+        }
         $data['user_id'] = auth()->id();
         ExpensesDetail::create($data);
         $this->reset();
@@ -106,13 +106,21 @@ class ExpensesForm extends Form
     public function update()
     {
         $this->validate();
-        $this->expensesDetail->update([
+
+        $updateData = [
             'expenses_date' => $this->expenses_date,
             'expenses_cost' => $this->expenses_cost,
             'expenses_note' => $this->expenses_note,
-            'expenses_image' => $this->expenses_image,
             'expenses_item_id' => $this->expenses_item_id,
-        ]);
+        ];
+
+        if ($this->expenses_image instanceof \Livewire\TemporaryUploadedFile || $this->expenses_image instanceof \Illuminate\Http\UploadedFile) {
+            $updateData['expenses_image'] = $this->expenses_image->store('expenses_images', 'public');
+        } else {
+            $updateData['expenses_image'] = $this->expenses_image;
+        }
+
+        $this->expensesDetail->update($updateData);
 
     }
 }

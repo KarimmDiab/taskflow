@@ -89,7 +89,7 @@ new #[Title('إدارة المصروفات')] class extends Component {
 
     public function edit(int $id): void
     {
-        $this->dispatch('editExpensesDetails', id: $id);
+        $this->dispatch('editExpensesDetail', id: $id);
     }
 
     public function delete(int $id): void
@@ -439,6 +439,26 @@ new #[Title('إدارة المصروفات')] class extends Component {
 
                                 <td class="p-4">
                                     <div class="flex items-center justify-center gap-2">
+                                        @php
+                                            $img = $expense->expenses_image ?? null;
+                                            $previewUrl = null;
+                                            if (is_string($img) && $img !== '') {
+                                                $s = preg_replace('#^(storage/app/public/|/storage/|storage/|public/)#', '', $img);
+                                                if (\Illuminate\Support\Facades\Storage::disk('public')->exists($s)) {
+                                                    $previewUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($s);
+                                                } else {
+                                                    $previewUrl = asset('storage/' . $s);
+                                                }
+                                            }
+                                        @endphp
+                                        @if ($previewUrl)
+                                            <a href="{{ $previewUrl }}" target="_blank" title="عرض الصورة"
+                                                class="p-2 text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-900/30 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7-5 7 5v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8zM3 8l9 6 9-6" />
+                                                </svg>
+                                            </a>
+                                        @endif
                                         <button wire:click="edit({{ $expense->id }})"
                                             class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"

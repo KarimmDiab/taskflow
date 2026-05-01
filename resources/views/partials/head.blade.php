@@ -2,7 +2,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <title>
-    {{ filled($title ?? 'taskFlow') ? $title.' - '. 'taskFlow' : 'taskFlow' }}
+    {{ filled($title ?? 'RYO') ? $title.' - '. 'RYO' : 'RYO' }}
 </title>
 
 <link rel="icon" href="/favicon.ico" sizes="any">

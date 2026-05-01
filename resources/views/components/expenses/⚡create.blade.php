@@ -2,6 +2,7 @@
 
 use Livewire\Component;
 use Livewire\WithPagination;
+use Livewire\WithFileUploads;
 use App\Livewire\Forms\ExpensesForm;
 use App\Models\ExpensesDetail;
 use App\Models\ExpensesItem;
@@ -10,6 +11,7 @@ use Flux\Flux;
 
 new class extends Component {
     use WithPagination;
+    use WithFileUploads;
 
     public ExpensesForm $form;
 
@@ -36,7 +38,7 @@ new class extends Component {
             ->paginate($this->perPage);
     }
 
-    public function getExpensesItemsProperty()
+    public function getExpensesItemProperty()
     {
         return ExpensesItem::select('id', 'expenses_name')->get();
     }
@@ -70,7 +72,7 @@ new class extends Component {
             <flux:select searchable placeholder="اختر بند المصروف" wire:model="form.expenses_item_id">
                 <flux:select.option value=""> اختر اختر بند المصروف </flux:select.option>
 
-                @foreach ($this->expensesItems as $item)
+                @foreach ($this->expensesItem as $item)
                     <flux:select.option value="{{ $item->id }}"> {{ $item->expenses_name }} </flux:select.option>
                 @endforeach
             </flux:select>
@@ -80,6 +82,9 @@ new class extends Component {
 
             <!-- 🔹 الملاحظات -->
             <flux:input label="الملحوظات" placeholder="ادخل الملاحظات" wire:model="form.expenses_note" />
+
+            <!-- 🔹 صورة المصروف (تحميل ملف) -->
+            <flux:input label="صورة المصروف" type="file" wire:model="form.expenses_image" />
 
             <!-- 🔥 التاريخ (بدل input العادي) -->
             <flux:input label="التاريخ" type="date" wire:model="form.expenses_date" dir="rtl" />
