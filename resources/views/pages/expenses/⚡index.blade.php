@@ -374,7 +374,7 @@ new #[Title('إدارة المصروفات')] class extends Component {
                             <tr
                                 class="hover:bg-gradient-to-r hover:from-emerald-50/50 hover:to-transparent dark:hover:from-emerald-900/20 transition-all duration-300 group">
                                 <td class="p-4 text-sm text-gray-500 dark:text-gray-400 font-mono font-bold">
-                                    #{{ $expense->id }}
+                                    #{{ $loop->iteration }}
                                 </td>
 
                                 <td class="p-4">

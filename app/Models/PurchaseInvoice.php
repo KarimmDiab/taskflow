@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\PurchaseInvoiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class PurchaseInvoice extends Model
 {
-    /** @use HasFactory<\Database\Factories\PurchaseInvoiceFactory> */
+    /** @use HasFactory<PurchaseInvoiceFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -19,27 +20,32 @@ class PurchaseInvoice extends Model
         'remaining_amount',
         'product_image',
         'branch_id',
-        'supplier_id'
+        'supplier_id',
     ];
 
     protected $casts = [
-        'purchase_invoice_date' => 'datetime', 
+        'purchase_invoice_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
     ];
 
-    public function supplier () 
+    public function supplier()
     {
         return $this->belongsTo(Supplier::class);
     }
 
-    public function purchaseInvoiceDetails () 
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function purchaseInvoiceDetails()
     {
         return $this->hasMany(PurchaseInvoiceDetail::class);
     }
 
-    public function supplierPayment () 
+    public function supplierPayment()
     {
         return $this->hasMany(SupplierPayment::class);
     }

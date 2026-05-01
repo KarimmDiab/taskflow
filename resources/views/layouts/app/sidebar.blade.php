@@ -27,50 +27,60 @@
         <flux:sidebar.nav class="px-3 pt-4">
             <flux:sidebar.group :heading="__('الاعدادات')" class="grid gap-1">
 
-                <flux:sidebar.item icon="user" :href="route('users')" :current="request()->routeIs('users')"
+                <flux:sidebar.item icon="users" :href="route('users')" :current="request()->routeIs('users')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('المستخدمين') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="building" :href="route('branches')" :current="request()->routeIs('branches')"
-                    wire:navigate
+                <flux:sidebar.item icon="building-storefront" :href="route('branches')"
+                    :current="request()->routeIs('branches')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('الفروع') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="building" :href="route('suppliers')" :current="request()->routeIs('suppliers')"
+                <flux:sidebar.item icon="truck" :href="route('suppliers')" :current="request()->routeIs('suppliers')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('الموردين') }}
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="building" :href="route('categories')"
+
+                <flux:sidebar.item icon="tag" :href="route('categories')"
                     :current="request()->routeIs('categories')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('تصنيفات المنتجات') }}
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="building" :href="route('customers')"
+
+                <flux:sidebar.item icon="user-group" :href="route('customers')"
                     :current="request()->routeIs('customers')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('العملاء') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="building" :href="route('expenses_items')"
+                <flux:sidebar.item icon="receipt-percent" :href="route('expenses_items')"
                     :current="request()->routeIs('expenses_items')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('بنود المصروفات') }}
                 </flux:sidebar.item>
-                <flux:sidebar.item icon="building" :href="route('products')"
-                    :current="request()->routeIs('products')" wire:navigate
+
+                <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
+                    wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('إدارة المنتجات') }}
                 </flux:sidebar.item>
 
-                <flux:sidebar.item icon="building" :href="route('expenses')"
+                <flux:sidebar.item icon="currency-dollar" :href="route('expenses')"
                     :current="request()->routeIs('expenses')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('جميع المصروفات') }}
                 </flux:sidebar.item>
+
+                <flux:sidebar.item icon="document-text" :href="route('purchaseInvoices')"
+                    :current="request()->routeIs('purchaseInvoices')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('فواتير المشتريات') }}
+                </flux:sidebar.item>
+
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
