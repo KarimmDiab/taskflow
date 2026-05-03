@@ -18,5 +18,6 @@ Route::livewire('products', 'pages::products.index')->middleware('auth')->name('
 Route::livewire('expenses', 'pages::expenses.index')->middleware('auth')->name('expenses');
 Route::livewire('purchaseInvoices', 'pages::purchases.index')->middleware('auth')->name('purchaseInvoices');
 
+Route::livewire('createpurchaseInvoices', 'pages::purchases.create')->middleware('auth')->name('createpurchaseInvoices');
 
 require __DIR__.'/settings.php';

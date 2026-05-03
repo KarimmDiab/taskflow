@@ -24,6 +24,7 @@ class PurchaseInvoiceFactory extends Factory
         $paid = fake()->numberBetween(0, $total);
 
         return [
+            'invoice_number' => 'INV-' . fake()->unique()->numerify('#######'),
             'purchase_invoice_date' => fake()->date(),
             'total_amount' => $total,
             'paid_amount' => $paid,

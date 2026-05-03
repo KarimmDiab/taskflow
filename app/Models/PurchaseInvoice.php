@@ -13,6 +13,7 @@ class PurchaseInvoice extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
+        'invoice_number',
         'purchase_invoice_date',
         'total_amount',
         'paid_amount',
@@ -21,6 +22,7 @@ class PurchaseInvoice extends Model
         'product_image',
         'branch_id',
         'supplier_id',
+        'user_id',
     ];
 
     protected $casts = [

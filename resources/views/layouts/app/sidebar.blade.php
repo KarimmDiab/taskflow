@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl" dark">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
 
 <head>
     @include('partials.head')
@@ -81,6 +81,11 @@
                     {{ __('فواتير المشتريات') }}
                 </flux:sidebar.item>
 
+                <flux:sidebar.item icon="document-text" :href="route('createpurchaseInvoices')"
+                    :current="request()->routeIs('createpurchaseInvoices')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('تسجيل فاتورة المشتريات') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 
