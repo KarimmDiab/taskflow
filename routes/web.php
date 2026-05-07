@@ -2,7 +2,14 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome')->name('home');
+
+Route::view('/', 'ryo-homepage')->name('home');
+Route::view('/shipping-policy', 'ryo-shipping-policy')->name('Shipping-Policy');
+Route::view('/terms-of-services', 'ryo-terms-of-services')->name('terms-of-services');
+Route::view('/privacy-policy', 'ryo-privacy-policy')->name('privacy-policy');
+
+
+
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
