@@ -99,13 +99,13 @@
       style="display:flex;align-items:center;justify-content:space-between;padding-top:24px;border-top:1px solid #1a1a1a;">
       <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#3D3D3A;">© 2026 RYO. All rights reserved.</p>
       <div style="display:flex;gap:24px;">
-        <a href={{ route('privacy-policy') }}
+        <a href={{ route('privacy-policy') }} target="_blank"
           style="font-family:'DM Sans',sans-serif;font-size:12px;color:#3D3D3A;text-decoration:none;transition:color 0.3s ease;"
           onmouseover="this.style.color='#9C9A96'" onmouseout="this.style.color='#3D3D3A'">Privacy Policy</a>
-        <a href={{ route('terms-of-services') }}
+        <a href={{ route('terms-of-services') }} target="_blank"
           style="font-family:'DM Sans',sans-serif;font-size:12px;color:#3D3D3A;text-decoration:none;transition:color 0.3s ease;"
           onmouseover="this.style.color='#9C9A96'" onmouseout="this.style.color='#3D3D3A'">Terms of Service</a>
-        <a href={{ route('Shipping-Policy') }}
+        <a href={{ route('Shipping-Policy') }} target="_blank"
           style="font-family:'DM Sans',sans-serif;font-size:12px;color:#3D3D3A;text-decoration:none;transition:color 0.3s ease;"
           onmouseover="this.style.color='#9C9A96'" onmouseout="this.style.color='#3D3D3A'">Shipping Policy</a>
       </div>

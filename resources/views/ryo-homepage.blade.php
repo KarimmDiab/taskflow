@@ -609,6 +609,9 @@
  {{-- Instgram Feed --}}
  @include('partials.instgram-feed')
 
+ 
+  {{-- Newslater --}}
+  @include('partials.newslater')
 
 
  {{-- Footer --}}

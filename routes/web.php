@@ -7,6 +7,14 @@ Route::view('/', 'ryo-homepage')->name('home');
 Route::view('/shipping-policy', 'ryo-shipping-policy')->name('Shipping-Policy');
 Route::view('/terms-of-services', 'ryo-terms-of-services')->name('terms-of-services');
 Route::view('/privacy-policy', 'ryo-privacy-policy')->name('privacy-policy');
+Route::view('/ryo-shop', 'ryo-shop')->name('all-products');
+Route::view('/ryo-product', 'ryo-product')->name('product');
+Route::view('/ryo-checkout', 'ryo-checkout')->name('checkout');
+Route::view('/ryo-cart', 'ryo-cart')->name('cart');
+
+
+
+
 
 
 

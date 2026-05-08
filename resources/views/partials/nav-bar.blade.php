@@ -6,9 +6,9 @@ style="position:fixed;top:0;left:0;right:0;z-index:50;padding:0 40px;height:64px
 class="nav-transparent">
 <!-- LEFT NAV -->
 <nav style="display:flex;gap:32px;align-items:center;" class="hidden md:flex">
-  <a href="shop.html" class="nav-link">Shop</a>
-  <a href="#" class="nav-link">Collections</a>
-  <a href="#" class="nav-link">New Drops</a>
+  <a href={{ route('home') }} class="nav-link">HOME</a>
+  <a href={{ route('all-products') }} class="nav-link">SHOP</a>
+  <a href="#" class="nav-link">COLLECTIONS</a>
 </nav>
 <!-- LOGO -->
 <a href="{{ route('home') }}" 
@@ -29,19 +29,12 @@ class="nav-transparent">
 <!-- RIGHT NAV -->
 <div style="display:flex;align-items:center;gap:24px;">
   <nav style="display:flex;gap:32px;" class="hidden md:flex">
-    <a href="#" class="nav-link">Sale</a>
+    <a href="#" class="nav-link">NEW IN</a>
     <a href="#" class="nav-link">About</a>
+    <a href="#" class="nav-link">CONTACT US</a>
   </nav>
   <div style="display:flex;align-items:center;gap:16px;">
-    <!-- Search -->
-    <button class="nav-icon"
-      style="background:none;border:none;cursor:pointer;color:#F8F6F2;transition:color 0.4s ease;padding:4px;"
-      aria-label="Search">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="11" cy="11" r="8" />
-        <path d="M21 21l-4.35-4.35" />
-      </svg>
-    </button>
+
     <!-- Account -->
     @if (Route::has('login'))
       <nav class="flex items-center justify-end gap-4">

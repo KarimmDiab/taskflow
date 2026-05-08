@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Policies — RYO</title>
+  <title>RYO - Shipping Policies</title>
   <meta name="description" content="RYO shipping policy, return policy, privacy policy, and terms of service.">
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.bunny.net">
