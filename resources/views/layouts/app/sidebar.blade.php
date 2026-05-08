@@ -51,6 +51,12 @@
                     {{ __('تصنيفات المنتجات') }}
                 </flux:sidebar.item>
 
+                <flux:sidebar.item icon="tag" :href="route('subCategories')"
+                    :current="request()->routeIs('subCategories')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('التصنيفات الفرعية للمنتجات') }}
+                </flux:sidebar.item>
+
                 <flux:sidebar.item icon="user-group" :href="route('customers')"
                     :current="request()->routeIs('customers')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
