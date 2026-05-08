@@ -96,7 +96,7 @@ new #[Title('إدارة التصنيفات الفرعية للمنتجات')] cl
                 </p>
             </div>
 
-            <flux:modal.trigger name="add-sub_category">
+            <flux:modal.trigger name="add-subCategory">
                 <button
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"

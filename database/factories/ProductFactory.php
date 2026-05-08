@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Branches;
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\SubCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -26,6 +27,7 @@ class ProductFactory extends Factory
             'product_price' => fake()->numberBetween(400, 900),
             'product_cost' => fake()->numberBetween(400, 900),
             'category_id' => Category::inRandomOrder()->first()->id,
+            'sub_category_id' => SubCategory::inRandomOrder()->first()->id,
             'branch_id' => Branches::inRandomOrder()->first()->id,
 
         ];
