@@ -49,10 +49,7 @@ class SalesInvoice extends Model
         return $this->hasMany(CustomerTransaction::class);
     }
 
-    public function customerSalesInvoice()
-    {
-        return $this->hasMany(CustomerSalesInvoice::class);
-    }
+
 
     public function paymentMethod()
     {

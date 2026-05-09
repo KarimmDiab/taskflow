@@ -33,9 +33,19 @@ class Branches extends Model
         return $this->hasMany(PurchaseInvoice::class);
     }
 
-    
+
     public function sales_invoices()
     {
         return $this->hasMany(SalesInvoice::class);
+    }
+
+    public function inventories()
+    {
+        return $this->hasMany(Inventory::class);
+    }
+
+    public function stockTransfers()
+    {
+        return $this->hasMany(StockTransfer::class);
     }
 }

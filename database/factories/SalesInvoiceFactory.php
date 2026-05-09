@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Branches;
+use App\Models\Customer;
 use App\Models\PaymentMethod;
 use App\Models\SalesInvoice;
 use App\Models\User;
@@ -35,6 +36,7 @@ class SalesInvoiceFactory extends Factory
             'paid_amount' => $paid,
             'remaining_amount' => $net - $paid,
             'payment_method_id' => PaymentMethod::inRandomOrder()->first()->id,
+            'customer_id' => Customer::inRandomOrder()->first()->id,
             'user_id' => User::inRandomOrder()->value('id'),
             'branch_id' => Branches::inRandomOrder()->first()->id,
 

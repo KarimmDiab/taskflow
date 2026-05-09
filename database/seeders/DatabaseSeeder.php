@@ -27,15 +27,17 @@ class DatabaseSeeder extends Seeder
             PurchaseInvoiceSeeder::class,
             PurchaseInvoiceDetailSeeder::class,
             SupplierPaymentSeeder::class,
+            CustomerSeeder::class,
             SalesInvoiceSeeder::class,
             SalesInvoiceDetailSeeder::class,
-            CustomerSeeder::class,
-            CustomerSalesInvoiceSeeder::class,
             CustomerTransactionSeeder::class,
             ExpensesItemSeeder::class,
             ExpensesDetailSeeder::class,
             RolePermissionSeeder::class,
             ProductImageSeeder::class,
+            InventorySeeder::class,
+            StockTransferSeeder::class,
+            StockTransferItemSeeder::class,
 
         ]);
 
