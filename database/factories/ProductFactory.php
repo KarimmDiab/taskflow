@@ -29,6 +29,9 @@ class ProductFactory extends Factory
             'category_id' => Category::inRandomOrder()->first()->id,
             'sub_category_id' => SubCategory::inRandomOrder()->first()->id,
             'branch_id' => Branches::inRandomOrder()->first()->id,
+            'is_active' => fake()->boolean(95),
+            'product_desc' => fake()->sentence(20),
+            'minimum_stock' => fake()->numberBetween(3, 15),
 
         ];
     }

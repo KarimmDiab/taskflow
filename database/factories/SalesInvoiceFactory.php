@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Branches;
+use App\Models\PaymentMethod;
 use App\Models\SalesInvoice;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -33,7 +34,7 @@ class SalesInvoiceFactory extends Factory
             'net_total' => $net,
             'paid_amount' => $paid,
             'remaining_amount' => $net - $paid,
-            'payment_method' => fake()->randomElement(['visa', 'credit', 'cash', 'instapay']),
+            'payment_method_id' => PaymentMethod::inRandomOrder()->first()->id,
             'user_id' => User::inRandomOrder()->value('id'),
             'branch_id' => Branches::inRandomOrder()->first()->id,
 

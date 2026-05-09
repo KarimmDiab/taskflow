@@ -56,7 +56,7 @@ class UpdatePurchaseInvoiceRequest extends FormRequest
                 'in:cash,visa,credit,bank_transfer',
             ],
 
-            'product_image' => [
+            'invoice_image' => [
                 'nullable',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
@@ -108,9 +108,9 @@ class UpdatePurchaseInvoiceRequest extends FormRequest
             'payment_method.in' => 'طريقة الدفع يجب أن تكون: cash أو visa أو credit أو bank_transfer',
 
             // image
-            'product_image.image' => 'المرفق يجب أن يكون صورة',
-            'product_image.mimes' => 'الصورة يجب أن تكون jpg أو jpeg أو png أو webp',
-            'product_image.max' => 'حجم الصورة لا يجب أن يتجاوز 2 ميجا',
+            'invoice_image.image' => 'المرفق يجب أن يكون صورة',
+            'invoice_image.mimes' => 'الصورة يجب أن تكون jpg أو jpeg أو png أو webp',
+            'invoice_image.max' => 'حجم الصورة لا يجب أن يتجاوز 2 ميجا',
 
             // branch
             'branch_id.required' => 'الفرع مطلوب',

@@ -19,7 +19,7 @@ class PurchaseInvoice extends Model
         'paid_amount',
         'payment_method',
         'remaining_amount',
-        'product_image',
+        'invoice_image',
         'branch_id',
         'supplier_id',
         'user_id',
@@ -50,5 +50,10 @@ class PurchaseInvoice extends Model
     public function supplierPayment()
     {
         return $this->hasMany(SupplierPayment::class);
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 }

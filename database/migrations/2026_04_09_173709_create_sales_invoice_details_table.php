@@ -15,7 +15,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products')->onDelete('restrict')->onUpdate('cascade');
             $table->foreignId('sales_invoice_id')->constrained('sales_invoices')->onDelete('restrict')->onUpdate('cascade');
             $table->integer('product_quantity')->unsigned()->default(0);
-            $table->decimal('cost_per_piece',10,2)->unsigned()->default(0);
+            $table->decimal('unit_price',10,2)->unsigned()->default(0);
             $table->timestamps();
             $table->softDeletes();
             $table->engine('InnoDB');

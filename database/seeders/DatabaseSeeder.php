@@ -2,9 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Branches;
-use App\Models\Category;
-use App\Models\Supplier;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -18,12 +15,11 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-
-
         User::factory(10)->create();
 
         $this->call([
             SupplierSeeder::class,
+            PaymentMethodSeeder::class,
             CategorySeeder::class,
             SubCategorySeeder::class,
             BranchesSeeder::class,
@@ -38,13 +34,15 @@ class DatabaseSeeder extends Seeder
             CustomerTransactionSeeder::class,
             ExpensesItemSeeder::class,
             ExpensesDetailSeeder::class,
-            RolePermissionSeeder::class
+            RolePermissionSeeder::class,
+            ProductImageSeeder::class,
+
         ]);
 
         $admin = User::factory()->create([
             'name' => 'karim diab',
             'email' => 'karim@karim.com',
-            'password' => '12345678'
+            'password' => '12345678',
         ]);
         $admin->assignRole('admin');
     }

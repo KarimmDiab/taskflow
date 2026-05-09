@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Branches;
+use App\Models\PaymentMethod;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\User;
@@ -28,7 +29,7 @@ class PurchaseInvoiceFactory extends Factory
             'purchase_invoice_date' => fake()->date(),
             'total_amount' => $total,
             'paid_amount' => $paid,
-            'payment_method' => fake()->randomElement(['visa', 'credit', 'cash', 'instapay']),
+            'payment_method_id' => PaymentMethod::inRandomOrder()->first()->id,
             'remaining_amount' => $total - $paid,
             'supplier_id' => Supplier::inRandomOrder()->first()->id,
             'branch_id' => Branches::inRandomOrder()->first()->id,

@@ -23,7 +23,7 @@ class SalesInvoiceDetailFactory extends Factory
             'product_id' => Product::inRandomOrder()->first()->id,
             'sales_invoice_id' => SalesInvoice::inRandomOrder()->first()->id,
             'product_quantity' => fake()->numberBetween(5,30),
-            'cost_per_piece' => fake()->numberBetween(500 , 1500),
+            'unit_price' => fake()->numberBetween(500 , 1500),
         ];
     }
 }

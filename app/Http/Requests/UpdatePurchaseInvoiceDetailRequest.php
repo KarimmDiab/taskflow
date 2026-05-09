@@ -41,7 +41,7 @@ class UpdatePurchaseInvoiceDetailRequest extends FormRequest
                 'min:1',
             ],
 
-            'cost_per_piece' => [
+            'unit_price' => [
                 'required',
                 'numeric',
                 'min:0',
@@ -69,10 +69,10 @@ class UpdatePurchaseInvoiceDetailRequest extends FormRequest
             'product_quantity.min' => 'الكمية يجب أن تكون على الأقل 1',
 
             // cost
-            'cost_per_piece.required' => 'سعر القطعة مطلوب',
-            'cost_per_piece.numeric' => 'سعر القطعة يجب أن يكون رقم',
-            'cost_per_piece.min' => 'سعر القطعة لا يمكن أن يكون أقل من 0',
-            'cost_per_piece.regex' => 'سعر القطعة يجب أن يكون رقم صحيح أو عشري بحد أقصى منزلتين',
+            'unit_price.required' => 'سعر القطعة مطلوب',
+            'unit_price.numeric' => 'سعر القطعة يجب أن يكون رقم',
+            'unit_price.min' => 'سعر القطعة لا يمكن أن يكون أقل من 0',
+            'unit_price.regex' => 'سعر القطعة يجب أن يكون رقم صحيح أو عشري بحد أقصى منزلتين',
         ];
     }
 }

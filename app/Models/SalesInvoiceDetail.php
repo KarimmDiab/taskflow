@@ -15,7 +15,7 @@ class SalesInvoiceDetail extends Model
         'product_id',
         'sales_invoice_id',
         'product_quantity',
-        'cost_per_piece',
+        'unit_price',
     ];
 
 

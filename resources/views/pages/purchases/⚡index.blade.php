@@ -22,11 +22,11 @@ new #[Title('إدارة فواتير المشتريات')] class extends Compone
     public function getPurchaseInvoicesProperty()
     {
         return PurchaseInvoice::query()
-            ->with(['supplier', 'user'])
+            ->with(['supplier', 'user', 'paymentMethod'])
             ->when($this->search, function (Builder $q) {
                 $q->where(function (Builder $query) {
                     $query
-                        ->where('payment_method', 'like', "%{$this->search}%")
+                        ->where('payment_method_name', 'like', "%{$this->search}%")
                         ->orWhere('invoice_number', 'like', "%{$this->search}%")
                         ->orWhereHas('supplier', function (Builder $q) {
                             $q->where('supplier_name', 'like', "%{$this->search}%");

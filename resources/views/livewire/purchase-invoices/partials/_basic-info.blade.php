@@ -87,7 +87,7 @@
                     <input
                         type="file"
                         id="invoice-image-input"
-                        wire:model="product_image"
+                        wire:model="invoice_image"
                         accept="image/*"
                         class="pi-upload-input"
                     >
@@ -96,12 +96,12 @@
                     </svg>
                     <p class="pi-upload-txt">اضغط لرفع الصورة</p>
                     <p class="pi-upload-hint">PNG، JPG أو WebP حتى 5MB</p>
-                    <div wire:loading wire:target="product_image" class="pi-upload-loading">
+                    <div wire:loading wire:target="invoice_image" class="pi-upload-loading">
                         <span class="pi-spinner"></span> جاري الرفع...
                     </div>
                 </label>
             @endif
-            @error('product_image')
+            @error('invoice_image')
                 <span class="pi-err-msg">⚠ {{ $message }}</span>
             @enderror
         </div>

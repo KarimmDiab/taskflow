@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\SalesInvoiceFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SalesInvoice extends Model
 {
-    /** @use HasFactory<\Database\Factories\SalesInvoiceFactory> */
+    /** @use HasFactory<SalesInvoiceFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -19,7 +20,7 @@ class SalesInvoice extends Model
         'remaining_amount',
         'payment_method',
         'user_id',
-        'branch_id'
+        'branch_id',
     ];
 
     protected $casts = [
@@ -51,5 +52,10 @@ class SalesInvoice extends Model
     public function customerSalesInvoice()
     {
         return $this->hasMany(CustomerSalesInvoice::class);
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
     }
 }

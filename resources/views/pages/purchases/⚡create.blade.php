@@ -12,6 +12,7 @@ use Livewire\Attributes\Title;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use App\Models\PaymentMethod;
 
 new #[Title('فاتورة مشتريات جديدة')] class extends Component {
     use WithFileUploads;
@@ -26,14 +27,14 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
     public ?int $supplier_id = null;
 
     #[Validate('nullable|image|max:5120')]
-    public $product_image = null;
+    public $invoice_image = null;
 
     public ?string $imagePreview = null;
 
     #[Validate('required|numeric|min:0')]
     public float $paid_amount = 0;
 
-    public string $payment_method = 'cash';
+    public ?int $payment_method_id = null;
 
     /** @var array<int, array<string, mixed>> */
     public array $rows = [];
@@ -89,6 +90,12 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
         return Category::query()
             ->orderBy('category_name')
             ->get(['id', 'category_name']);
+    }
+
+    #[Computed]
+    public function paymentMethods(): \Illuminate\Database\Eloquent\Collection
+    {
+        return PaymentMethod::where('is_active', true)->select('id', 'payment_method_name')->orderBy('payment_method_name')->get();
     }
 
     #[Computed]
@@ -216,13 +223,13 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
     public function updatedProductImage(): void
     {
-        $this->validateOnly('product_image');
-        $this->imagePreview = $this->product_image?->temporaryUrl();
+        $this->validateOnly('invoice_image');
+        $this->imagePreview = $this->invoice_image?->temporaryUrl();
     }
 
     public function removeImage(): void
     {
-        $this->product_image = null;
+        $this->invoice_image = null;
         $this->imagePreview = null;
     }
 
@@ -304,7 +311,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                 'invoice_number' => ['required', 'string', 'max:100', Rule::unique('purchase_invoices', 'invoice_number')->whereNull('deleted_at')],
                 'purchase_invoice_date' => 'required|date',
                 'supplier_id' => 'required|exists:suppliers,id',
-                'product_image' => 'nullable|image|max:5120',
+                'invoice_image' => 'nullable|image|max:5120',
                 'paid_amount' => 'required|numeric|min:0',
             ],
             [
@@ -349,8 +356,8 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
         try {
             DB::transaction(function () {
                 $imagePath = null;
-                if ($this->product_image) {
-                    $imagePath = $this->product_image->store('purchase-invoices', 'public');
+                if ($this->invoice_image) {
+                    $imagePath = $this->invoice_image->store('purchase-invoices', 'public');
                 }
 
                 $total = $this->invoiceTotal;
@@ -363,7 +370,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                     'paid_amount' => $this->paid_amount,
                     'remaining_amount' => $remaining,
                     'payment_method' => $this->payment_method,
-                    'product_image' => $imagePath,
+                    'invoice_image' => $imagePath,
                     'supplier_id' => $this->supplier_id,
                     'branch_id' => auth()->user()?->branch_id ?? 1,
                     'user_id' => auth()->id(),
@@ -374,7 +381,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                         'purchase_invoice_id' => $invoice->id,
                         'product_id' => $row['product_id'],
                         'product_quantity' => $row['qty'],
-                        'cost_per_piece' => $row['cost'],
+                        'unit_price' => $row['cost'],
                     ]);
 
                     $product = Product::query()->find($row['product_id']);
@@ -418,10 +425,10 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 ?>
 <div>
 
-{{-- ══════════════════════════════════════════════════════════
+    {{-- ══════════════════════════════════════════════════════════
 TOAST NOTIFICATION
  ══════════════════════════════════════════════════════════ --}}
-<div id="pi-toast" class="pi-toast" aria-live="polite"></div>
+    <div id="pi-toast" class="pi-toast" aria-live="polite"></div>
 
 
     @include('livewire.purchase-invoices.partials._header')

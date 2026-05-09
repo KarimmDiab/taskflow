@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('net_total', 10, 2)->unsigned()->default(0);
             $table->decimal('paid_amount', 10, 2)->unsigned()->default(0);
             $table->decimal('remaining_amount', 10, 2)->unsigned()->default(0);
-            $table->string('payment_method');
+            $table->foreignId('payment_method_id')->constrained('payment_methods')->onUpdate('cascade')->onDelete('restrict');
             $table->foreignId('user_id')->constrained('users')->onDelete('restrict')->onUpdate('cascade');
             $table->foreignId('branch_id')->constrained('branches')->onUpdate('cascade')->onDelete('restrict');
             $table->timestamps();
