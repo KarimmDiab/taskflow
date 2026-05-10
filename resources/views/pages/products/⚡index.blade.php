@@ -15,7 +15,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
 
     public function getProductsProperty()
     {
-        return Product::with(['category', 'branch'])
+        return Product::with(['category', 'branch', 'inventories.branch'])
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query
@@ -23,7 +23,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                         ->orWhereHas('category', function ($q) {
                             $q->where('category_name', 'like', "%{$this->search}%");
                         })
-                        ->orWhereHas('branch', function ($q) {
+                        ->orWhereHas('inventories.branch', function ($q) {
                             $q->where('branch_name', 'like', "%{$this->search}%");
                         });
                 });
@@ -346,10 +346,27 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                 </td>
 
                                 <td class="p-4">
-                                    <span
-                                        class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs text-gray-600 dark:text-gray-300">
-                                        {{ $product->branch?->branch_name ?? 'غير محدد' }}
-                                    </span>
+                                    <div class="flex flex-wrap gap-1">
+
+                                        @forelse ($product->inventories->where('quantity', '>', 0) as $inventory)
+                                            <span
+                                                class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs text-gray-600 dark:text-gray-300">
+
+                                                {{ $inventory->branch?->branch_name }}
+
+                                            </span>
+
+                                        @empty
+
+                                            <span
+                                                class="px-2 py-1 bg-red-100 dark:bg-red-900 rounded-lg text-xs text-red-600 dark:text-red-300">
+
+                                                غير موزع في فرع
+
+                                            </span>
+                                        @endforelse
+
+                                    </div>
                                 </td>
 
                                 <td class="p-4">

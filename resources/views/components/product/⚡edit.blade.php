@@ -3,7 +3,7 @@
 use Livewire\Component;
 use Livewire\Attributes\On;
 use App\Models\Product;
-use App\Models\Branches;
+use App\Models\SubCategory;
 use App\Models\Category;
 
 // Create this file as app/Livewire/Forms/ProductForm.php if not exists
@@ -11,7 +11,7 @@ use App\Models\Category;
 new class extends Component {
     public $product_id;
     public $category_id;
-    public $branch_id;
+    public $sub_category_id;
     public $product_name;
     public $product_quantity;
     public $product_cost;
@@ -22,10 +22,11 @@ new class extends Component {
         return Category::select('id', 'category_name')->get();
     }
 
-    public function getBranchesProperty()
+    public function getSubCategoriesProperty()
     {
-        return Branches::select('id', 'branch_name')->get();
+        return SubCategory::select('id', 'sub_category_name')->get();
     }
+
 
     #[On('openEditModal')]
     public function loadProduct($id)
@@ -33,7 +34,7 @@ new class extends Component {
         $product = Product::findOrFail($id);
         $this->product_id = $product->id;
         $this->category_id = $product->category_id;
-        $this->branch_id = $product->branch_id;
+        $this->sub_category_id = $product->sub_category_id;
         $this->product_name = $product->product_name;
         $this->product_quantity = $product->product_quantity;
         $this->product_cost = $product->product_cost;
@@ -47,7 +48,7 @@ new class extends Component {
         $validated = $this->validate(
             [
                 'category_id' => 'required|exists:categories,id',
-                'branch_id' => 'required|exists:branches,id',
+                'sub_category_id' => 'required|exists:sub_categories,id',
                 'product_name' => 'required|string|max:255',
                 'product_quantity' => 'required|integer|min:0',
                 'product_cost' => 'required|numeric|min:0',
@@ -72,7 +73,6 @@ new class extends Component {
                 'product_price.min' => 'سعر البيع لا يمكن أن يكون أقل من 0',
             ],
         );
-
 
         $product = Product::findOrFail($this->product_id);
         $product->update($validated);
@@ -104,6 +104,16 @@ new class extends Component {
                 @endforeach
             </flux:select>
 
+            <!-- 🔹 التصنيف الفرعي -->
+            <flux:select label="اختر التصنيف الفرعي" searchable placeholder="اختر التصنيف الفرعي"
+                wire:model="form.sub_category_id">
+                <flux:select.option value=""> اختر التصنيف الفرعي </flux:select.option>
+                @foreach ($this->subCategories as $subCategory)
+                    <flux:select.option value="{{ $subCategory->id }}"> {{ $subCategory->sub_category_name }}
+                    </flux:select.option>
+                @endforeach
+            </flux:select>
+
             <!-- Product Name -->
             <flux:input label="اسم المنتج" type="text" placeholder="ادخل اسم المنتج" wire:model="product_name" />
 
@@ -116,15 +126,7 @@ new class extends Component {
             <!-- Price -->
             <flux:input label="سعر المنتج" type="number" placeholder="سعر المنتج" wire:model="product_price" />
 
-            <!-- Branch Select -->
-            <flux:select label="اختر الفرع" searchable placeholder="اختر الفرع" wire:model="branch_id">
-                <flux:select.option value="">اختر الفرع</flux:select.option>
-                @foreach ($this->branches as $branch)
-                    <flux:select.option value="{{ $branch->id }}">
-                        {{ $branch->branch_name }}
-                    </flux:select.option>
-                @endforeach
-            </flux:select>
+
 
             <!-- Buttons -->
             <div class="grid grid-cols-3 items-center">

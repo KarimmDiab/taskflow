@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\SubCategory;
 use App\Models\Product;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceDetail;
@@ -34,7 +35,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
     #[Validate('required|numeric|min:0')]
     public float $paid_amount = 0;
 
-    public ?int $payment_method_id = null;
+    public ?int $payment_method = null;
 
     /** @var array<int, array<string, mixed>> */
     public array $rows = [];
@@ -60,6 +61,8 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
     #[Validate('required|exists:categories,id', as: 'التصنيف', onUpdate: false)]
     public ?int $newProductCategoryId = null;
+
+    public ?int $newProductSubCategoryId = null;
 
     #[Validate('required|numeric|min:0', as: 'سعر التكلفة', onUpdate: false)]
     public float $newProductCost = 0;
@@ -90,6 +93,20 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
         return Category::query()
             ->orderBy('category_name')
             ->get(['id', 'category_name']);
+    }
+
+    public function getSubCategoriesProperty()
+    {
+        if (!$this->newProductCategoryId) {
+            return collect();
+        }
+
+        return SubCategory::where('category_id', $this->newProductCategoryId)->select('id', 'sub_category_name')->orderBy('sub_category_name')->get();
+    }
+
+    public function updatedNewProductCategoryId()
+    {
+        $this->newProductSubCategoryId = null;
     }
 
     #[Computed]
@@ -259,6 +276,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                 'newProductName' => 'required|string|max:191',
                 'newProductCode' => 'required|string|max:100|unique:products,product_code',
                 'newProductCategoryId' => 'required|exists:categories,id',
+                'newProductSubCategoryId' => 'nullable|exists:sub_categories,id',
                 'newProductCost' => 'required|numeric|min:0',
                 'newProductSell' => 'nullable|numeric|min:0',
             ],
@@ -268,12 +286,14 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                 'newProductCode.unique' => 'كود المنتج مستخدم مسبقاً',
                 'newProductCategoryId.required' => 'التصنيف مطلوب',
                 'newProductCategoryId.exists' => 'التصنيف غير صحيح',
+
+                'newProductsubCategoryId.exists' => 'التصنيف الفرعي غير صحيح',
+
                 'newProductCost.required' => 'سعر التكلفة مطلوب',
                 'newProductCost.numeric' => 'سعر التكلفة يجب أن يكون رقماً',
                 'newProductCost.min' => 'سعر التكلفة يجب أن يكون أكبر من أو يساوي 0',
             ],
         );
-
         $product = Product::create([
             'product_name' => $this->newProductName,
             'product_code' => mb_strtoupper($this->newProductCode),
@@ -281,7 +301,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
             'product_cost' => $this->newProductCost,
             'product_price' => $this->newProductSell ?? 0,
             'category_id' => $this->newProductCategoryId,
-            'branch_id' => auth()->user()?->branch_id ?? 1,
+            'sub_category_id' => $this->newProductSubCategoryId,
         ]);
 
         $displayCode = $product->product_code ?: 'PRD-' . str_pad((string) $product->id, 4, '0', STR_PAD_LEFT);
@@ -369,7 +389,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                     'total_amount' => $total,
                     'paid_amount' => $this->paid_amount,
                     'remaining_amount' => $remaining,
-                    'payment_method' => $this->payment_method,
+                    'payment_method_id' => $this->payment_method,
                     'invoice_image' => $imagePath,
                     'supplier_id' => $this->supplier_id,
                     'branch_id' => auth()->user()?->branch_id ?? 1,
@@ -381,7 +401,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                         'purchase_invoice_id' => $invoice->id,
                         'product_id' => $row['product_id'],
                         'product_quantity' => $row['qty'],
-                        'unit_price' => $row['cost'],
+                        'unit_cost' => $row['cost'],
                     ]);
 
                     $product = Product::query()->find($row['product_id']);

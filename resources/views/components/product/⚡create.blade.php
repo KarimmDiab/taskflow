@@ -5,7 +5,7 @@ use Livewire\WithPagination;
 use App\Livewire\Forms\ProductForm;
 use App\Models\Product;
 use App\Models\Category;
-use App\Models\Branches;
+use App\Models\SubCategory;
 use Illuminate\Database\Eloquent\Builder;
 use Flux\Flux;
 
@@ -42,9 +42,9 @@ new class extends Component {
         return Category::select('id', 'category_name')->get();
     }
 
-    public function getBranchesProperty()
+    public function getSubCategoriesProperty()
     {
-        return Branches::select('id', 'branch_name')->get();
+        return SubCategory::select('id', 'sub_category_name')->get();
     }
 
     public function save()
@@ -76,12 +76,23 @@ new class extends Component {
             <flux:select label="اختر تصنيف المنتج" searchable placeholder="اختر التصنيف" wire:model="form.category_id">
                 <flux:select.option value=""> اختر التصنيف </flux:select.option>
                 @foreach ($this->categories as $category)
-                    <flux:select.option value="{{ $category->id }}"> {{ $category->category_name }} </flux:select.option>
+                    <flux:select.option value="{{ $category->id }}"> {{ $category->category_name }}
+                    </flux:select.option>
+                @endforeach
+            </flux:select>
+
+            <!-- 🔹 التصنيف الفرعي -->
+            <flux:select label="اختر التصنيف الفرعي" searchable placeholder="اختر التصنيف الفرعي" wire:model="form.sub_category_id">
+                <flux:select.option value=""> اختر التصنيف الفرعي </flux:select.option>
+                @foreach ($this->subCategories as $subCategory)
+                    <flux:select.option value="{{ $subCategory->id }}"> {{ $subCategory->sub_category_name }}
+                    </flux:select.option>
                 @endforeach
             </flux:select>
 
             <!-- 🔹 اسم المنتج -->
-            <flux:input label="اسم المنتج" type="text" placeholder="ادخل اسم المنتج" wire:model="form.product_name" />
+            <flux:input label="اسم المنتج" type="text" placeholder="ادخل اسم المنتج"
+                wire:model="form.product_name" />
 
             <!-- 🔹 الكمية -->
             <flux:input label="الكمية" type="number" placeholder="ادخل الكمية" wire:model="form.product_quantity" />
@@ -91,16 +102,6 @@ new class extends Component {
 
             <!-- 🔹 السعر -->
             <flux:input label="سعر المنتج" type="number" placeholder="سعر المنتج" wire:model="form.product_price" />
-
-
-            <!-- 🔹 الفرع -->
-            <flux:select label="اختر الفرع" searchable placeholder="اختر الفرع" wire:model="form.branch_id">
-                <flux:select.option value=""> اختر الفرع </flux:select.option>
-                @foreach ($this->branches as $branch)
-                    <flux:select.option value="{{ $branch->id }}"> {{ $branch->branch_name }}
-                    </flux:select.option>
-                @endforeach
-            </flux:select>
 
             <!-- 🔹 الأزرار -->
             <div class="grid grid-cols-3 items-center">

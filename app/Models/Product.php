@@ -19,7 +19,7 @@ class Product extends Model
         'product_price',
         'product_cost',
         'category_id',
-        'branch_id',
+        'sub_category_id',
     ];
 
     protected $casts = [

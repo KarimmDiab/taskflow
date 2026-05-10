@@ -17,7 +17,6 @@ return new class extends Migration
             $table->integer('product_quantity')->unsigned()->default(0);
             $table->decimal('product_price', 10, 2)->unsigned()->default(0);
             $table->foreignId('category_id')->constrained('categories')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreignId('branch_id')->constrained('branches')->onDelete('restrict')->onUpdate('cascade');
             $table->softDeletes();
             $table->timestamps();
             $table->engine('InnoDB');

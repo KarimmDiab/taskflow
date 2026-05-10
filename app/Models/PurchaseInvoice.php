@@ -17,7 +17,7 @@ class PurchaseInvoice extends Model
         'purchase_invoice_date',
         'total_amount',
         'paid_amount',
-        'payment_method',
+        'payment_method_id',
         'remaining_amount',
         'invoice_image',
         'branch_id',
