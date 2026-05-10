@@ -8,7 +8,7 @@
 <body class="min-h-screen bg-zinc-100 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
     <flux:sidebar sticky collapsible="mobile"
         class="border-e border-zinc-200/80 bg-white/95 shadow-sm backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/90">
-        <flux:sidebar.header class="border-b border-zinc-200/80 px-4 py-4 dark:border-zinc-800">
+        <flux:sidebar.header class="border-b border-zinc-200/80 px-4  dark:border-zinc-800" style="padding-bottom: 5px;">
             <x-app-logo :sidebar="true" href="{{ route('dashboard') }}" wire:navigate />
             <flux:sidebar.collapse class="lg:hidden" />
         </flux:sidebar.header>
@@ -109,7 +109,7 @@
 
         <flux:spacer />
 
-        <div class="hidden border-t border-zinc-200/80 px-3 py-3 dark:border-zinc-800 lg:block">
+        <div class="hidden border-t border-zinc-200/80 px-3  dark:border-zinc-800 lg:block" style="padding-top: 5px;">
             <x-desktop-user-menu
                 class="w-full rounded-xl bg-zinc-50 px-2 py-2 shadow-sm ring-1 ring-zinc-200/70 dark:bg-zinc-800/60 dark:ring-zinc-700/70"
                 :name="auth()->user()->name" />
