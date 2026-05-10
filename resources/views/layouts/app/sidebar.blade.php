@@ -14,19 +14,83 @@
         </flux:sidebar.header>
 
         <flux:sidebar.nav class="px-3 pt-4">
-            <flux:sidebar.group :heading="__('الصفحة الرئيسية')" class="grid gap-1">
+            {{-- لوحة التحكم --}}
+            <flux:sidebar.group :heading="__('الرئيسية')" class="mb-6">
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('لوحة التحكم') }}
                 </flux:sidebar.item>
-
             </flux:sidebar.group>
-        </flux:sidebar.nav>
 
-        <flux:sidebar.nav class="px-3 pt-4">
-            <flux:sidebar.group :heading="__('الاعدادات')" class="grid gap-1">
+            {{-- إدارة المنتجات والمخزون --}}
+            <flux:sidebar.group :heading="__('إدارة المنتجات والمخزون')" class="mb-6">
+                <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
+                    wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('المنتجات') }}
+                </flux:sidebar.item>
 
+                <flux:sidebar.item icon="tag" :href="route('categories')"
+                    :current="request()->routeIs('categories')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('التصنيفات الرئيسية') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="tag" :href="route('subCategories')"
+                    :current="request()->routeIs('subCategories')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('التصنيفات الفرعية') }}
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+
+            {{-- إدارة الفواتير --}}
+            <flux:sidebar.group :heading="__('إدارة الفواتير')" class="mb-6">
+                <flux:sidebar.item icon="document-text" :href="route('purchaseInvoices')"
+                    :current="request()->routeIs('purchaseInvoices')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('قائمة فواتير المشتريات') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="document-plus" :href="route('createpurchaseInvoices')"
+                    :current="request()->routeIs('createpurchaseInvoices')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('تسجيل فاتورة مشتريات جديدة') }}
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+
+            {{-- إدارة المصروفات --}}
+            <flux:sidebar.group :heading="__('إدارة المصروفات')" class="mb-6">
+                <flux:sidebar.item icon="currency-dollar" :href="route('expenses')"
+                    :current="request()->routeIs('expenses')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('جميع المصروفات') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="receipt-percent" :href="route('expenses_items')"
+                    :current="request()->routeIs('expenses_items')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('بنود المصروفات') }}
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+
+            {{-- إدارة العلاقات التجارية --}}
+            <flux:sidebar.group :heading="__('العلاقات التجارية')" class="mb-6">
+                <flux:sidebar.item icon="user-group" :href="route('customers')"
+                    :current="request()->routeIs('customers')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('العملاء') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="truck" :href="route('suppliers')"
+                    :current="request()->routeIs('suppliers')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('الموردين') }}
+                </flux:sidebar.item>
+            </flux:sidebar.group>
+
+            {{-- إعدادات النظام --}}
+            <flux:sidebar.group :heading="__('إعدادات النظام')" class="mb-6">
                 <flux:sidebar.item icon="users" :href="route('users')" :current="request()->routeIs('users')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
@@ -37,60 +101,6 @@
                     :current="request()->routeIs('branches')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('الفروع') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="truck" :href="route('suppliers')" :current="request()->routeIs('suppliers')"
-                    wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('الموردين') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="tag" :href="route('categories')"
-                    :current="request()->routeIs('categories')" wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('تصنيفات المنتجات') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="tag" :href="route('subCategories')"
-                    :current="request()->routeIs('subCategories')" wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('التصنيفات الفرعية للمنتجات') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="user-group" :href="route('customers')"
-                    :current="request()->routeIs('customers')" wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('العملاء') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="receipt-percent" :href="route('expenses_items')"
-                    :current="request()->routeIs('expenses_items')" wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('بنود المصروفات') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
-                    wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('إدارة المنتجات') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="currency-dollar" :href="route('expenses')"
-                    :current="request()->routeIs('expenses')" wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('جميع المصروفات') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="document-text" :href="route('purchaseInvoices')"
-                    :current="request()->routeIs('purchaseInvoices')" wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('فواتير المشتريات') }}
-                </flux:sidebar.item>
-
-                <flux:sidebar.item icon="document-text" :href="route('createpurchaseInvoices')"
-                    :current="request()->routeIs('createpurchaseInvoices')" wire:navigate
-                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
-                    {{ __('تسجيل فاتورة المشتريات') }}
                 </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
