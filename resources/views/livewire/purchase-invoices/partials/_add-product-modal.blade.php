@@ -78,10 +78,9 @@
                         @enderror
                     </div>
 
-
                     {{-- Sub Category --}}
                     <div class="pi-field">
-                        <label class="pi-label">التصنيف الفرعي <span class="pi-optional">(اختياري)</span></label>
+                        <label class="pi-label">التصنيف الفرعي <span class="pi-req">*</span></label>
                         <select wire:model.live="newProductSubCategoryId"
                             class="pi-input pi-select @error('newProductSubCategoryId') pi-input-err @enderror">
                             <option value="">-- اختر التصنيف الفرعي --</option>
@@ -93,6 +92,51 @@
                             <span class="pi-err-msg">⚠ {{ $message }}</span>
                         @enderror
                     </div>
+
+                    {{-- Size --}}
+                    <div class="pi-field">
+                        <label class="pi-label">المقاس <span class="pi-req">*</span></label>
+                        <select wire:model.live="newProductSize"
+                            class="pi-input pi-select @error('newProductSize') pi-input-err @enderror">
+                            <option value="">-- اختر المقاس --</option>
+                            <option value="XS">XS</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                            <option value="XXXL">XXXL</option>
+                        </select>
+                        @error('newProductSize')
+                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                        @enderror
+                    </div>
+
+{{-- Color --}}
+<div class="pi-field">
+    <label class="pi-label">اللون <span class="pi-req">*</span></label>
+    <div style="display:flex;gap:10px;align-items:center">
+        <input type="color"
+            x-data
+            x-init="$watch('$wire.newProductColor', value => $el.value = value || '#000000')"
+            x-on:input="$wire.newProductColor = $el.value"
+            class="pi-input @error('newProductColor') pi-input-err @enderror"
+            style="width:60px;height:40px;padding:4px;cursor:pointer"
+            value="{{ $newProductColor ?? '#000000' }}">
+        <input type="text"
+            readonly
+            wire:model="newProductColor"
+            class="pi-input @error('newProductColor') pi-input-err @enderror"
+            style="flex:1;background:var(--bg2);font-family:monospace;font-size:13px;direction:ltr"
+            placeholder="#000000">
+    </div>
+    @error('newProductColor')
+        <span class="pi-err-msg">⚠ {{ $message }}</span>
+    @enderror
+    <div style="font-size:10px;color:var(--tx3);margin-top:5px">
+        💡 اختر لون باستخدام منتقي الألوان
+    </div>
+</div>
 
                     {{-- Cost Price --}}
                     <div class="pi-field">
@@ -113,14 +157,18 @@
                     <div class="pi-field">
                         <label class="pi-label">
                             سعر البيع
-                            <span class="pi-optional">(اختياري)</span>
+                            <span class="pi-req">*</span>
                         </label>
                         <div style="position:relative">
-                            <input type="number" wire:model.live="newProductSell" class="pi-input" min="0"
+                            <input type="number" wire:model.live="newProductSell"
+                                class="pi-input @error('newProductSell') pi-input-err @enderror" min="0"
                                 step="0.01" placeholder="0.00" style="padding-left:42px" dir="ltr">
                             <span
                                 style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--tx3);pointer-events:none">ج.م</span>
                         </div>
+                        @error('newProductSell')
+                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                        @enderror
                     </div>
 
                 </div>
