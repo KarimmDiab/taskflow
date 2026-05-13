@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('sales_invoice_details', function (Blueprint $table) {
-            $table->foreignId('product_id')->constrained('products')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('product_variant_id')->constrained('product_variants')->onDelete('restrict')->onUpdate('cascade');
             $table->foreignId('sales_invoice_id')->constrained('sales_invoices')->onDelete('restrict')->onUpdate('cascade');
             $table->integer('product_quantity')->unsigned()->default(0);
             $table->decimal('unit_price',10,2)->unsigned()->default(0);

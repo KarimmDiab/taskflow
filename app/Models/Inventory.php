@@ -12,7 +12,7 @@ class Inventory extends Model
     use HasFactory;
 
     protected $fillable = [
-        'product_id',
+        'product_variant_id',
         'branch_id',
         'quantity',
     ];
@@ -23,9 +23,9 @@ class Inventory extends Model
         'deleted_at' => 'datetime',
     ];
 
-    public function product()
+    public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class);
     }
 
     public function branch()

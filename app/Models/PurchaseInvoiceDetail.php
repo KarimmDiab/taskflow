@@ -12,7 +12,7 @@ class PurchaseInvoiceDetail extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'product_id',
+        'product_variant_id',
         'purchase_invoice_id',
         'product_quantity',
         'unit_cost'
@@ -29,8 +29,8 @@ class PurchaseInvoiceDetail extends Model
         return $this->belongsTo(PurchaseInvoice::class);
     }
 
-    public function product()
+    public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class);
     }
 }

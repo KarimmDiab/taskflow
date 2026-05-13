@@ -22,6 +22,7 @@ class ProductFactory extends Factory
     {
         return [
             'product_name' => fake()->name(),
+            'slug' => fake()->unique()->slug(),
             'product_code' => strtoupper(fake()->unique()->bothify('SKU-######')),
             'product_quantity' => fake()->numberBetween(5, 15),
             'product_price' => fake()->numberBetween(400, 900),

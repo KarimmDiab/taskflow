@@ -19,11 +19,14 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SupplierSeeder::class,
+            ColorSeeder::class,
+            SizeSeeder::class,
             PaymentMethodSeeder::class,
             CategorySeeder::class,
             SubCategorySeeder::class,
             BranchesSeeder::class,
             ProductSeeder::class,
+            ProductVariantSeeder::class,
             PurchaseInvoiceSeeder::class,
             PurchaseInvoiceDetailSeeder::class,
             SupplierPaymentSeeder::class,
@@ -38,6 +41,7 @@ class DatabaseSeeder extends Seeder
             InventorySeeder::class,
             StockTransferSeeder::class,
             StockTransferItemSeeder::class,
+            CollectionSeeder::class,
 
         ]);
 

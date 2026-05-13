@@ -12,14 +12,14 @@ class SalesInvoiceDetail extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'product_id',
+        'product_variant_id',
         'sales_invoice_id',
         'product_quantity',
         'unit_price',
     ];
 
 
-    
+
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -27,12 +27,12 @@ class SalesInvoiceDetail extends Model
     ];
 
 
-    public function salesInvoice() 
+    public function salesInvoice()
     {
         return $this->belongsTo(SalesInvoice::class);
     }
-    public function product() 
+    public function productVariant()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(ProductVariant::class);
     }
 }

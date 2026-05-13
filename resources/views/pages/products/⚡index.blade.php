@@ -15,7 +15,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
 
     public function getProductsProperty()
     {
-        return Product::with(['category', 'branch', 'inventories.branch'])
+        return Product::with(['category', 'branch', 'productVariants.inventory.branch'])
             ->when($this->search, function ($q) {
                 $q->where(function ($query) {
                     $query
@@ -23,7 +23,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                         ->orWhereHas('category', function ($q) {
                             $q->where('category_name', 'like', "%{$this->search}%");
                         })
-                        ->orWhereHas('inventories.branch', function ($q) {
+                        ->orWhereHas('productVariants.inventory.branch', function ($q) {
                             $q->where('branch_name', 'like', "%{$this->search}%");
                         });
                 });
@@ -348,7 +348,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                 <td class="p-4">
                                     <div class="flex flex-wrap gap-1">
 
-                                        @forelse ($product->inventories->where('quantity', '>', 0) as $inventory)
+                                        @forelse ($product->productVariants->pluck('inventory')->flatten()->where('quantity', '>', 0) as $inventory)
                                             <span
                                                 class="px-2 py-1 bg-gray-100 dark:bg-gray-700 rounded-lg text-xs text-gray-600 dark:text-gray-300">
 

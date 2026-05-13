@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Product;
+use App\Models\ProductVariant;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceDetail;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -20,7 +21,7 @@ class PurchaseInvoiceDetailFactory extends Factory
     public function definition(): array
     {
         return [
-            'product_id' => Product::inRandomOrder()->first()->id,
+            'product_variant_id' => ProductVariant::inRandomOrder()->first()->id,
             'purchase_invoice_id' => PurchaseInvoice::inRandomOrder()->first()->id,
             'product_quantity' => fake()->numberBetween(5,15),
             'unit_cost' => fake()->numberBetween(500,1000),

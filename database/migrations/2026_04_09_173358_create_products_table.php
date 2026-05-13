@@ -16,7 +16,12 @@ return new class extends Migration
             $table->string('product_name');
             $table->integer('product_quantity')->unsigned()->default(0);
             $table->decimal('product_price', 10, 2)->unsigned()->default(0);
+            $table->string('slug')->unique();
             $table->foreignId('category_id')->constrained('categories')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('collection_id')
+                ->nullable()
+                ->constrained('collections')
+                ->nullOnDelete();
             $table->softDeletes();
             $table->timestamps();
             $table->engine('InnoDB');
