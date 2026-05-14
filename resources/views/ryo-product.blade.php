@@ -6,6 +6,8 @@
   <title>RYO - Product</title>
   <meta name="description" content="The RYO Oversized Essential Tee. Premium 350gsm cotton. Dropped shoulders, relaxed silhouette. SS25 Collection.">
   <script src="https://cdn.tailwindcss.com"></script>
+      <link rel="icon" type="image/png" href="{{ asset('images/favicon/favicon.png') }}">
+
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {

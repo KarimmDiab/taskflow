@@ -6,6 +6,7 @@
   <title>RYO - Your Bag</title>
   <meta name="description" content="Review your RYO bag and proceed to checkout.">
   <link href="{{ asset('css/website.css') }}" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon/favicon.png') }}">
 
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">

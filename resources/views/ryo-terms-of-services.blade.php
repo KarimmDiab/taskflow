@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=cairo:300,400,500,600,700,800&display=swap" rel="stylesheet" />
   <link href="{{ asset('css/website.css') }}" rel="stylesheet">
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon/favicon.png') }}">
 
 
   <script src="https://cdn.tailwindcss.com"></script>
