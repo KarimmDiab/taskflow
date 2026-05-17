@@ -134,17 +134,17 @@
                     style="font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,64px);font-weight:300;letter-spacing:-0.01em;line-height:1;margin-bottom:8px;">
                     {{ $currentCategoryName }}
                 </h1>
-                <p id="productsCount" style="font-family:'DM Sans',sans-serif;font-size:13px;color:#9C9A96;font-weight:300;">
+                <p id="productsCount"
+                    style="font-family:'DM Sans',sans-serif;font-size:13px;color:#9C9A96;font-weight:300;">
                     {{ $currentCategoryCount }} {{ $currentCategoryCount == 1 ? 'product' : 'products' }}
                 </p>
             </div>
 
             <!-- Top Filter Bar (desktop) -->
             <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;" class="hidden md:flex">
-                <button class="filter-btn {{ $selectedCategory == 'all' ? 'active' : '' }}"
-                        onclick="setCategory('all')"
-                        data-cat="all"
-                        style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:8px 16px;border-radius:30px;background:{{ $selectedCategory == 'all' ? '#0A0A0A' : 'transparent' }};border:1px solid #D5D3CF;color:{{ $selectedCategory == 'all' ? '#FFFFFF' : '#0A0A0A' }};cursor:pointer;transition:all 0.3s ease;display:inline-flex;align-items:center;gap:6px;">
+                <button class="filter-btn {{ $selectedCategory == 'all' ? 'active' : '' }}" onclick="setCategory('all')"
+                    data-cat="all"
+                    style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:8px 16px;border-radius:30px;background:{{ $selectedCategory == 'all' ? '#0A0A0A' : 'transparent' }};border:1px solid #D5D3CF;color:{{ $selectedCategory == 'all' ? '#FFFFFF' : '#0A0A0A' }};cursor:pointer;transition:all 0.3s ease;display:inline-flex;align-items:center;gap:6px;">
                     All
                     <span style="font-size:11px;opacity:0.8;">({{ $totalProducts }})</span>
                 </button>
@@ -152,9 +152,9 @@
                 @foreach ($categories as $category)
                     @if ($category->products_count > 0)
                         <button class="filter-btn {{ $selectedCategory == $category->category_name ? 'active' : '' }}"
-                                onclick="setCategory('{{ $category->category_name }}')"
-                                data-cat="{{ $category->category_name }}"
-                                style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:8px 16px;border-radius:30px;background:{{ $selectedCategory == $category->category_name ? '#0A0A0A' : 'transparent' }};border:1px solid #D5D3CF;color:{{ $selectedCategory == $category->category_name ? '#FFFFFF' : '#0A0A0A' }};cursor:pointer;transition:all 0.3s ease;display:inline-flex;align-items:center;gap:6px;">
+                            onclick="setCategory('{{ $category->category_name }}')"
+                            data-cat="{{ $category->category_name }}"
+                            style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:8px 16px;border-radius:30px;background:{{ $selectedCategory == $category->category_name ? '#0A0A0A' : 'transparent' }};border:1px solid #D5D3CF;color:{{ $selectedCategory == $category->category_name ? '#FFFFFF' : '#0A0A0A' }};cursor:pointer;transition:all 0.3s ease;display:inline-flex;align-items:center;gap:6px;">
                             {{ $category->category_name }}
                             <span style="font-size:11px;opacity:0.8;">({{ $category->products_count }})</span>
                         </button>
@@ -255,27 +255,33 @@
                 @forelse ($products as $product)
                     <!-- Product Card -->
                     <div class="product-card product-item reveal"
-                         data-cat="{{ $product->category ? $product->category->slug : 'uncategorized' }}"
-                         data-price="{{ $product->productVariants->first()?->variant_price ?? ($product->product_price ?? 0) }}"
-                         data-product-id="{{ $product->id }}">
+                        data-cat="{{ $product->category ? $product->category->slug : 'uncategorized' }}"
+                        data-price="{{ $product->productVariants->first()?->variant_price ?? ($product->product_price ?? 0) }}"
+                        data-product-id="{{ $product->id }}">
                         <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                            <img src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500&q=80"
-                                alt="{{ $product->product_name }}">
-                            <img class="hover-img"
-                                src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80"
-                                alt="{{ $product->product_name }} alt">
-                            <span class="product-badge badge-new">New</span>
-                            <button class="wishlist-btn" aria-label="Wishlist" onclick="addToWishlist({{ $product->id }})">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
-                                    stroke="#0A0A0A" stroke-width="1.5">
-                                    <path
-                                        d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                                </svg>
-                            </button>
+                            <a href="{{ route('product', $product->slug) }}">
+
+                                <img src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500&q=80"
+                                    alt="{{ $product->product_name }}">
+                                <img class="hover-img"
+                                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80"
+                                    alt="{{ $product->product_name }} alt">
+                                <span class="product-badge badge-new">New</span>
+                                <button class="wishlist-btn" aria-label="Wishlist"
+                                    onclick="addToWishlist({{ $product->id }})">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                                        stroke="#0A0A0A" stroke-width="1.5">
+                                        <path
+                                            d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                                    </svg>
+                                </button>
+                            </a>
+
                             <button class="product-quick-add"
                                 onclick="addToCart(event,'{{ addslashes($product->product_name) }}', {{ $product->id }})">
                                 Quick Add
                             </button>
+
                         </div>
                         <div class="product-meta">
                             <p class="product-name">

@@ -112,3 +112,5 @@
     </div>
   </div>
 </footer>
+<!-- Add this in your <head> or before closing </body> tag -->
+<script src="{{ asset('js/cart.js') }}" defer></script>

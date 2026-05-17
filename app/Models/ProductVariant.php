@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Database\Factories\ProductVariantFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class ProductVariant extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductVariantFactory> */
+    /** @use HasFactory<ProductVariantFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
@@ -21,7 +22,7 @@ class ProductVariant extends Model
         'is_active',
     ];
 
-        protected $casts =[
+    protected $casts = [
         'is_active' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -43,7 +44,7 @@ class ProductVariant extends Model
         return $this->belongsTo(Size::class);
     }
 
-    public function inventory()
+    public function inventories()
     {
         return $this->hasMany(Inventory::class);
     }

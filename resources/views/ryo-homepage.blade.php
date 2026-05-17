@@ -650,7 +650,6 @@
     @include('partials.footer')
 
 
-
     <script>
         // ── HERO BG LOAD ──
         window.addEventListener('load', () => {
