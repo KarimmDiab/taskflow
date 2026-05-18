@@ -123,6 +123,7 @@
             @php $variantsJson = $selectedProdcut->productVariants->map(fn($v) => ['id' => $v->id, 'colorId' => $v->color_id, 'colorName' => $v->color?->color_name ?? '', 'colorHex' => $v->color?->color_hex_code ?? '#000', 'sizeId' => $v->size_id, 'sizeName' => $v->size?->size_name ?? '', 'price' => (float)$v->variant_price, 'stock' => (int)$v->inventories->sum('quantity'), 'sku' => $v->sku ?? ''])->values(); @endphp
             <script>
                 window.VARIANTS = @json($variantsJson);
+                window.CHECKOUT_URL = @json(route('checkout'));
             </script>
 
             <!-- COLOR -->
@@ -173,7 +174,7 @@
                 <p
                     style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px;">
                     Quantity</p>
-                <div style="display:flex;gap:12px;align-items:center;">
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
                     <div style="display:flex;align-items:center;border:1px solid #D5D3CF;height:52px;flex-shrink:0;">
                         <button class="qty-btn" onclick="window.cart.changeQty(-1)" style="width:44px;"><svg
                                 width="14" height="14" viewBox="0 0 24 24" fill="none"
@@ -195,6 +196,13 @@
                             <line x1="3" y1="6" x2="21" y2="6" />
                             <path d="M16 10a4 4 0 01-8 0" />
                         </svg>Add to Bag</button>
+                    <button class="pay-now-btn" id="payNowBtn" onclick="window.cart.payNow()"
+                        style="height:52px;background:#F8F6F2;color:#0A0A0A;border:1px solid #0A0A0A;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0 24px;display:flex;align-items:center;gap:10px;transition:all .2s ease;"><svg
+                            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <line x1="2" y1="10" x2="22" y2="10" />
+                        </svg>Pay Now</button>
                     <button class="wishlist-btn-lg" id="wishBtn" onclick="window.wishlist.toggle()"
                         aria-label="Add to wishlist"><svg width="18" height="18" viewBox="0 0 24 24"
                             fill="none" stroke="#0A0A0A" stroke-width="1.5" id="wishIcon">
@@ -445,9 +453,15 @@
                 {{ $selectedProdcut->product_name }}</p>
             <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;" id="stickyPrice">EGP
                 {{ number_format($price) }}</p>
-        </div><button onclick="window.cart.add()"
-            style="background:#0A0A0A;color:#F8F6F2;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px 24px;">Add
-            to Bag</button>
+        </div>
+        <div style="display:flex;gap:8px;">
+            <button onclick="window.cart.add()"
+                style="background:#0A0A0A;color:#F8F6F2;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px 18px;">Add
+                to Bag</button>
+            <button onclick="window.cart.payNow()"
+                style="background:#F8F6F2;color:#0A0A0A;border:1px solid #0A0A0A;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px 18px;">Pay
+                Now</button>
+        </div>
     </div>
 
     <!-- SIZE GUIDE MODAL -->
@@ -527,7 +541,7 @@
     @include('partials.newslater')
     @include('partials.footer')
 
-    <script src="{{ asset('js/website-product.js') }}"></script>
+    <script src="{{ asset('js/website-product.js') }}" defer></script>
 
 </body>
 

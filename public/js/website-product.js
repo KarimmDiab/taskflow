@@ -68,6 +68,7 @@
     const stickyPriceSpan = document.getElementById("stickyPrice");
     const toastEl = document.getElementById("toast");
     const cartBadge = document.getElementById("cartBadge");
+    const checkoutUrl = window.CHECKOUT_URL || "/ryo-checkout";
 
     function updatePriceDisplay(price) {
         if (priceEl && oldPriceEl) {
@@ -147,6 +148,36 @@
 
     // Replace your existing window.cart object with this complete version
     window.cart = {
+        init: () => {
+            window.cart.updateBadge();
+        },
+
+        getItems: () => {
+            try {
+                return JSON.parse(localStorage.getItem("ryo_cart") || "[]");
+            } catch (error) {
+                localStorage.setItem("ryo_cart", "[]");
+                return [];
+            }
+        },
+
+        saveItems: (items) => {
+            localStorage.setItem("ryo_cart", JSON.stringify(items));
+            window.cart.updateBadge();
+        },
+
+        updateBadge: () => {
+            const cartItems = window.cart.getItems();
+            const totalItems = cartItems.reduce(
+                (sum, item) => sum + item.quantity,
+                0,
+            );
+            if (cartBadge) {
+                cartBadge.style.display = totalItems > 0 ? "flex" : "none";
+                cartBadge.textContent = totalItems;
+            }
+        },
+
         changeQty: (delta) => {
             // Get current stock from selected variant
             let maxStock = state.selectedVariant
@@ -178,7 +209,9 @@
             }
         },
 
-        add: () => {
+        add: (options = {}) => {
+            const shouldRedirect = options.redirectToCheckout === true;
+
             if (!state.selectedVariant) {
                 document
                     .querySelectorAll(".size-btn:not(.sold-out)")
@@ -189,7 +222,7 @@
                                 btn.style.borderColor = "";
                         }, 1200);
                     });
-                return;
+                return false;
             }
 
             // Check inventory before adding
@@ -205,13 +238,11 @@
                     .querySelector(".atc-btn")
                     ?.parentElement?.appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 3000);
-                return;
+                return false;
             }
 
             // Get existing cart items from localStorage
-            let cartItems = JSON.parse(
-                localStorage.getItem("ryo_cart") || "[]",
-            );
+            let cartItems = window.cart.getItems();
 
             // Check if item already exists in cart
             const existingIndex = cartItems.findIndex(
@@ -242,7 +273,7 @@
                     .querySelector(".atc-btn")
                     ?.parentElement?.appendChild(errorDiv);
                 setTimeout(() => errorDiv.remove(), 4000);
-                return;
+                return false;
             }
 
             if (existingIndex !== -1) {
@@ -269,23 +300,13 @@
             }
 
             // Save to localStorage
-            localStorage.setItem("ryo_cart", JSON.stringify(cartItems));
+            window.cart.saveItems(cartItems);
 
             // Update cart UI
             window.cart.updateCartDrawer();
 
-            // Update cart badge
-            const totalItems = cartItems.reduce(
-                (sum, item) => sum + item.quantity,
-                0,
-            );
-            if (cartBadge) {
-                cartBadge.style.display = totalItems > 0 ? "flex" : "none";
-                cartBadge.textContent = totalItems;
-            }
-
             // Show success toast
-            if (toastEl) {
+            if (toastEl && !shouldRedirect) {
                 toastEl.style.opacity = "1";
                 toastEl.style.transform = "translateX(-50%) translateY(0)";
                 setTimeout(() => {
@@ -296,7 +317,7 @@
             }
 
             // Button feedback
-            if (atcBtn) {
+            if (atcBtn && !shouldRedirect) {
                 const orig = atcBtn.innerHTML;
                 atcBtn.innerHTML = "Added to Bag ✓";
                 atcBtn.style.background = "#2C5F2D";
@@ -309,12 +330,20 @@
             // Reset quantity display to 1
             state.qty = 1;
             if (qtyDisplaySpan) qtyDisplaySpan.textContent = "1";
+
+            if (shouldRedirect) {
+                window.location.href = checkoutUrl;
+            }
+
+            return true;
+        },
+
+        payNow: () => {
+            return window.cart.add({ redirectToCheckout: true });
         },
 
         updateCartDrawer: () => {
-            const cartItems = JSON.parse(
-                localStorage.getItem("ryo_cart") || "[]",
-            );
+            const cartItems = window.cart.getItems();
             const cartItemsContainer =
                 document.getElementById("cartItemsContainer");
             const cartDrawerSubtotal =
@@ -392,9 +421,7 @@
         },
 
         updateQuantity: (index, delta) => {
-            let cartItems = JSON.parse(
-                localStorage.getItem("ryo_cart") || "[]",
-            );
+            let cartItems = window.cart.getItems();
             if (!cartItems[index]) return;
 
             const variant = window.VARIANTS?.find(
@@ -421,16 +448,14 @@
                 cartItems[index].quantity = newQuantity;
             }
 
-            localStorage.setItem("ryo_cart", JSON.stringify(cartItems));
+            window.cart.saveItems(cartItems);
             window.cart.updateCartDrawer();
         },
 
         removeItem: (index) => {
-            let cartItems = JSON.parse(
-                localStorage.getItem("ryo_cart") || "[]",
-            );
+            let cartItems = window.cart.getItems();
             cartItems.splice(index, 1);
-            localStorage.setItem("ryo_cart", JSON.stringify(cartItems));
+            window.cart.saveItems(cartItems);
             window.cart.updateCartDrawer();
         },
 
@@ -450,7 +475,7 @@
         window.cart.updateCartDrawer();
 
         // Optional: Clear expired cart items if stock becomes 0
-        const cartItems = JSON.parse(localStorage.getItem("ryo_cart") || "[]");
+        const cartItems = window.cart.getItems();
         let hasChanges = false;
 
         cartItems.forEach((item, idx) => {
@@ -467,7 +492,7 @@
         });
 
         if (hasChanges) {
-            localStorage.setItem("ryo_cart", JSON.stringify(cartItems));
+            window.cart.saveItems(cartItems);
             window.cart.updateCartDrawer();
         }
     });
@@ -576,4 +601,3 @@
         selectedColorLabel.textContent = initVariant.colorName;
     handleResize();
 })();
-
