@@ -30,6 +30,7 @@ class SalesInvoiceFactory extends Factory
         $paid = fake()->numberBetween(0, $net);
 
         return [
+            'invoice_number' => 'INV-'.fake()->unique()->numberBetween(1000, 9999),
             'total_amount' => $total,
             'deduction' => $deduction,
             'net_total' => $net,

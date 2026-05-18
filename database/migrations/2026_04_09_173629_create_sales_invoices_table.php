@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('sales_invoices', function (Blueprint $table) {
             $table->id();
+            $table->string('invoice_number', 100)->unique();
             $table->decimal('total_amount', 10, 2)->unsigned()->default(0);
             $table->decimal('deduction', 10, 2)->unsigned()->default(0);
             $table->decimal('net_total', 10, 2)->unsigned()->default(0);

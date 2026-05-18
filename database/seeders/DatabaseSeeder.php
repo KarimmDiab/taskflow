@@ -19,6 +19,8 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             SupplierSeeder::class,
+            ShippingSeeder::class,
+
             ColorSeeder::class,
             SizeSeeder::class,
             PaymentMethodSeeder::class,
@@ -42,7 +44,7 @@ class DatabaseSeeder extends Seeder
             StockTransferSeeder::class,
             StockTransferItemSeeder::class,
             CollectionSeeder::class,
-
+            OnlineOrdersSeeder::class,
         ]);
 
         $admin = User::factory()->create([

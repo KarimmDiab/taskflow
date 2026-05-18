@@ -12,6 +12,94 @@
         <link rel="icon" type="image/png" href="{{ asset('images/favicon/favicon.png') }}">
 
   <script>
+    const FREE_SHIPPING_THRESHOLD = 2000;
+    let cartSubtotal = 0;
+
+    function formatEGP(value) {
+      return `EGP ${Math.round(value).toLocaleString('en-EG')}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function loadCheckoutCart() {
+      try {
+        if (!window.localStorage) return [];
+        const parsed = JSON.parse(window.localStorage.getItem('ryo_cart') || '[]');
+        if (!Array.isArray(parsed)) return [];
+
+        return parsed
+          .map(item => ({
+            productName: item.productName || 'RYO Product',
+            colorName: item.colorName || 'Default',
+            sizeName: item.sizeName || 'OS',
+            price: Number(item.price) || 0,
+            quantity: Math.max(1, Number.parseInt(item.quantity, 10) || 1),
+            imageUrl: item.imageUrl || '',
+          }))
+          .filter(item => item.quantity > 0);
+      } catch (error) {
+        if (window.localStorage) window.localStorage.setItem('ryo_cart', '[]');
+        return [];
+      }
+    }
+
+    function renderOrderSummary() {
+      const cart = loadCheckoutCart();
+      const itemsWrap = document.getElementById('orderItems');
+      const placeOrderBtn = document.getElementById('placeOrderBtn');
+
+      cartSubtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      shippingCost = cart.length > 0 && cartSubtotal < FREE_SHIPPING_THRESHOLD ? 60 : 0;
+
+      if (!itemsWrap) return;
+
+      if (cart.length === 0) {
+        itemsWrap.innerHTML = `
+          <div style="text-align:center;padding:36px 16px;border:1px solid #D5D3CF;background:rgba(248,246,242,.55);">
+            <p style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;margin-bottom:8px;">Your bag is empty</p>
+            <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;margin-bottom:20px;">Add items to see your active order summary.</p>
+            <a href="{{ route('all-products') }}" style="display:inline-flex;align-items:center;justify-content:center;background:#0A0A0A;color:#F8F6F2;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;padding:12px 20px;text-decoration:none;">Continue Shopping</a>
+          </div>`;
+        if (placeOrderBtn) {
+          placeOrderBtn.disabled = true;
+          placeOrderBtn.style.opacity = '.45';
+          placeOrderBtn.style.cursor = 'not-allowed';
+        }
+      } else {
+        itemsWrap.innerHTML = cart.map(item => `
+          <div class="summary-item">
+            <div class="summary-img">
+              <img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.productName)}" onerror="this.src='data:image/svg+xml;charset=UTF-8,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2264%22 height=%2280%22%3E%3Crect width=%22100%25%22 height=%22100%25%22 fill=%22%23EDEDEB%22/%3E%3C/svg%3E'">
+              <div class="item-qty-badge">${item.quantity}</div>
+            </div>
+            <div style="flex:1;">
+              <p style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;margin-bottom:3px;">${escapeHtml(item.productName)}</p>
+              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;margin-bottom:2px;">Size: ${escapeHtml(item.sizeName)} · ${escapeHtml(item.colorName)}</p>
+              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;">RYO Collection</p>
+            </div>
+            <span style="font-family:'DM Sans',sans-serif;font-size:13px;flex-shrink:0;">${formatEGP(item.price * item.quantity)}</span>
+          </div>
+        `).join('');
+        if (placeOrderBtn) {
+          placeOrderBtn.disabled = false;
+          placeOrderBtn.style.opacity = '';
+          placeOrderBtn.style.cursor = '';
+        }
+      }
+
+      document.getElementById('subtotalDisplay').textContent = formatEGP(cartSubtotal);
+      document.getElementById('shippingDisplay').textContent = shippingCost > 0 ? formatEGP(shippingCost) : 'Free';
+      const standardShippingPrice = document.getElementById('std-price');
+      if (standardShippingPrice) standardShippingPrice.textContent = shippingCost > 0 ? formatEGP(shippingCost) : 'Free';
+      updateTotal();
+    }
     tailwind.config = {
       theme: {
         extend: {
@@ -481,7 +569,7 @@
 ══════════════════════════════════════════ -->
   <header
     style="height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 40px;border-bottom:1px solid #EDEDEB;background:#F8F6F2;position:sticky;top:0;z-index:50;">
-    <a href="cart.html"
+    <a href="{{ route('cart') }}"
       style="display:flex;align-items:center;gap:8px;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#9C9A96;text-decoration:none;transition:color .2s ease;"
       onmouseover="this.style.color='#0A0A0A'" onmouseout="this.style.color='#9C9A96'">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
@@ -660,71 +748,13 @@
             </div>
           </div>
 
-          <div class="shipping-opt" onclick="selectShipping(this,'express',150)">
-            <div style="display:flex;align-items:center;gap:14px;">
-              <div class="pay-radio" id="ship-radio-exp">
-                <div class="pay-radio-dot" style="opacity:0;"></div>
-              </div>
-              <div>
-                <p style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;margin-bottom:2px;">Express
-                  Delivery</p>
-                <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;">Same day / Next day</p>
-              </div>
-            </div>
-            <div style="text-align:right;">
-              <p style="font-family:'DM Sans',sans-serif;font-size:13px;color:#0A0A0A;">EGP 150</p>
-            </div>
-          </div>
-
-          <div class="shipping-opt" style="margin-bottom:0;" onclick="selectShipping(this,'pickup',0)">
-            <div style="display:flex;align-items:center;gap:14px;">
-              <div class="pay-radio" id="ship-radio-pick">
-                <div class="pay-radio-dot" style="opacity:0;"></div>
-              </div>
-              <div>
-                <p style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;margin-bottom:2px;">Store
-                  Pickup</p>
-                <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;">Ready in 2 hours · Cairo only
-                </p>
-              </div>
-            </div>
-            <div style="text-align:right;">
-              <p style="font-family:'DM Sans',sans-serif;font-size:13px;color:#0A0A0A;">Free</p>
-            </div>
-          </div>
         </div>
 
         <!-- Payment Method -->
         <div class="form-panel reveal" style="transition-delay:.3s;">
           <p class="section-heading">04 — Payment</p>
 
-          <!-- Payment Options -->
-          <div class="pay-option active" id="pay-card" onclick="selectPayment('card')">
-            <div class="pay-radio">
-              <div class="pay-radio-dot" style="opacity:1;"></div>
-            </div>
-            <div style="flex:1;">
-              <p style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;">Credit / Debit Card</p>
-            </div>
-            <div style="display:flex;gap:6px;align-items:center;">
-              <div
-                style="background:#1a1f71;color:#F8F6F2;font-size:9px;font-family:'Space Grotesk',sans-serif;font-weight:500;padding:3px 7px;letter-spacing:.05em;">
-                VISA</div>
-              <div style="background:#eb001b;border-radius:50%;width:22px;height:22px;"></div>
-              <div style="background:#f79e1b;border-radius:50%;width:22px;height:22px;margin-left:-12px;"></div>
-            </div>
-          </div>
 
-          <div class="pay-option" id="pay-wallet" onclick="selectPayment('wallet')">
-            <div class="pay-radio">
-              <div class="pay-radio-dot"></div>
-            </div>
-            <div style="flex:1;">
-              <p style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;">Mobile Wallet</p>
-              <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;">Vodafone Cash · Orange Money ·
-                Etisalat</p>
-            </div>
-          </div>
 
           <div class="pay-option" id="pay-cod" onclick="selectPayment('cod')">
             <div class="pay-radio">
@@ -736,53 +766,6 @@
             </div>
           </div>
 
-          <!-- Card Fields (shown when card selected) -->
-          <div id="cardFields" style="margin-top:20px;display:block;">
-            <div class="form-group">
-              <label class="form-label">Card Number</label>
-              <div class="card-field-wrap" style="display:flex;align-items:center;justify-content:space-between;">
-                <span class="card-field-fake">•••• •••• •••• ••••</span>
-                <div style="display:flex;gap:6px;">
-                  <div
-                    style="background:#1a1f71;color:#F8F6F2;font-size:8px;font-family:'Space Grotesk',sans-serif;font-weight:500;padding:2px 5px;">
-                    VISA</div>
-                </div>
-              </div>
-            </div>
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-              <div class="form-group">
-                <label class="form-label">Expiry Date</label>
-                <input class="form-input" type="text" placeholder="MM / YY" maxlength="7" id="expiry"
-                  oninput="formatExpiry(this)">
-              </div>
-              <div class="form-group">
-                <label class="form-label">CVV / CVC</label>
-                <input class="form-input" type="text" placeholder="•••" maxlength="4" id="cvv"
-                  style="letter-spacing:.2em;">
-              </div>
-            </div>
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Cardholder Name</label>
-              <input class="form-input" type="text" placeholder="Name as on card" id="cardName" autocomplete="cc-name">
-            </div>
-          </div>
-
-          <!-- Wallet Fields -->
-          <div id="walletFields" style="margin-top:20px;display:none;">
-            <div class="form-group" style="margin-bottom:0;">
-              <label class="form-label">Mobile Number</label>
-              <input class="form-input" type="tel" placeholder="010 xxxx xxxx">
-            </div>
-          </div>
-
-          <!-- Trust note -->
-          <div style="display:flex;align-items:center;gap:8px;margin-top:20px;">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C9A96" stroke-width="1.5">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-            </svg>
-            <p style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;font-weight:300;">Your payment is
-              encrypted and secure. We never store your card details.</p>
-          </div>
         </div>
 
         <!-- Submit -->
@@ -790,7 +773,7 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
           </svg>
-          Place Order — EGP <span id="totalInBtn">6,350</span>
+          Place Order — EGP <span id="totalInBtn">0</span>
         </button>
 
         <p
@@ -876,17 +859,15 @@
       <div>
         <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
           <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">Subtotal</span>
-          <span style="font-family:'DM Sans',sans-serif;font-size:13px;">EGP 6,000</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;" id="subtotalDisplay">EGP 0</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
           <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">Shipping</span>
           <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#9C9A96;" id="shippingDisplay">Free</span>
         </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:10px;" id="discountRow"
-          style="display:none;">
+        <div style="display:none;justify-content:space-between;margin-bottom:10px;" id="discountRow">
           <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">Discount</span>
-          <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#0A0A0A;" id="discountDisplay">— EGP
-            600</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#0A0A0A;" id="discountDisplay">EGP 0</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
           <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">VAT (14%)</span>
@@ -897,7 +878,7 @@
           <span
             style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.15em;text-transform:uppercase;">Total</span>
           <div style="text-align:right;">
-            <p style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;" id="grandTotal">EGP 6,000
+            <p style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;" id="grandTotal">EGP 0
             </p>
             <p style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;">VAT included</p>
           </div>
@@ -938,17 +919,23 @@
   <script>
     // ── PAYMENT METHOD ──
     function selectPayment(type) {
-      const options = { card: 'pay-card', wallet: 'pay-wallet', cod: 'pay-cod' };
+      const options = { cod: 'pay-cod' };
       Object.values(options).forEach(id => {
         const el = document.getElementById(id);
+        if (!el) return;
         el.classList.remove('active');
         el.querySelector('.pay-radio-dot').style.opacity = '0';
       });
-      document.getElementById(options[type]).classList.add('active');
-      document.getElementById(options[type]).querySelector('.pay-radio-dot').style.opacity = '1';
+      const selected = document.getElementById(options[type]);
+      if (selected) {
+        selected.classList.add('active');
+        selected.querySelector('.pay-radio-dot').style.opacity = '1';
+      }
 
-      document.getElementById('cardFields').style.display = type === 'card' ? 'block' : 'none';
-      document.getElementById('walletFields').style.display = type === 'wallet' ? 'block' : 'none';
+      const cardFields = document.getElementById('cardFields');
+      const walletFields = document.getElementById('walletFields');
+      if (cardFields) cardFields.style.display = type === 'card' ? 'block' : 'none';
+      if (walletFields) walletFields.style.display = type === 'wallet' ? 'block' : 'none';
     }
 
     // ── SHIPPING METHOD ──
@@ -978,11 +965,11 @@
       const code = document.getElementById('promoCode').value.toUpperCase().trim();
       const msg = document.getElementById('promoMsg');
       if (code === 'RYO10') {
-        discount = 600;
+        discount = Math.round(cartSubtotal * 0.1);
         msg.textContent = '✓ RYO10 applied — 10% off';
         msg.style.color = '#0A0A0A';
         document.getElementById('discountRow').style.display = 'flex';
-        document.getElementById('discountDisplay').textContent = `− EGP ${discount.toLocaleString()}`;
+        document.getElementById('discountDisplay').textContent = `− ${formatEGP(discount)}`;
       } else if (code === '') {
         msg.textContent = 'Please enter a promo code.';
         msg.style.color = '#9C9A96';
@@ -990,15 +977,15 @@
         msg.textContent = 'Invalid code. Try RYO10 for 10% off.';
         msg.style.color = '#c0392b';
         discount = 0;
+        document.getElementById('discountRow').style.display = 'none';
       }
       updateTotal();
     }
 
     // ── TOTAL ──
     function updateTotal() {
-      const base = 6000;
-      const total = base + shippingCost - discount;
-      document.getElementById('grandTotal').textContent = `EGP ${total.toLocaleString('en-EG')}`;
+      const total = Math.max(0, cartSubtotal + shippingCost - discount);
+      document.getElementById('grandTotal').textContent = formatEGP(total);
       document.getElementById('totalInBtn').textContent = total.toLocaleString('en-EG');
     }
 
@@ -1011,6 +998,7 @@
 
     // ── PLACE ORDER ──
     function placeOrder() {
+      if (loadCheckoutCart().length === 0) return;
       const btn = document.getElementById('placeOrderBtn');
       btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" opacity=".3"/><path d="M21 12a9 9 0 00-9-9"/></svg> Processing...';
       btn.style.background = '#3D3D3A';
@@ -1036,7 +1024,12 @@
         layout.style.gridTemplateColumns = '1fr 420px';
       }
     }
+    renderOrderSummary();
+    selectPayment('cod');
     checkLayout();
+    window.addEventListener('storage', (event) => {
+      if (event.key === 'ryo_cart') renderOrderSummary();
+    });
     window.addEventListener('resize', checkLayout);
 
     // ── SPIN ANIMATION ──
