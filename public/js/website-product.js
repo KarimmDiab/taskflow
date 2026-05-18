@@ -43,7 +43,7 @@
 
     // ---------- STATE ----------
     let state = {
-        selectedColorId: window.VARIANTS[0]?.colorId ?? null,
+        selectedColorId: window.VARIANTS?.[0]?.colorId ?? null,
         selectedSizeId: null,
         selectedVariant: null,
         qty: 1,
@@ -577,98 +577,3 @@
     handleResize();
 })();
 
-
-
-// On your product page, simplify the add to cart logic
-window.productCart = {
-    addToCart: () => {
-        if (!state.selectedVariant) {
-            // Show size selection error
-            document.querySelectorAll('.size-btn:not(.sold-out)').forEach(btn => {
-                btn.style.borderColor = '#C0392B';
-                setTimeout(() => {
-                    if (!btn.classList.contains('active')) btn.style.borderColor = '';
-                }, 1200);
-            });
-            return;
-        }
-
-        const availableStock = state.selectedVariant.stock;
-
-        if (availableStock <= 0) {
-            const errorDiv = document.createElement('p');
-            errorDiv.style.cssText = 'font-family: "DM Sans", sans-serif; font-size: 12px; color: #C0392B; margin-top: 8px; text-align: center;';
-            errorDiv.textContent = 'Out of stock - cannot add to cart';
-            document.querySelector('.atc-btn')?.parentElement?.appendChild(errorDiv);
-            setTimeout(() => errorDiv.remove(), 3000);
-            return;
-        }
-
-        // Check if item already exists in cart
-        const existingItem = window.cart.items.find(item =>
-            item.variantId === state.selectedVariant.id
-        );
-
-        let currentQtyInCart = existingItem ? existingItem.quantity : 0;
-        const requestedQty = currentQtyInCart + state.qty;
-
-        if (requestedQty > availableStock) {
-            const maxAllowed = availableStock - currentQtyInCart;
-            const errorMsg = maxAllowed <= 0
-                ? `Cannot add more. Only ${availableStock} available in stock (${currentQtyInCart} already in cart)`
-                : `Only ${maxAllowed} more can be added`;
-
-            const errorDiv = document.createElement('p');
-            errorDiv.style.cssText = 'font-family: "DM Sans", sans-serif; font-size: 11px; color: #C0392B; margin-top: 8px; text-align: center;';
-            errorDiv.textContent = errorMsg;
-            document.querySelector('.atc-btn')?.parentElement?.appendChild(errorDiv);
-            setTimeout(() => errorDiv.remove(), 4000);
-            return;
-        }
-
-        // Add to global cart
-        window.cart.addItem({
-            variantId: state.selectedVariant.id,
-            productName: document.querySelector('h1')?.textContent || '',
-            colorName: state.selectedVariant.colorName,
-            sizeName: state.selectedVariant.sizeName,
-            price: state.selectedVariant.price,
-            quantity: state.qty,
-            imageUrl: GALLERY_IMAGES[0],
-            maxStock: availableStock
-        });
-
-        // Update cart drawer display
-        window.cart.updateCartDrawer();
-
-        // Show success toast
-        const toastEl = document.getElementById('toast');
-        if (toastEl) {
-            toastEl.style.opacity = '1';
-            toastEl.style.transform = 'translateX(-50%) translateY(0)';
-            setTimeout(() => {
-                toastEl.style.opacity = '0';
-                toastEl.style.transform = 'translateX(-50%) translateY(80px)';
-            }, 3000);
-        }
-
-        // Button feedback
-        const atcBtn = document.getElementById('atcBtn');
-        if (atcBtn) {
-            const orig = atcBtn.innerHTML;
-            atcBtn.innerHTML = 'Added to Bag ✓';
-            atcBtn.style.background = '#2C5F2D';
-            setTimeout(() => {
-                atcBtn.innerHTML = orig;
-                atcBtn.style.background = '';
-            }, 2000);
-        }
-
-        // Reset quantity
-        state.qty = 1;
-        if (qtyDisplaySpan) qtyDisplaySpan.textContent = '1';
-    }
-};
-
-// Override the add button to use the new method
-document.getElementById('atcBtn')?.addEventListener('click', () => window.productCart.addToCart());

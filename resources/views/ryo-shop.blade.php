@@ -228,7 +228,7 @@
                     <!-- Sort & Per Page -->
                     <div style="display:flex;align-items:center;gap:8px;">
                         <select class="sort-select" id="sortSelect" onchange="sortProducts(this.value)"
-                            style="padding: 8px 12px; border-radius: 8px; border: 1px solid #e0e0e0;">
+                            style="padding: 8px 12px; border-radius: 8px; border: 1px solid #e0e0e0; width: 160px;">
                             <option value="">-- Sort By --</option>
                             <option value="price-asc" {{ $sort == 'price-asc' ? 'selected' : '' }}>Price: Low to High
                             </option>
@@ -277,10 +277,23 @@
                                 </button>
                             </a>
 
-                            <button class="product-quick-add"
-                                onclick="addToCart(event,'{{ addslashes($product->product_name) }}', {{ $product->id }})">
+                            <button class="product-quick-add" data-product-id="{{ $product->id }}"
+                                data-product-name="{{ addslashes($product->product_name) }}"
+                                data-product-price="{{ $product->price }}"
+                                data-product-image="{{ $product->image_url }}" onclick="quickAddToCart(this)">
                                 Quick Add
                             </button>
+
+                            <script>
+                                function quickAddToCart(btn) {
+                                    const productId = btn.dataset.productId;
+                                    const productName = btn.dataset.productName;
+                                    const productPrice = parseInt(btn.dataset.productPrice);
+                                    const productImage = btn.dataset.productImage;
+
+                                    addToCart(event, productName, productId, productPrice, productImage);
+                                }
+                            </script>
 
                         </div>
                         <div class="product-meta">
