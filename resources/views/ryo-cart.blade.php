@@ -148,44 +148,79 @@
                     style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9C9A96;margin-bottom:20px;">
                     Complete Your Look</p>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="upsellGrid">
-                    <div class="upsell-card" data-upsell-name="Utility Coach Jacket" data-upsell-price="5500"
-                        data-upsell-img="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80">
-                        <div class="upsell-img"><img
-                                src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80"
-                                alt="Coach Jacket"></div>
-                        <div style="flex:1;min-width:0;">
-                            <p
-                                style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;margin-bottom:3px;">
-                                Utility Coach Jacket</p>
-                            <p style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;">Olive / Black</p>
-                            <p style="font-family:'DM Sans',sans-serif;font-size:12px;">EGP 5,500</p>
+                    @foreach ($completeLookProducts as $product)
+                        @php
+                            $image = $product->images->first()?->image_path
+                                ? asset('storage/' . $product->images->first()->image_path)
+                                : 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80';
+                            $colors = $product->productVariants
+                                ->pluck('color.color_name')
+                                ->filter()
+                                ->unique()
+                                ->take(3)
+                                ->implode(' / ');
+                            $sizes = $product->productVariants
+                                ->pluck('size.size_name')
+                                ->filter()
+                                ->unique()
+                                ->implode(' - ');
+                            $price =
+                                $product->productVariants->where('variant_price', '>', 0)->min('variant_price') ??
+                                ($product->product_price ?? 0);
+                        @endphp
+                        <div class="upsell-card" data-upsell-name="{{ $product->product_name }}"
+                            data-upsell-price="{{ $price }}" data-upsell-img="{{ $image }}">
+                            {{-- IMAGE --}}
+                            <div class="upsell-img">
+                                <img src="{{ $image }}" alt="{{ $product->product_name }}">
+                            </div>
+                            {{-- CONTENT --}}
+                            <div style="flex:1;min-width:0;">
+                                {{-- NAME --}}
+                                <p
+                                    style="font-family:'DM Sans',sans-serif;
+                                        font-size:12px;
+                                        font-weight:400;
+                                        margin-bottom:3px;">
+                                    {{ $product->product_name }}
+                                </p>
+                                {{-- COLORS --}}
+                                @if ($colors)
+                                    <p
+                                        style="font-family:'DM Sans',sans-serif;
+                                            font-size:11px;
+                                            color:#9C9A96;
+                                            margin-bottom:2px;">
+                                        {{ $colors }}
+                                    </p>
+                                @endif
+                                {{-- SIZES --}}
+                                @if ($sizes)
+                                    <p
+                                        style="font-family:'DM Sans',sans-serif;
+                                            font-size:10px;
+                                            color:#B0AAA2;
+                                            margin-bottom:4px;">
+                                        Sizes: {{ $sizes }}
+                                    </p>
+                                @endif
+                                {{-- PRICE --}}
+                                <p style="font-family:'DM Sans',sans-serif;
+                                    font-size:12px;">
+                                    EGP {{ number_format($price, 0) }}
+                                </p>
+                            </div>
+                            {{-- ADD --}}
+                            <button class="upsell-add" onclick="event.stopPropagation(); addUpsellItem(this)">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.8">
+                                    <line x1="12" y1="5" x2="12" y2="19" />
+                                    <line x1="5" y1="12" x2="19" y2="12" />
+                                </svg>
+                            </button>
                         </div>
-                        <button class="upsell-add" onclick="event.stopPropagation(); addUpsellItem(this)"><svg
-                                width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.8">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg></button>
-                    </div>
-                    <div class="upsell-card" data-upsell-name="Washed Crewneck Sweat" data-upsell-price="3400"
-                        data-upsell-img="https://images.unsplash.com/photo-1594938298603-f4d8c9a3a9a4?w=300&q=80">
-                        <div class="upsell-img"><img
-                                src="https://images.unsplash.com/photo-1594938298603-f4d8c9a3a9a4?w=300&q=80"
-                                alt="Crewneck"></div>
-                        <div style="flex:1;min-width:0;">
-                            <p
-                                style="font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;margin-bottom:3px;">
-                                Washed Crewneck Sweat</p>
-                            <p style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;">Faded Grey</p>
-                            <p style="font-family:'DM Sans',sans-serif;font-size:12px;">EGP 3,400</p>
-                        </div>
-                        <button class="upsell-add" onclick="event.stopPropagation(); addUpsellItem(this)"><svg
-                                width="14" height="14" viewBox="0 0 24 24" fill="none"
-                                stroke="currentColor" stroke-width="1.8">
-                                <line x1="12" y1="5" x2="12" y2="19" />
-                                <line x1="5" y1="12" x2="19" y2="12" />
-                            </svg></button>
-                    </div>
+                    @endforeach
+
                 </div>
             </div>
         </div>

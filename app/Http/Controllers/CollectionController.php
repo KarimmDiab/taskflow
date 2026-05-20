@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Collection;
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionRequest;
+use App\Models\Collection;
 
 class CollectionController extends Controller
 {
@@ -35,9 +35,23 @@ class CollectionController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Collection $collection)
+    public function show($slug)
     {
-        //
+        $collection = Collection::where('slug', $slug)
+            ->with('products')
+            ->firstOrFail();
+
+        $countCollectionProducts = $collection->products()->count();
+        $collectionProducts = $collection->products()->with(['images', 'category', 'subCategory', 'productVariants' => function ($query) {
+            $query->with([
+                'color',
+                'size',
+                'inventories',
+            ])->where('is_active', true);
+        },
+        ])->get();
+
+        return view('ryo-explore-collections', compact('collection', 'countCollectionProducts', 'collectionProducts'));
     }
 
     /**

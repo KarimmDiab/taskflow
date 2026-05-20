@@ -121,7 +121,7 @@
     <div style="padding:48px 40px 32px;max-width:1440px;margin:0 auto;border-bottom:1px solid #EDEDEB;">
         <!-- Breadcrumb -->
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:24px;">
-            <a href="index.html" class="breadcrumb-item"
+            <a href="{{ route('home') }}" class="breadcrumb-item"
                 style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;text-decoration:none;">Home</a>
             <span style="color:#D5D3CF;font-size:12px;">/</span>
             <span class="breadcrumb-item current"
@@ -403,6 +403,7 @@
     {{-- Footer --}}
     @include('partials.footer')
 
+    <script src="{{ asset('js/website-product.js') }}" defer></script>
     <script src="{{ asset('js/website-shop.js') }}"></script>
 </body>
 

@@ -42,7 +42,7 @@
     }
 </style>
 
-<div class="cart-overlay" id="cartOverlay" onclick="window.cart.toggle()" aria-hidden="true"></div>
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()" aria-hidden="true"></div>
 
 <div class="cart-drawer" id="cartDrawer" role="dialog" aria-modal="true" aria-label="Shopping bag">
     <div style="padding:22px 24px 18px;border-bottom:1px solid #EDEDEB;background:#FBF9F6;">
@@ -55,7 +55,7 @@
                     Your Bag <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#9C9A96;">(<span id="cartDrawerCount">0</span>)</span>
                 </h2>
             </div>
-            <button class="cart-drawer__close" onclick="window.cart.toggle()" aria-label="Close cart"
+            <button class="cart-drawer__close" onclick="toggleCart()" aria-label="Close cart"
                 style="width:40px;height:40px;border:1px solid #EDEDEB;background:#F8F6F2;color:#3D3D3A;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s ease;">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                     <path d="M18 6L6 18M6 6l12 12" />
@@ -92,7 +92,7 @@
                 <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
         </a>
-        <button class="cart-drawer__continue" onclick="window.cart.toggle()"
+        <button class="cart-drawer__continue" onclick="toggleCart()"
             style="width:100%;background:none;border:none;cursor:pointer;margin-top:12px;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:#9C9A96;padding:10px;transition:color .2s ease;">
             Continue Shopping
         </button>

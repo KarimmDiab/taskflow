@@ -5,7 +5,6 @@
   <div style="max-width:1440px;margin:0 auto;">
     <!-- Footer Top Grid -->
     <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:64px;">
-
       <!-- Brand Column -->
       <div>
         <p

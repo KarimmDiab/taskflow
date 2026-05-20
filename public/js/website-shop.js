@@ -409,6 +409,9 @@
 
     // Make functions globally available
     window.toggleCart = toggleCart;
+    // Provide minimal cart object for pages that call `window.cart.toggle()`
+    window.cart = window.cart || {};
+    window.cart.toggle = toggleCart;
     window.toggleMenu = toggleMenu;
     window.setCategory = setCategory;
     window.setGrid = setGrid;

@@ -750,6 +750,9 @@
         }
     </script>
 
+
+    <script src="{{ asset('js/website-product.js') }}" defer></script>
+    <script src="{{ asset('js/website-shop.js') }}"></script>
     @if (Route::has('login'))
         <div class="h-14.5 hidden lg:block"></div>
     @endif

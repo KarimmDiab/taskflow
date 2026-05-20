@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
+use App\Models\Collection;
 use App\Models\Product;
 
 class ProductController extends Controller
@@ -13,7 +14,25 @@ class ProductController extends Controller
      */
     public function index()
     {
-        //
+        $completeLookProducts = Product::with([
+            'images',
+            'category',
+            'subCategory',
+            'productVariants' => function ($query) {
+
+                $query->with([
+                    'color',
+                    'size',
+                    'inventories',
+                ])->where('is_active', true);
+            },
+        ])
+            ->inRandomOrder()
+            ->take(2)
+            ->get();
+
+        return view('ryo-cart', compact('completeLookProducts'));
+
     }
 
     /**
@@ -37,17 +56,33 @@ class ProductController extends Controller
      */
     public function show(Product $product)
     {
-        $selectedProdcut = Product::with(['images','category','subCategory','productVariants' => function ($query) {
-                $query->with([
-                    'color',
-                    'size',
-                    'inventories',
-                ])->where('is_active', true);
-            },
+        $selectedProdcut = Product::with(['images', 'category', 'subCategory', 'productVariants' => function ($query) {
+            $query->with([
+                'color',
+                'size',
+                'inventories',
+            ])->where('is_active', true);
+        },
         ])->where('slug', $product->slug)
             ->firstOrFail();
 
         return view('ryo-product', compact('selectedProdcut'));
+    }
+
+    public function showAllCollection()
+    {
+        $all_collections = Collection::with('products')
+            ->withCount('products')
+            ->where('is_active', true)
+            ->latest()
+            ->take(5)
+            ->get();
+        $featured_collections = Collection::withCount('products')
+            ->where('is_active', true)
+            ->where('is_featured', true)
+            ->first();
+
+        return view('ryo-collections', compact('all_collections', 'featured_collections'));
     }
 
     /**

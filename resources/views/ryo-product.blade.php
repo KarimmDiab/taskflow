@@ -169,47 +169,57 @@
                 style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;margin-top:-20px;margin-bottom:20px;display:none;">
             </p>
 
-           <!-- QUANTITY + CART (Enhanced: Buttons stacked vertically, refined spacing & styling) -->
-<div style="margin-bottom:24px;">
-    <p style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px;">
-        Quantity
-    </p>
-    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px;">
-        <div style="display:flex;align-items:center;border:1px solid #D5D3CF;height:52px;flex-shrink:0;">
-            <button class="qty-btn" onclick="window.cart.changeQty(-1)" style="width:44px;background:transparent;border:none;cursor:pointer;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-            </button>
-            <span id="qtyDisplay" style="font-family:'DM Sans',sans-serif;font-size:14px;width:36px;text-align:center;border-left:1px solid #EDEDEB;border-right:1px solid #EDEDEB;height:100%;display:flex;align-items:center;justify-content:center;">1</span>
-            <button class="qty-btn" onclick="window.cart.changeQty(1)" style="width:44px;background:transparent;border:none;cursor:pointer;">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-            </button>
-        </div>
-    </div>
+            <!-- QUANTITY + CART (Enhanced: Buttons stacked vertically, refined spacing & styling) -->
+            <div style="margin-bottom:24px;">
+                <p
+                    style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px;">
+                    Quantity
+                </p>
+                <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:24px;">
+                    <div style="display:flex;align-items:center;border:1px solid #D5D3CF;height:52px;flex-shrink:0;">
+                        <button class="qty-btn" onclick="window.cart.changeQty(-1)"
+                            style="width:44px;background:transparent;border:none;cursor:pointer;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5">
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                        </button>
+                        <span id="qtyDisplay"
+                            style="font-family:'DM Sans',sans-serif;font-size:14px;width:36px;text-align:center;border-left:1px solid #EDEDEB;border-right:1px solid #EDEDEB;height:100%;display:flex;align-items:center;justify-content:center;">1</span>
+                        <button class="qty-btn" onclick="window.cart.changeQty(1)"
+                            style="width:44px;background:transparent;border:none;cursor:pointer;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                stroke="currentColor" stroke-width="1.5">
+                                <line x1="12" y1="5" x2="12" y2="19" />
+                                <line x1="5" y1="12" x2="19" y2="12" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
 
-    <!-- Buttons stacked vertically (each on its own row) with refined gap & consistent sizing -->
-    <div style="display:flex;flex-direction:column;gap:14px;">
-        <button class="atc-btn" id="atcBtn" onclick="window.cart.add()" style="height:52px;background:#0A0A0A;color:#FFFFFF;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:20px 24px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s ease;width:100%;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <path d="M16 10a4 4 0 01-8 0" />
-            </svg>
-            Add to Bag
-        </button>
-        <button class="pay-now-btn" id="payNowBtn" onclick="window.cart.payNow()" style="height:52px;background:#F8F6F2;color:#0A0A0A;border:1px solid #0A0A0A;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0 24px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s ease;width:100%;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="2" y="5" width="20" height="14" rx="2" />
-                <line x1="2" y1="10" x2="22" y2="10" />
-            </svg>
-            Pay Now
-        </button>
-    </div>
-</div>
+                <!-- Buttons stacked vertically (each on its own row) with refined gap & consistent sizing -->
+                <div style="display:flex;flex-direction:column;gap:14px;">
+                    <button class="atc-btn" id="atcBtn" onclick="window.cart.add()"
+                        style="height:52px;background:#0A0A0A;color:#FFFFFF;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:20px 24px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s ease;width:100%;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <path d="M16 10a4 4 0 01-8 0" />
+                        </svg>
+                        Add to Bag
+                    </button>
+                    <button class="pay-now-btn" id="payNowBtn" onclick="window.cart.payNow()"
+                        style="height:52px;background:#F8F6F2;color:#0A0A0A;border:1px solid #0A0A0A;cursor:pointer;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:0 24px;display:flex;align-items:center;justify-content:center;gap:10px;transition:all .2s ease;width:100%;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="1.5">
+                            <rect x="2" y="5" width="20" height="14" rx="2" />
+                            <line x1="2" y1="10" x2="22" y2="10" />
+                        </svg>
+                        Pay Now
+                    </button>
+                </div>
+            </div>
 
             <!-- TRUST BADGES (unchanged) -->
             <div
@@ -541,6 +551,8 @@
     @include('partials.footer')
 
     <script src="{{ asset('js/website-product.js') }}" defer></script>
+    <script src="{{ asset('js/website-shop.js') }}"></script>
+
 
 </body>
 

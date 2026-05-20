@@ -7,7 +7,7 @@
     <nav style="display:flex;gap:32px;align-items:center;" class="hidden md:flex">
         <a href={{ route('home') }} class="nav-link">HOME</a>
         <a href={{ route('all-products') }} class="nav-link">SHOP</a>
-        <a href="#" class="nav-link">COLLECTIONS</a>
+        <a href="{{ route('collections') }}" class="nav-link">COLLECTIONS</a>
     </nav>
     <!-- LOGO -->
     <a href="{{ route('home') }}" class="nav-logo"
@@ -27,9 +27,8 @@
     <!-- RIGHT NAV -->
     <div style="display:flex;align-items:center;gap:24px;">
         <nav style="display:flex;gap:32px;" class="hidden md:flex">
-            <a href="#" class="nav-link">NEW IN</a>
-            <a href="#" class="nav-link">About</a>
-            <a href="#" class="nav-link">CONTACT US</a>
+            <a href="{{ route('about-us') }}" class="nav-link">About</a>
+            <a href="{{ route('contact-us') }}" class="nav-link">CONTACT US</a>
         </nav>
         <div style="display:flex;align-items:center;gap:16px;">
 
