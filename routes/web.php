@@ -11,6 +11,12 @@ Route::view('/', 'ryo-homepage')->name('home');
 Route::view('/shipping-policy', 'ryo-shipping-policy')->name('Shipping-Policy');
 Route::view('/contact-us', 'ryo-contact-us')->name('contact-us');
 Route::view('/about-us', 'ryo-about-us')->name('about-us');
+Route::view('/FAQs', 'ryo-FAQs')->name('FAQs');
+Route::view('/polices', 'polices')->name('polices');
+Route::view('/refund-policy', 'ryo-refund-policy')->name('refund-policy');
+
+
+
 
 Route::view('/terms-of-services', 'ryo-terms-of-services')->name('terms-of-services');
 Route::view('/privacy-policy', 'ryo-privacy-policy')->name('privacy-policy');
@@ -26,7 +32,6 @@ Route::get('/ryo-cart', [ProductController::class, 'index'])->name('cart');
 
 Route::get('/collections/{slug}', [CollectionController::class, 'show'])
     ->name('collection.show');
-
 
 
 

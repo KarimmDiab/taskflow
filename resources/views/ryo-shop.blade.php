@@ -16,27 +16,8 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=DM+Sans:wght@300;400;500&family=Space+Grotesk:wght@400;500&display=swap"
         rel="stylesheet">
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        'ryo-black': '#0A0A0A',
-                        'ryo-white': '#F8F6F2',
-                        'ryo-gray-100': '#EDEDEB',
-                        'ryo-gray-200': '#D5D3CF',
-                        'ryo-gray-400': '#9C9A96',
-                        'ryo-gray-700': '#3D3D3A',
-                    },
-                    fontFamily: {
-                        display: ['Cormorant Garamond', 'serif'],
-                        body: ['DM Sans', 'sans-serif'],
-                        label: ['Space Grotesk', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
+        <script src="{{ asset('js/tailwind.js') }}"></script>
+
 </head>
 
 <body>

@@ -11,147 +11,10 @@
   <link href="https://fonts.bunny.net/css?family=cairo:300,400,500,600,700,800&display=swap" rel="stylesheet" />
   <link href="{{ asset('css/website.css') }}" rel="stylesheet">
     <link rel="icon" type="image/png" href="{{ asset('images/favicon/favicon.png') }}">
-
-
+    <link href="{{ asset('css/website-terms-of-services.css') }}" rel="stylesheet">
+    <script src="{{ asset('js/tailwind.js') }}"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 
-
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'ryo-black': '#0A0A0A',
-            'ryo-white': '#F8F6F2',
-            'ryo-gray-100': '#EDEDEB',
-            'ryo-gray-200': '#D5D3CF',
-            'ryo-gray-400': '#9C9A96',
-            'ryo-gray-700': '#3D3D3A',
-            'ryo-silver': '#C8C6C2',
-            'ryo-cream': '#F2EEE8',
-          },
-          fontFamily: {
-            display: ['Cormorant Garamond', 'serif'],
-            body: ['DM Sans', 'sans-serif'],
-            label: ['Space Grotesk', 'sans-serif'],
-          },
-          transitionTimingFunction: {
-            'luxury': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          },
-          transitionDuration: {
-            '400': '400ms',
-            '600': '600ms',
-            '800': '800ms',
-          }
-        }
-      }
-    }
-  </script>
-
-
-<style>
-  *{margin:0;padding:0;box-sizing:border-box;}
-  html{scroll-behavior:smooth;}
-  body{font-family:'DM Sans',sans-serif;background:#F8F6F2;color:#0A0A0A;overflow-x:hidden;}
-  ::-webkit-scrollbar{width:4px;}
-  ::-webkit-scrollbar-track{background:#F8F6F2;}
-  ::-webkit-scrollbar-thumb{background:#9C9A96;}
-
-  /* NAV */
-  .nav-link{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#0A0A0A;text-decoration:none;position:relative;padding-bottom:2px;}
-  .nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:#0A0A0A;transition:width .3s cubic-bezier(.25,.46,.45,.94);}
-  .nav-link:hover::after{width:100%;}
-
-  /* SIDEBAR NAV */
-  .policy-nav-link{
-    display:block;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.15em;text-transform:uppercase;
-    color:#9C9A96;text-decoration:none;padding:12px 0;border-bottom:1px solid #EDEDEB;
-    transition:color .25s ease;position:relative;
-  }
-  .policy-nav-link::before{
-    content:'';position:absolute;left:-20px;top:50%;transform:translateY(-50%);
-    width:2px;height:0;background:#0A0A0A;transition:height .25s ease;
-  }
-  .policy-nav-link:hover{color:#0A0A0A;}
-  .policy-nav-link.active{color:#0A0A0A;}
-  .policy-nav-link.active::before{height:20px;}
-
-  /* CONTENT */
-  .policy-section{padding:80px 0;border-bottom:1px solid #EDEDEB;}
-  .policy-section:last-child{border-bottom:none;}
-  .policy-section h2{
-    font-family:'Cormorant Garamond',serif;font-size:clamp(32px,3.5vw,52px);font-weight:300;
-    letter-spacing:-.01em;line-height:1.1;margin-bottom:32px;
-  }
-  .policy-section h3{
-    font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;
-    color:#0A0A0A;margin:32px 0 14px;
-  }
-  .policy-section p{
-    font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#3D3D3A;line-height:1.85;
-    margin-bottom:16px;
-  }
-  .policy-section ul{margin-bottom:20px;padding-left:0;list-style:none;}
-  .policy-section li{
-    font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#3D3D3A;line-height:1.85;
-    padding:6px 0;border-bottom:1px solid #EDEDEB;display:flex;gap:12px;
-  }
-  .policy-section li::before{content:'—';color:#9C9A96;flex-shrink:0;}
-  .policy-section a{color:#0A0A0A;text-decoration:none;border-bottom:1px solid #D5D3CF;padding-bottom:1px;transition:border-color .2s ease;}
-  .policy-section a:hover{border-color:#0A0A0A;}
-
-  /* INFO BOX */
-  .info-box{
-    background:#EDEDEB;padding:24px 28px;margin:24px 0;
-    display:flex;gap:16px;
-  }
-  .info-box p{color:#3D3D3A;margin-bottom:0;}
-
-  /* TABLE */
-  .policy-table{width:100%;border-collapse:collapse;margin:20px 0;}
-  .policy-table th{
-    font-family:'Space Grotesk',sans-serif;font-size:9px;letter-spacing:.15em;text-transform:uppercase;
-    color:#9C9A96;text-align:left;padding:12px 0;border-bottom:1px solid #0A0A0A;font-weight:400;
-  }
-  .policy-table td{
-    font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#3D3D3A;
-    padding:14px 0;border-bottom:1px solid #EDEDEB;vertical-align:top;line-height:1.6;
-  }
-  .policy-table td:first-child{font-weight:400;color:#0A0A0A;width:35%;}
-
-  /* CART DRAWER */
-  .cart-drawer{position:fixed;top:0;right:0;width:min(420px,100vw);height:100%;background:#F8F6F2;z-index:200;transform:translateX(100%);transition:transform .45s cubic-bezier(.25,.46,.45,.94);display:flex;flex-direction:column;border-left:1px solid #D5D3CF;}
-  .cart-drawer.open{transform:translateX(0);}
-  .cart-overlay{position:fixed;inset:0;background:rgba(10,10,10,.4);z-index:199;opacity:0;pointer-events:none;transition:opacity .4s ease;}
-  .cart-overlay.open{opacity:1;pointer-events:all;}
-
-  /* MOBILE MENU */
-  .mobile-menu{position:fixed;inset:0;background:#0A0A0A;z-index:100;transform:translateX(-100%);transition:transform .5s cubic-bezier(.25,.46,.45,.94);display:flex;flex-direction:column;padding:32px;}
-  .mobile-menu.open{transform:translateX(0);}
-
-  /* REVEAL */
-  .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.25,.46,.45,.94),transform .7s cubic-bezier(.25,.46,.45,.94);}
-  .reveal.visible{opacity:1;transform:translateY(0);}
-
-  /* FOOTER */
-  .footer-link{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;text-decoration:none;transition:color .3s ease;}
-  .footer-link:hover{color:#F8F6F2;}
-
-  /* STICKY SIDEBAR */
-  .policy-sidebar{position:sticky;top:80px;align-self:start;}
-
-  /* CONTACT CARD */
-  .contact-card{border:1px solid #EDEDEB;padding:28px;margin-top:32px;}
-  .contact-card p{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#3D3D3A;line-height:1.7;margin-bottom:0;}
-
-  /* BADGE */
-  .return-badge{
-    display:inline-flex;align-items:center;gap:8px;
-    font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.12em;text-transform:uppercase;
-    padding:8px 16px;border:1px solid #EDEDEB;color:#3D3D3A;margin:4px 4px 4px 0;
-  }
-</style>
 </head>
 
 <body>
@@ -352,7 +215,7 @@
                             font-size:14px;
                             color:#0A0A0A;
                         ">
-                support@ryo.com
+                info.ryo.brand@gmail.com
               </p>
             </div>
 
@@ -439,64 +302,8 @@
 
 
 
-  <script>
-    // ── CART ──
-    function toggleCart() {
-      document.getElementById('cartDrawer').classList.toggle('open');
-      document.getElementById('cartOverlay').classList.toggle('open');
-    }
 
-    // ── MENU ──
-    function toggleMenu() {
-      document.getElementById('mobileMenu').classList.toggle('open');
-    }
-
-    // ── ACTIVE SIDEBAR NAV ──
-    function setActive(el) {
-      document.querySelectorAll('.policy-nav-link').forEach(l => l.classList.remove('active'));
-      el.classList.add('active');
-    }
-
-    // ── SCROLL SPY ──
-    const sections = ['shipping', 'returns', 'privacy', 'terms', 'cookies', 'contact'];
-    window.addEventListener('scroll', () => {
-      let current = '';
-      sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top < 120) current = id;
-      });
-      if (current) {
-        document.querySelectorAll('.policy-nav-link').forEach(l => {
-          l.classList.remove('active');
-          if (l.getAttribute('href') === `#${current}`) l.classList.add('active');
-        });
-      }
-    });
-
-    // ── SCROLL REVEAL ──
-    const revObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revObs.unobserve(e.target); } });
-    }, { threshold: 0.06 });
-    document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
-
-    // ── RESPONSIVE ──
-    function checkLayout() {
-      const layout = document.getElementById('policyLayout');
-      if (window.innerWidth < 900) {
-        layout.style.gridTemplateColumns = '1fr';
-        layout.style.gap = '0';
-        document.querySelector('.policy-sidebar').style.display = 'none';
-      } else {
-        layout.style.gridTemplateColumns = '220px 1fr';
-        layout.style.gap = '64px';
-        document.querySelector('.policy-sidebar').style.display = 'block';
-      }
-    }
-    checkLayout();
-    window.addEventListener('resize', checkLayout);
-  </script>
-
-
+<script src="{{ asset('js/website-terms-of-services.js') }}"></script>
   @if (Route::has('login'))
     <div class="h-14.5 hidden lg:block"></div>
   @endif

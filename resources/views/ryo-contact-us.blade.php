@@ -11,175 +11,10 @@
   <link href="https://fonts.bunny.net/css?family=cairo:300,400,500,600,700,800&display=swap" rel="stylesheet" />
   <link href="{{ asset('css/website.css') }}" rel="stylesheet">
   <link rel="icon" type="image/png" href="{{ asset('images/favicon/favicon.png') }}">
-
+  <link href="{{ asset('css/website-contact-us.css') }}" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ asset('js/tailwind.js') }}"></script>
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'ryo-black': '#0A0A0A',
-            'ryo-white': '#F8F6F2',
-            'ryo-gray-100': '#EDEDEB',
-            'ryo-gray-200': '#D5D3CF',
-            'ryo-gray-400': '#9C9A96',
-            'ryo-gray-700': '#3D3D3A',
-            'ryo-silver': '#C8C6C2',
-            'ryo-cream': '#F2EEE8',
-          },
-          fontFamily: {
-            display: ['Cormorant Garamond', 'serif'],
-            body: ['DM Sans', 'sans-serif'],
-            label: ['Space Grotesk', 'sans-serif'],
-          },
-          transitionTimingFunction: {
-            'luxury': 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-          },
-          transitionDuration: {
-            '400': '400ms',
-            '600': '600ms',
-            '800': '800ms',
-          }
-        }
-      }
-    }
-  </script>
-
-  <style>
-    *{margin:0;padding:0;box-sizing:border-box;}
-    html{scroll-behavior:smooth;}
-    body{font-family:'DM Sans',sans-serif;background:#F8F6F2;color:#0A0A0A;overflow-x:hidden;}
-    ::-webkit-scrollbar{width:4px;}
-    ::-webkit-scrollbar-track{background:#F8F6F2;}
-    ::-webkit-scrollbar-thumb{background:#9C9A96;}
-
-    /* NAV */
-    .nav-link{font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#0A0A0A;text-decoration:none;position:relative;padding-bottom:2px;}
-    .nav-link::after{content:'';position:absolute;bottom:0;left:0;width:0;height:1px;background:#0A0A0A;transition:width .3s cubic-bezier(.25,.46,.45,.94);}
-    .nav-link:hover::after{width:100%;}
-
-    /* CART DRAWER */
-    .cart-drawer{position:fixed;top:0;right:0;width:min(420px,100vw);height:100%;background:#F8F6F2;z-index:200;transform:translateX(100%);transition:transform .45s cubic-bezier(.25,.46,.45,.94);display:flex;flex-direction:column;border-left:1px solid #D5D3CF;}
-    .cart-drawer.open{transform:translateX(0);}
-    .cart-overlay{position:fixed;inset:0;background:rgba(10,10,10,.4);z-index:199;opacity:0;pointer-events:none;transition:opacity .4s ease;}
-    .cart-overlay.open{opacity:1;pointer-events:all;}
-
-    /* MOBILE MENU */
-    .mobile-menu{position:fixed;inset:0;background:#0A0A0A;z-index:100;transform:translateX(-100%);transition:transform .5s cubic-bezier(.25,.46,.45,.94);display:flex;flex-direction:column;padding:32px;}
-    .mobile-menu.open{transform:translateX(0);}
-
-    /* REVEAL */
-    .reveal{opacity:0;transform:translateY(20px);transition:opacity .7s cubic-bezier(.25,.46,.45,.94),transform .7s cubic-bezier(.25,.46,.45,.94);}
-    .reveal.visible{opacity:1;transform:translateY(0);}
-
-    /* FOOTER */
-    .footer-link{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;text-decoration:none;transition:color .3s ease;}
-    .footer-link:hover{color:#F8F6F2;}
-
-    /* CONTACT CARD STYLES */
-    .contact-card-modern{
-      background:#FFFFFF;
-      border:1px solid #EDEDEB;
-      transition:all 0.3s ease;
-    }
-    .contact-card-modern:hover{
-      border-color:#D5D3CF;
-      transform:translateY(-4px);
-    }
-    .contact-icon{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      width:48px;
-      height:48px;
-      background:#0A0A0A;
-      color:#F8F6F2;
-      font-family:'Space Grotesk',sans-serif;
-      font-weight:400;
-      font-size:20px;
-      transition:all 0.2s ease;
-    }
-    .form-input, .form-textarea{
-      width:100%;
-      background:transparent;
-      border:none;
-      border-bottom:1px solid #D5D3CF;
-      padding:14px 0 10px;
-      font-family:'DM Sans',sans-serif;
-      font-size:14px;
-      font-weight:300;
-      color:#0A0A0A;
-      transition:border-color 0.2s ease;
-      outline:none;
-    }
-    .form-input:focus, .form-textarea:focus{
-      border-bottom-color:#0A0A0A;
-    }
-    .form-input::placeholder, .form-textarea::placeholder{
-      color:#9C9A96;
-      font-weight:300;
-    }
-    .submit-btn{
-      background:#0A0A0A;
-      color:#F8F6F2;
-      font-family:'Space Grotesk',sans-serif;
-      font-size:10px;
-      letter-spacing:.2em;
-      text-transform:uppercase;
-      padding:16px 32px;
-      border:none;
-      cursor:pointer;
-      transition:background 0.3s ease;
-    }
-    .submit-btn:hover{
-      background:#3D3D3A;
-    }
-    .faq-item{
-      border-bottom:1px solid #EDEDEB;
-      padding:20px 0;
-      cursor:pointer;
-    }
-    .faq-question{
-      font-family:'DM Sans',sans-serif;
-      font-size:14px;
-      font-weight:500;
-      letter-spacing:-0.2px;
-      color:#0A0A0A;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-    }
-    .faq-answer{
-      font-family:'DM Sans',sans-serif;
-      font-size:13px;
-      font-weight:300;
-      color:#5A5A57;
-      line-height:1.7;
-      margin-top:12px;
-      display:none;
-    }
-    .faq-item.open .faq-answer{
-      display:block;
-    }
-    .faq-icon{
-      font-size:20px;
-      font-weight:300;
-      transition:transform 0.2s ease;
-    }
-    .faq-item.open .faq-icon{
-      transform:rotate(45deg);
-    }
-    .store-card{
-      background:#FFFFFF;
-      border:1px solid #EDEDEB;
-      padding:28px;
-    }
-    @media (max-width: 768px) {
-      .contact-hero-grid{grid-template-columns:1fr !important; gap:48px !important;}
-      .contact-two-col{grid-template-columns:1fr !important; gap:48px !important;}
-    }
-  </style>
 </head>
 
 <body>
@@ -249,12 +84,12 @@
           </p>
           <div style="display:flex;flex-wrap:wrap;gap:48px;">
             <div>
-              <p style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9C9A96;margin-bottom:10px;">Response Time</p>
-              <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;">Within 24 hours</p>
+              <p style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9C9A96;margin-bottom:10px;">Customer Care</p>
+              <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;">Available 24 Hours • Every Day</p>
             </div>
             <div>
-              <p style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9C9A96;margin-bottom:10px;">Live Chat</p>
-              <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;">Mon–Fri, 10AM–6PM</p>
+              <p style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#9C9A96;margin-bottom:10px;">Live Support</p>
+              <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;">Always Here For You</p>
             </div>
           </div>
         </div>
@@ -275,8 +110,8 @@
           <div class="contact-icon" style="margin-bottom:24px;">✉</div>
           <h3 style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;">Email Us</h3>
           <p style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#3D3D3A;margin-bottom:8px;">General inquiries:</p>
-          <a href="mailto:hello@ryo.com" style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;color:#0A0A0A;text-decoration:none;border-bottom:1px solid #D5D3CF;">hello@ryo.com</a>
-          <p style="margin-top:16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">For press & collaborations: <a href="mailto:press@ryo.com" style="color:#0A0A0A;border-bottom:1px solid #D5D3CF;">press@ryo.com</a></p>
+          <a href="mailto:hello@ryo.com" style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;color:#0A0A0A;text-decoration:none;border-bottom:1px solid #D5D3CF;">info.ryo.brand@gmail.com</a>
+          <p style="margin-top:16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">For press & collaborations: <a href="mailto:press@ryo.com" style="color:#0A0A0A;border-bottom:1px solid #D5D3CF;">info.ryo.brand@gmail.com</a></p>
         </div>
 
         <!-- Phone / WhatsApp Card -->
@@ -284,17 +119,16 @@
           <div class="contact-icon" style="margin-bottom:24px;">📞</div>
           <h3 style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;">Call or WhatsApp</h3>
           <p style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#3D3D3A;margin-bottom:8px;">Customer support:</p>
-          <a href="tel:+201234567890" style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;color:#0A0A0A;text-decoration:none;border-bottom:1px solid #D5D3CF;">+20 123 456 7890</a>
-          <p style="margin-top:16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">Mon–Fri, 10AM – 6PM (GMT+2)</p>
+          <a href="tel:+201234567890" style="font-family:'DM Sans',sans-serif;font-size:16px;font-weight:400;color:#0A0A0A;text-decoration:none;border-bottom:1px solid #D5D3CF;">+20 155 805 6772</a>
+          <p style="margin-top:16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">Available 24 Hours • Every Day</p>
         </div>
 
         <!-- Boutique / Showroom Card -->
         <div class="contact-card-modern" style="padding:36px 28px;">
-          <div class="contact-icon" style="margin-bottom:24px;">📍</div>
-          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;">Visit Us</h3>
-          <p style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#3D3D3A;margin-bottom:4px;">RYO Atelier – Zamalek</p>
-          <p style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#5A5A57;">12 Brazil Street, Cairo, Egypt</p>
-          <p style="margin-top:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;">By appointment only</p>
+          <div class="contact-icon" style="margin-bottom:24px;">🌐</div>
+          <h3 style="font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:12px;">ONLINE EXPERIENCE</h3>
+          <p style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#3D3D3A;margin-bottom:4px;">RYO is an online destination for refined essentials designed with simplicity, comfort, and timeless presence in mind.</p>
+          <p style="margin-top:12px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;"> Alexandria, Egypt</p>
         </div>
       </div>
     </div>
@@ -347,35 +181,35 @@
                 <span>How long does shipping take?</span>
                 <span class="faq-icon">+</span>
               </div>
-              <div class="faq-answer">Domestic orders (Egypt): 2–4 business days. International shipping: 7–12 business days. You’ll receive a tracking link once shipped.</div>
+              <div class="faq-answer">Orders within Egypt are delivered within 3–5 business days for most governorates. Border and remote areas may take up to 5–7 business days.</div>
             </div>
             <div class="faq-item" onclick="toggleFaq(this)">
               <div class="faq-question">
                 <span>What is your return policy?</span>
                 <span class="faq-icon">+</span>
               </div>
-              <div class="faq-answer">We accept returns within 14 days of delivery. Items must be unworn, unwashed, with original tags attached. For more details, see our Returns section.</div>
+              <div class="faq-answer">We accept returns within 5 days of delivery. Items must be unworn, unwashed, with original tags attached. For more details, see our Returns section.</div>
             </div>
             <div class="faq-item" onclick="toggleFaq(this)">
               <div class="faq-question">
                 <span>Can I modify or cancel my order?</span>
                 <span class="faq-icon">+</span>
               </div>
-              <div class="faq-answer">Orders can be modified or canceled within 1 hour of placement. Please contact our support team immediately with your order number.</div>
+              <div class="faq-answer">Orders can be modified or canceled within 2 hours of placement. Once processing begins, changes may no longer be possible.</div>
             </div>
             <div class="faq-item" onclick="toggleFaq(this)">
               <div class="faq-question">
                 <span>Do you offer international shipping?</span>
                 <span class="faq-icon">+</span>
               </div>
-              <div class="faq-answer">Yes, we ship worldwide. Shipping costs and duties are calculated at checkout based on destination.</div>
+              <div class="faq-answer">We currently offer domestic shipping across Egypt only. International shipping is not available at this time.</div>
             </div>
             <div class="faq-item" onclick="toggleFaq(this)">
               <div class="faq-question">
                 <span>How can I track my order?</span>
                 <span class="faq-icon">+</span>
               </div>
-              <div class="faq-answer">Once your order is dispatched, you’ll receive an email with tracking details and a link to monitor delivery status.</div>
+              <div class="faq-answer">Once your order is dispatched, tracking details will be shared via email. You can also contact our support team anytime for delivery updates.</div>
             </div>
           </div>
         </div>
@@ -384,42 +218,6 @@
   </section>
 
 
-  <!-- ══════════════════════════════════════════
-       STORE LOCATION / MAP SECTION
-══════════════════════════════════════════ -->
-  <section style="background:#F8F6F2;padding:40px 40px 100px;">
-    <div style="max-width:1200px;margin:0 auto;">
-      <div class="reveal" style="display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:center;">
-        <!-- Left Text -->
-        <div>
-          <p style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:#9C9A96;margin-bottom:16px;">Visit our atelier</p>
-          <h2 style="font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,48px);font-weight:300;letter-spacing:-.02em;line-height:1.2;margin-bottom:20px;">Experience RYO in person</h2>
-          <p style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#3D3D3A;line-height:1.8;margin-bottom:28px;">Our Zamalek boutique is a minimalist sanctuary where you can discover our latest collections, receive personal styling consultations, and enjoy a curated selection of limited pieces.</p>
-          <div class="store-card" style="padding:0;background:transparent;border:none;">
-            <div style="display:flex;gap:24px;flex-wrap:wrap;">
-              <div>
-                <p style="font-family:'Space Grotesk',sans-serif;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#9C9A96;">Address</p>
-                <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;margin-top:6px;">12 Brazil Street, Zamalek, Cairo</p>
-              </div>
-              <div>
-                <p style="font-family:'Space Grotesk',sans-serif;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:#9C9A96;">Hours</p>
-                <p style="font-family:'DM Sans',sans-serif;font-size:14px;color:#0A0A0A;margin-top:6px;">Tuesday – Saturday, 11AM – 7PM</p>
-              </div>
-            </div>
-            <a href="#" style="display:inline-block;margin-top:28px;font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#0A0A0A;border-bottom:1px solid #0A0A0A;padding-bottom:4px;text-decoration:none;">Book an appointment →</a>
-          </div>
-        </div>
-        <!-- Right Map (placeholder with same design system) -->
-        <div style="background:#EDEDEB;height:320px;display:flex;align-items:center;justify-content:center;border:1px solid #D5D3CF;">
-          <div style="text-align:center;">
-            <span style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.2em;color:#9C9A96;">Interactive map</span>
-            <p style="font-family:'DM Sans',sans-serif;font-size:13px;color:#3D3D3A;margin-top:12px;">12 Brazil Street, Zamalek</p>
-            <div style="margin-top:16px;width:40px;height:40px;background:#0A0A0A;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;color:white;font-size:18px;">📍</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
 
   {{-- Newsletter --}}
@@ -429,44 +227,7 @@
   @include('partials.footer')
 
 
-  <script>
-    // ── CART & MENU (same as policy page) ──
-    function toggleCart() {
-      document.getElementById('cartDrawer')?.classList.toggle('open');
-      document.getElementById('cartOverlay')?.classList.toggle('open');
-    }
-    function toggleMenu() {
-      document.getElementById('mobileMenu')?.classList.toggle('open');
-    }
-
-    // ── SCROLL REVEAL ──
-    const revObs = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); revObs.unobserve(e.target); } });
-    }, { threshold: 0.08 });
-    document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
-
-    // ── FAQ ACCORDION ──
-    function toggleFaq(element) {
-      element.classList.toggle('open');
-    }
-
-    // ── FORM SUBMIT (prevent default + console simulation) ──
-    const contactForm = document.getElementById('contactForm');
-    if(contactForm) {
-      contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        alert('Thank you for reaching out. Our team will respond within 24 hours.');
-        contactForm.reset();
-      });
-    }
-
-    // ── RESPONSIVE (no sidebar needed but keep consistency) ──
-    function checkLayout() {
-      // nothing critical for contact page, but keep pattern
-    }
-    checkLayout();
-    window.addEventListener('resize', checkLayout);
-  </script>
+  <script src="{{ asset('js/website-contact-us.js') }}">
 
   @if (Route::has('login'))
     <div class="h-14.5 hidden lg:block"></div>
