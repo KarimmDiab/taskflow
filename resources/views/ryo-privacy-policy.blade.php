@@ -25,7 +25,7 @@
     @include('partials.mobile-menu')
 
     {{-- Cart Drawer --}}
-    @include('partials.cart-drawer2')
+    @include('partials.cart-drawer')
 
 
     <!-- ══════════════════════════════════════════

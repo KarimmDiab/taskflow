@@ -120,3 +120,4 @@
   </footer>
   <!-- Add this in your <head> or before closing </body> tag -->
   <script src="{{ asset('js/cart.js') }}" defer></script>
+  <script src="{{ asset('js/website-cart-drawer.js') }}" defer></script>

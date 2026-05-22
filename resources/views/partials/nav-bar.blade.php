@@ -3,34 +3,29 @@
 ═══════════════════════════════════════════ -->
   <header id="navbar"
       style="position:fixed;top:0;left:0;right:0;z-index:50;padding:0 40px;height:64px;display:flex;align-items:center;justify-content:space-between;transition:all 0.4s cubic-bezier(0.25,0.46,0.45,0.94);border-bottom:1px solid transparent;"
-      class="nav-transparent">
-      <!-- LEFT NAV -->
-      <nav style="display:flex;gap:32px;align-items:center;" class="hidden md:flex">
+      class="">
+
+      <!-- LOGO -->
+      <div style="display:flex;align-items:center;gap:16px;">
+          <a href="{{ route('home') }}" class="nav-logo" style="display:flex;align-items:center;">
+              <img src="{{ asset('images/logos/white_logo.png') }}" class="logo-img" alt="RYO"
+                  style="height:48px;width:auto;display:block;transition:filter .25s ease;">
+          </a>
+      </div>
+
+      <!-- CENTER NAV -->
+      <nav class="center-nav hidden md:flex"
+          style="position:absolute;left:50%;transform:translateX(-50%);display:flex;gap:32px;align-items:center;">
           <a href={{ route('home') }} class="nav-link">HOME</a>
           <a href={{ route('all-products') }} class="nav-link">SHOP</a>
           <a href="{{ route('collections') }}" class="nav-link">COLLECTIONS</a>
+          <a href="{{ route('about-us') }}" class="nav-link">About</a>
+          <a href="{{ route('contact-us') }}" class="nav-link">CONTACT US</a>
       </nav>
-      <!-- LOGO -->
-      <a href="{{ route('home') }}" class="nav-logo"
-          style="
-        position:absolute;
-        left:50%;
-        transform:translateX(-50%);
-        display:flex;
-        align-items:center;
-        justify-content:center;
-   ">
 
-          <img src="{{ asset('images/logos/white_logo.png') }}" class="nav-logo" alt="RYO"
-              style="height:70px;width:auto;display:block;">
-
-      </a>
       <!-- RIGHT NAV -->
       <div style="display:flex;align-items:center;gap:24px;">
-          <nav style="display:flex;gap:32px;" class="hidden md:flex">
-              <a href="{{ route('about-us') }}" class="nav-link">About</a>
-              <a href="{{ route('contact-us') }}" class="nav-link">CONTACT US</a>
-          </nav>
+
           <div style="display:flex;align-items:center;gap:16px;">
 
               <!-- Account -->
@@ -90,7 +85,7 @@
               @endif
               <!-- Cart -->
               <button onclick="window.cart.toggle()" class="nav-icon"
-                  style="background:none;border:none;cursor:pointer;color:white;transition:color 0.4s ease;padding:4px;position:relative;"
+                  style="background:none;border:none;cursor:pointer;color:inherit;transition:color 0.4s ease;padding:4px;position:relative;"
                   aria-label="Cart">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       stroke-width="1.5">
@@ -105,7 +100,7 @@
               </button>
               <!-- Hamburger (mobile) -->
               <button onclick="toggleMenu()" class="nav-icon md:hidden"
-                  style="background:none;border:none;cursor:pointer;color:#F8F6F2;transition:color 0.4s ease;padding:4px;"
+                  style="background:none;border:none;cursor:pointer;color:inherit;transition:color 0.4s ease;padding:4px;"
                   aria-label="Menu">
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                       stroke-width="1.5">
@@ -116,4 +111,58 @@
               </button>
           </div>
       </div>
+
+      <style>
+          #navbar {
+              background: transparent;
+              color: #F8F6F2;
+          }
+
+          #navbar .nav-link {
+              color: inherit;
+              text-decoration: none;
+          }
+
+          #navbar .nav-icon {
+              color: inherit;
+          }
+
+          #navbar.scrolled {
+              background: #ffffff;
+              color: #111827;
+              border-bottom-color: rgba(0, 0, 0, 0.08);
+              box-shadow: 0 12px 40px rgba(0, 0, 0, 0.06);
+          }
+
+          #navbar.scrolled .nav-link,
+          #navbar.scrolled .nav-icon {
+              color: black;
+          }
+
+          #navbar.scrolled .logo-img {
+              filter: invert(1) grayscale(1) contrast(1.1);
+          }
+
+          @media (max-width: 767px) {
+              .center-nav {
+                  position: static;
+                  transform: none;
+              }
+          }
+      </style>
+
+      <script>
+          (function() {
+              const nav = document.getElementById('navbar');
+              const onScroll = () => {
+                  if (window.scrollY > 20) nav.classList.add('scrolled');
+                  else nav.classList.remove('scrolled');
+              };
+              document.addEventListener('scroll', onScroll, {
+                  passive: true
+              });
+              onScroll();
+          })();
+      </script>
+
   </header>

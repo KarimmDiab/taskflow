@@ -26,7 +26,7 @@
   @include('partials.mobile-menu')
 
   {{-- Cart Drawer --}}
-  @include('partials.cart-drawer2')
+  @include('partials.cart-drawer')
 
 
   <!-- ══════════════════════════════════════════
@@ -227,7 +227,7 @@
   @include('partials.footer')
 
 
-  <script src="{{ asset('js/website-contact-us.js') }}">
+  <script src="{{ asset('js/website-contact-us.js') }}"></script>
 
   @if (Route::has('login'))
     <div class="h-14.5 hidden lg:block"></div>
