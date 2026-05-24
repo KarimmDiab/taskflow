@@ -46,7 +46,7 @@
 
                           <!-- Dropdown -->
                           <div
-                              class="absolute right-0 top-full pt-2 w-48 bg-white shadow-lg rounded-lg hidden group-hover:block z-50">
+                              class="absolute right-0 top-full pt-2 w-48 bg-white shadow-lg rounded-lg hidden group-hover:block z-50" style="color: black;font-weight: bold;">
                               @auth
 
                                   <a href="{{ route('dashboard') }}" class="block px-4 py-2 hover:bg-gray-100">
@@ -94,7 +94,7 @@
                       <path d="M16 10a4 4 0 01-8 0" />
                   </svg>
                   <span id="cartBadge"
-                      style="position:absolute;top:-2px;right:-4px;width:16px;height:16px;border-radius:50%;background:white;color:black;font-size:9px;font-family:'Space Grotesk',sans-serif;display:none;align-items:center;justify-content:center;font-weight:bolder;">
+                      style="position:absolute;top:-2px;right:-4px;width:16px;height:16px;border-radius:50%;background:black;color:white;font-size:9px;font-family:'Space Grotesk',sans-serif;display:none;align-items:center;justify-content:center;font-weight:bolder;">
                       0
                   </span>
               </button>
