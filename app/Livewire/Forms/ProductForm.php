@@ -2,7 +2,14 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Inventory;
 use App\Models\Product;
+use App\Models\ProductImage;
+use App\Models\ProductVariant;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
 class ProductForm extends Form
@@ -112,6 +119,147 @@ class ProductForm extends Form
         $data = $this->validate();
         Product::create($data);
         $this->reset();
+    }
+
+    /**
+     * Store a product and its create-page related records in one transaction.
+     *
+     * @param  array<int, array<string, mixed>>  $variants
+     * @param  array<int, TemporaryUploadedFile|UploadedFile>  $media
+     * @param  array<int|string, array<int, TemporaryUploadedFile|UploadedFile>>  $colorMedia
+     */
+    public function storeWithRelations(
+        array $productData,
+        array $variants = [],
+        array $media = [],
+        array $colorMedia = [],
+        ?string $primaryUpload = null,
+    ): Product {
+        return DB::transaction(function () use ($productData, $variants, $media, $colorMedia, $primaryUpload) {
+            $product = Product::create([
+                'category_id' => $productData['category_id'],
+                'sub_category_id' => $productData['sub_category_id'] ?: null,
+                'collection_id' => $productData['collection_id'] ?: null,
+                'product_name' => $productData['product_name'],
+                'product_code' => $productData['product_code'] ?: null,
+                'product_quantity' => $productData['product_quantity'],
+                'product_cost' => $productData['product_cost'],
+                'product_price' => $productData['product_price'],
+            ]);
+
+            $extra = [];
+
+            if (Schema::hasColumn('products', 'product_desc')) {
+                $extra['product_desc'] = $productData['product_desc'] ?: null;
+            }
+
+            if (Schema::hasColumn('products', 'is_active')) {
+                $extra['is_active'] = $productData['is_active'];
+            }
+
+            if ($extra) {
+                $product->forceFill($extra)->save();
+            }
+
+            foreach ($variants as $variantData) {
+                $variantBranchId = $variantData['branch_id'] ?? $productData['branch_id'];
+
+                $variant = ProductVariant::create([
+                    'product_id' => $product->id,
+                    'color_id' => $variantData['color_id'] ?? null,
+                    'size_id' => $variantData['size_id'] ?? null,
+                    'sku' => $this->uniqueVariantSku($variantData['sku']),
+                    'variant_cost' => $variantData['variant_cost'],
+                    'variant_price' => $variantData['variant_price'],
+                    'is_active' => $variantData['is_active'] ?? true,
+                ]);
+
+                if ($variantBranchId) {
+                    Inventory::create([
+                        'product_variant_id' => $variant->id,
+                        'branch_id' => $variantBranchId,
+                        'quantity' => $variantData['quantity'],
+                    ]);
+                }
+            }
+
+            $sortOrder = 0;
+
+            foreach ($media as $index => $file) {
+                $this->createProductImage(
+                    product: $product,
+                    file: $file,
+                    sortOrder: $sortOrder,
+                    isPrimary: $primaryUpload === "media:$index" || ($primaryUpload === null && $sortOrder === 0),
+                );
+                $sortOrder++;
+            }
+
+            foreach ($colorMedia as $colorId => $files) {
+                foreach ($files ?? [] as $fileIndex => $file) {
+                    $this->createProductImage(
+                        product: $product,
+                        file: $file,
+                        sortOrder: $sortOrder,
+                        isPrimary: $primaryUpload === "color_media:$colorId:$fileIndex" || ($primaryUpload === null && $sortOrder === 0),
+                        colorId: (int) $colorId,
+                    );
+                    $sortOrder++;
+                }
+            }
+
+            return $product;
+        });
+    }
+
+    private function createProductImage(
+        Product $product,
+        TemporaryUploadedFile|UploadedFile $file,
+        int $sortOrder,
+        bool $isPrimary,
+        ?int $colorId = null,
+        ?string $sku = null,
+    ): void {
+
+        $categoryName = optional($product->category)->category_name ?? 'uncategorized';
+
+        $subCategoryName = optional($product->subCategory)->sub_category_name ?? 'general';
+
+        $categorySlug = str($categoryName)->slug();
+        $subCategorySlug = str($subCategoryName)->slug();
+
+        $skuFolder = str($sku ?? $product->id)->slug();
+
+        $directory = "products/{$categorySlug}/{$subCategorySlug}/{$skuFolder}";
+
+        $path = $file->store($directory, 'public');
+
+        $imageData = [
+            'product_id' => $product->id,
+            'image_path' => $path,
+            'is_primary' => $isPrimary,
+            'sort_order' => $sortOrder,
+        ];
+
+        if (Schema::hasColumn('product_images', 'color_id') && $colorId !== null) {
+            $imageData['color_id'] = $colorId;
+        }
+
+        ProductImage::create($imageData);
+    }
+
+    private function uniqueVariantSku(string $sku): string
+    {
+        $base = strtoupper($sku);
+        $sku = $base;
+        $counter = 1;
+
+        while (ProductVariant::where('sku', $sku)->exists()) {
+            $sku = $base.'-'.now()->format('His').'-'.$counter;
+            $counter++;
+        }
+
+        return $sku;
     }
 
     public function update()

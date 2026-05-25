@@ -49,6 +49,7 @@ Route::livewire('categories', 'pages::categories.index')->middleware('auth')->na
 Route::livewire('subCategories', 'pages::sub_categories.index')->middleware('auth')->name('subCategories');
 Route::livewire('customers', 'pages::customers.index')->middleware('auth')->name('customers');
 Route::livewire('expenses_items', 'pages::expenses_item.index')->middleware('auth')->name('expenses_items');
+Route::livewire('products/create', 'product.create')->middleware('auth')->name('products.create');
 Route::livewire('products', 'pages::products.index')->middleware('auth')->name('products');
 Route::livewire('expenses', 'pages::expenses.index')->middleware('auth')->name('expenses');
 Route::livewire('purchaseInvoices', 'pages::purchases.index')->middleware('auth')->name('purchaseInvoices');

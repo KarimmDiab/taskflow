@@ -110,7 +110,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                 </p>
             </div>
 
-            <flux:modal.trigger name="add-product">
+            <a href="{{ route('products.create') }}" wire:navigate>
                 <button
                     class="group relative bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                     <span class="flex items-center gap-2">
@@ -122,7 +122,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                         إضافة منتج جديد
                     </span>
                 </button>
-            </flux:modal.trigger>
+            </a>
         </div>
 
         {{-- Stats Cards --}}
@@ -200,7 +200,6 @@ new #[Title('إدارة المنتجات')] class extends Component {
         </div>
     </div>
 
-    <livewire:product.create />
     <livewire:product.edit />
 
     {{-- Main Table Card --}}
@@ -421,12 +420,12 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                                 منتجات</p>
                                             <p class="text-sm text-gray-400 mt-1">ابدأ بإضافة منتج جديد للنظام</p>
                                         </div>
-                                        <flux:modal.trigger name="add-product">
+                                        <a href="{{ route('products.create') }}" wire:navigate>
                                             <button
                                                 class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                                                 + إضافة منتج
                                             </button>
-                                        </flux:modal.trigger>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
