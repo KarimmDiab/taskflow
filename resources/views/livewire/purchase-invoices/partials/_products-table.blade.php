@@ -1,203 +1,83 @@
-{{-- ══════════════════════════════════════════════════════════
-     SECTION 2 — PRODUCTS TABLE
-══════════════════════════════════════════════════════════ --}}
-<div class="pi-card">
-    <div class="pi-sec-hd">
-        <span class="pi-step">٢</span>
-        <div>
-            <div class="pi-sec-title">أصناف الفاتورة</div>
-            <div class="pi-sec-sub">أضف المنتجات وحدد الكميات والأسعار</div>
+<section class="px-4 py-4 lg:px-6" x-data="{ focusNext(row, field) { this.$nextTick(() => { const target = document.querySelector(`[data-row='${row}'][data-field='${field}']`); if (target) target.focus(); }); }, nextRow(row) { this.$wire.addRow(); this.$nextTick(() => setTimeout(() => { const target = document.querySelector(`[data-row='${row + 1}'][data-field='sku']`); if (target) target.focus(); }, 150)); } }">
+    <div class="rounded-md border border-slate-200 bg-white shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+            <div>
+                <h2 class="text-base font-bold text-slate-950">Receiving Lines</h2>
+                <p class="text-xs text-slate-500">Scan barcode or search SKU, product, color, and size directly.</p>
+            </div>
+            <div class="flex items-center gap-3 text-xs font-semibold text-slate-500">
+                <span>{{ count($rows) }} lines</span>
+                <span>{{ number_format(collect($rows)->sum(fn($r) => (float) ($r['qty'] ?? 0)), 2) }} units</span>
+            </div>
         </div>
-        <span class="pi-row-count" style="margin-right:auto">{{ count($rows) }}
-            {{ count($rows) === 1 ? 'صنف' : 'أصناف' }}</span>
-    </div>
 
-    @error('rows')
-        <div class="pi-alert-warn" style="margin-bottom:12px">⚠ {{ $message }}</div>
-    @enderror
+        @error('rows') <div class="m-4 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">{{ $message }}</div> @enderror
 
-    <div class="pi-table-wrap" style="height: 400px;">
-        <table class="pi-table">
-            <thead>
-                <tr>
-                    <th style="width:36px">#</th>
-                    <th style="min-width:220px">المنتج</th>
-                    <th style="width:88px">الكمية</th>
-                    <th style="width:120px">سعر التكلفة</th>
-                    <th style="width:120px">سعر البيع</th>
-                    <th style="width:140px">الفرع</th>
-                    <th style="width:100px">الإجمالي</th>
-                    <th style="width:46px"></th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($rows as $index => $row)
-                    <tr wire:key="row-{{ $row['id'] }}" class="pi-tr">
-                        {{-- # --}}
-                        <td class="pi-td-num">{{ $index + 1 }}</td>
-
-                        {{-- Product search --}}
-                        <td style="position:relative">
-                            <div style="position: relative; direction: rtl;">
-                                <input type="text" wire:model.live.debounce.400ms="searchQueries.{{ $index }}"
-                                    wire:focus="$set('openDropdowns.{{ $index }}', true)"
-                                    class="pi-ti @error("rows.{$index}.product_id") pi-ti-err @enderror"
-                                    placeholder="ابحث بالاسم أو الكود..." autocomplete="off"
-                                    style="padding-right: 10px; padding-left: 90px;">
-                                @if ($row['product_id'])
-                                    <span class="pi-prod-badge"
-                                        style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; direction: ltr;">
-                                        <svg width="10" height="10" fill="none" stroke="currentColor"
-                                            stroke-width="2.5" viewBox="0 0 24 24">
-                                            <polyline points="20 6 9 17 4 12" />
-                                        </svg>
-                                        {{ $row['product_code'] }}
-                                    </span>
-                                @endif
-                                {{-- Loading indicator --}}
-                                <span wire:loading wire:target="searchQueries" class="pi-search-loading">
-                                    <span class="pi-spinner-sm"></span>
-                                </span>
-                            </div>
-
-                            {{-- Autocomplete dropdown --}}
-                            @if (
-                                ($openDropdowns[$index] ?? false) &&
-                                    (count($searchResults[$index] ?? []) > 0 || strlen(trim($searchQueries[$index] ?? '')) > 0))
-                                <div class="pi-dropdown" wire:click.stop>
-                                    @forelse($searchResults[$index] ?? [] as $product)
-                                        <div class="pi-drop-item"
-                                            wire:click="selectProduct({{ $index }}, {{ $product['id'] }})"
-                                            wire:key="prod-{{ $product['id'] }}">
-                                            <div style="flex:1">
-                                                <div class="pi-drop-name">{{ $product['product_name'] }}</div>
-                                                <div class="pi-drop-cat">
-                                                    {{ $product['category']['category_name'] ?? '' }}</div>
-                                            </div>
-                                            <span
-                                                class="pi-drop-code">{{ $product['product_code'] ? $product['product_code'] : 'PRD-' . str_pad($product['id'], 4, '0', STR_PAD_LEFT) }}</span>
-                                        </div>
-                                    @empty
-                                        <div
-                                            style="padding:10px 14px; font-size:12px; color:var(--tx3); text-align:center">
-                                            لا توجد نتائج</div>
-                                    @endforelse
-
-                                    {{-- Add New Product --}}
-                                    <div class="pi-drop-add"
-                                        wire:click="openAddProductModal({{ $index }}, @js(trim($searchQueries[$index] ?? '')))">
-                                        <svg width="14" height="14" fill="none" stroke="currentColor"
-                                            stroke-width="2.5" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="10" />
-                                            <path d="M12 8v8M8 12h8" />
-                                        </svg>
-                                        إضافة "{{ trim($searchQueries[$index] ?? '') }}" كمنتج جديد
-                                    </div>
-                                </div>
-                            @endif
-
-                            @error("rows.{$index}.product_id")
-                                <span class="pi-err-msg">⚠ {{ $message }}</span>
-                            @enderror
-                        </td>
-
-                        {{-- Quantity --}}
-                        <td>
-                            <input type="number" wire:change="updateRowQty({{ $index }}, $event.target.value)"
-                                class="pi-ti pi-ti-sm @error("rows.{$index}.qty") pi-ti-err @enderror"
-                                value="{{ $row['qty'] }}" min="0.01" step="0.01">
-                            @error("rows.{$index}.qty")
-                                <span class="pi-err-msg" style="font-size:10px">⚠ {{ $message }}</span>
-                            @enderror
-                        </td>
-
-                        {{-- Cost Price --}}
-                        <td>
-                            <div style="position:relative">
-                                <input type="number"
-                                    wire:change="updateRowCost({{ $index }}, $event.target.value)"
-                                    class="pi-ti @error("rows.{$index}.cost") pi-ti-err @enderror"
-                                    value="{{ $row['cost'] }}" min="0" step="0.01"
-                                    style="padding-left:34px">
-                                <span class="pi-curr">ج.م</span>
-                            </div>
-                            @error("rows.{$index}.cost")
-                                <span class="pi-err-msg" style="font-size:10px">⚠ {{ $message }}</span>
-                            @enderror
-                        </td>
-
-                        {{-- Selling Price --}}
-                        <td>
-                            <div style="position:relative">
-                                <input type="number"
-                                    wire:change="updateRowSell({{ $index }}, $event.target.value)"
-                                    class="pi-ti" value="{{ $row['sell'] ?? '' }}" min="0" step="0.01"
-                                    placeholder="—" style="padding-left:34px">
-                                <span class="pi-curr">ج.م</span>
-                            </div>
-                        </td>
-
-
-                        {{-- Row Total --}}
-                        <td>
-                            <span class="pi-tot-cell">
-                                {{ number_format(($row['qty'] ?? 0) * ($row['cost'] ?? 0), 2) }}
-                            </span>
-                        </td>
-
-
-                        {{-- Branch Selection --}}
-                        <td>
-                            <select
-                                wire:change="updateRowBranch({{ $index }}, $event.target.value)"
-                                class="pi-ti @error("rows.{$index}.branch_id") pi-ti-err @enderror"
-                                style="width: 100%; padding: 8px 10px; font-size: 13px;">
-                                <option value="">-- اختر الفرع --</option>
-                                @foreach($this->branches as $branch)
-                                    <option value="{{ $branch->id }}" {{ ($row['branch_id'] ?? '') == $branch->id ? 'selected' : '' }}>
-                                        {{ $branch->branch_name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error("rows.{$index}.branch_id")
-                                <span class="pi-err-msg" style="font-size:10px">⚠ {{ $message }}</span>
-                            @enderror
-                        </td>
-
-                        {{-- Remove --}}
-                        <td>
-                            <button type="button" wire:click="removeRow({{ $index }})" class="pi-btn-rm"
-                                title="حذف الصنف">
-                                <svg width="13" height="13" fill="none" stroke="currentColor"
-                                    stroke-width="2.5" viewBox="0 0 24 24">
-                                    <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" />
-                                </svg>
-                            </button>
-                        </td>
-                    </tr>
-                @empty
+        <div class="max-h-[calc(100vh-310px)] overflow-auto" style="height: 400px;">
+            <table class="w-full min-w-[1120px] border-separate border-spacing-0 text-sm">
+                <thead class="sticky top-0 z-20 bg-slate-100 text-left text-xs font-bold uppercase tracking-wide text-slate-500">
                     <tr>
-                        <td colspan="8" class="pi-empty-state">
-                            <div class="pi-empty-icon">
-                                <svg width="22" height="22" fill="none" stroke="var(--tx3)"
-                                    stroke-width="1.5" viewBox="0 0 24 24">
-                                    <path
-                                        d="M20 7H4a2 2 0 00-2 2v9a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16" />
-                                </svg>
-                            </div>
-                            <p>لا توجد أصناف — اضغط "إضافة صنف جديد"</p>
-                        </td>
+                        <th class="w-12 border-b border-slate-200 px-3 py-2">#</th>
+                        <th class="w-[320px] border-b border-slate-200 px-3 py-2">SKU Search</th>
+                        <th class="min-w-[260px] border-b border-slate-200 px-3 py-2">Variant</th>
+                        <th class="w-28 border-b border-slate-200 px-3 py-2">Qty</th>
+                        <th class="w-32 border-b border-slate-200 px-3 py-2">Cost</th>
+                        <th class="w-32 border-b border-slate-200 px-3 py-2">Sell</th>
+                        <th class="w-44 border-b border-slate-200 px-3 py-2">Branch</th>
+                        <th class="w-32 border-b border-slate-200 px-3 py-2 text-right">Total</th>
+                        <th class="w-24 border-b border-slate-200 px-3 py-2"></th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    @foreach($rows as $index => $row)
+                        <tr wire:key="erp-row-{{ $row['id'] }}" class="odd:bg-white even:bg-slate-50/60 hover:bg-sky-50/60">
+                            <td class="px-3 py-2 align-top font-semibold text-slate-400">{{ $index + 1 }}</td>
+                            <td class="relative px-3 py-2 align-top">
+                                <input type="text" wire:model.live.debounce.250ms="searchQueries.{{ $index }}" wire:focus="$set('openDropdowns.{{ $index }}', true)" @keydown.enter.prevent="if (($wire.searchResults[{{ $index }}] || [])[0]) { $wire.selectVariantForRow({{ $index }}, $wire.searchResults[{{ $index }}][0].id); focusNext({{ $index }}, 'qty'); }" @keydown.escape.prevent="$wire.closeDropdown({{ $index }})" data-row="{{ $index }}" data-field="sku" class="h-9 w-full rounded-md border border-slate-300 bg-white px-3 font-mono text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200 @error("rows.{$index}.product_id") border-red-400 @enderror" placeholder="Scan or search SKU / barcode / black xl hoodie" autocomplete="off" dir="ltr">
+                                <div wire:loading wire:target="searchQueries.{{ $index }}" class="absolute right-5 top-4 text-xs text-slate-400">Searching...</div>
 
-    <button type="button" wire:click="addRow" class="pi-btn-add-row">
-        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
-            viewBox="0 0 24 24">
-            <path d="M12 5v14M5 12h14" />
-        </svg>
-        إضافة صنف جديد
-    </button>
-</div>{{-- /card --}}
+                                @if (($openDropdowns[$index] ?? false) && (count($searchResults[$index] ?? []) > 0 || strlen(trim($searchQueries[$index] ?? '')) > 0))
+                                    <div class="absolute left-3 right-3 top-12 z-30 overflow-hidden rounded-md border border-slate-200 bg-white shadow-xl" wire:click.stop>
+                                        @forelse($searchResults[$index] ?? [] as $variant)
+                                            <button type="button" wire:click="selectVariantForRow({{ $index }}, {{ $variant['id'] }})" class="flex w-full items-center gap-3 border-b border-slate-100 px-3 py-2 text-left hover:bg-slate-50">
+                                                <div class="h-10 w-10 overflow-hidden rounded-md border border-slate-200 bg-slate-100">
+                                                    @if($variant['image_url'])<img src="{{ $variant['image_url'] }}" alt="" class="h-full w-full object-cover">@else<div class="flex h-full w-full items-center justify-center text-xs font-bold text-slate-400">SKU</div>@endif
+                                                </div>
+                                                <div class="min-w-0 flex-1">
+                                                    <div class="truncate font-semibold text-slate-950">{{ $variant['product_name'] }}</div>
+                                                    <div class="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-slate-500"><span>{{ $variant['color_name'] ?: 'No color' }}</span><span>{{ $variant['size_name'] ?: 'No size' }}</span><span class="font-mono text-slate-700">{{ $variant['sku'] }}</span></div>
+                                                </div>
+                                                <div class="text-right text-xs"><div class="font-semibold text-slate-900">Stock {{ number_format($variant['stock'], 2) }}</div><div class="text-slate-500">Cost {{ number_format($variant['cost'], 2) }}</div></div>
+                                            </button>
+                                        @empty
+                                            <div class="px-3 py-3 text-center text-sm text-slate-500">No variants found.</div>
+                                        @endforelse
+                                        <button type="button" wire:click="openAddProductModal({{ $index }}, @js(trim($searchQueries[$index] ?? '')))" class="flex w-full items-center gap-2 bg-slate-950 px-3 py-2 text-left text-sm font-semibold text-white hover:bg-slate-800">Quick create variant</button>
+                                    </div>
+                                @endif
+                                @error("rows.{$index}.product_id") <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror
+                            </td>
+                            <td class="px-3 py-2 align-top">
+                                @if($row['variant_id'])
+                                    <div class="flex items-center gap-3">
+                                        <div class="h-9 w-9 overflow-hidden rounded-md border border-slate-200 bg-slate-100">@if($row['image_url'] ?? null)<img src="{{ $row['image_url'] }}" alt="" class="h-full w-full object-cover">@else<div class="h-full w-full" style="background: {{ $row['color_hex'] ?: '#e2e8f0' }}"></div>@endif</div>
+                                        <div class="min-w-0"><div class="truncate font-semibold text-slate-950">{{ $row['product_name'] }}</div><div class="flex flex-wrap items-center gap-2 text-xs text-slate-500"><span>{{ $row['color_name'] ?: 'No color' }}</span><span>{{ $row['size_name'] ?: 'No size' }}</span><span class="font-mono text-slate-700">{{ $row['sku'] ?: $row['product_code'] }}</span><span>Stock {{ number_format((float) ($row['stock'] ?? 0), 2) }}</span></div></div>
+                                    </div>
+                                @else
+                                    <span class="text-xs text-slate-400">Select a variant SKU</span>
+                                @endif
+                            </td>
+                            <td class="px-3 py-2 align-top"><input type="number" wire:change="updateRowQty({{ $index }}, $event.target.value)" @keydown.enter.prevent="focusNext({{ $index }}, 'cost')" data-row="{{ $index }}" data-field="qty" value="{{ $row['qty'] }}" min="0.01" step="0.01" class="h-9 w-full rounded-md border border-slate-300 bg-white px-2 text-right text-sm font-semibold focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">@error("rows.{$index}.qty") <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror</td>
+                            <td class="px-3 py-2 align-top"><input type="number" wire:change="updateRowCost({{ $index }}, $event.target.value)" @keydown.enter.prevent="nextRow({{ $index }})" data-row="{{ $index }}" data-field="cost" value="{{ $row['cost'] }}" min="0" step="0.01" class="h-9 w-full rounded-md border border-slate-300 bg-white px-2 text-right text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">@error("rows.{$index}.cost") <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror</td>
+                            <td class="px-3 py-2 align-top"><input type="number" wire:change="updateRowSell({{ $index }}, $event.target.value)" value="{{ $row['sell'] ?? '' }}" min="0" step="0.01" class="h-9 w-full rounded-md border border-slate-300 bg-white px-2 text-right text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"></td>
+                            <td class="px-3 py-2 align-top"><select wire:change="updateRowBranch({{ $index }}, $event.target.value)" class="h-9 w-full rounded-md border border-slate-300 bg-white px-2 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"><option value="">Header branch</option>@foreach($this->branches as $branch)<option value="{{ $branch->id }}" {{ ($row['branch_id'] ?? $branch_id) == $branch->id ? 'selected' : '' }}>{{ $branch->branch_name }}</option>@endforeach</select>@error("rows.{$index}.branch_id") <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror</td>
+                            <td class="px-3 py-2 text-right align-top font-mono font-bold text-slate-950">{{ number_format(($row['qty'] ?? 0) * ($row['cost'] ?? 0), 2) }}</td>
+                            <td class="px-3 py-2 align-top"><div class="flex justify-end gap-1"><button type="button" wire:click="duplicateRow({{ $index }})" title="Duplicate" class="flex h-8 w-8 items-center justify-center rounded-md border border-slate-300 bg-white text-slate-600 hover:bg-slate-50">Copy</button><button type="button" wire:click="removeRow({{ $index }})" title="Remove" class="flex h-8 w-8 items-center justify-center rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50">X</button></div></td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        <div class="flex items-center justify-between border-t border-slate-200 px-4 py-3"><button type="button" wire:click="addRow" class="inline-flex h-9 items-center gap-2 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Add line</button><div class="text-xs text-slate-500">Enter selects first match. Enter on cost opens the next row.</div></div>
+    </div>
+</section>

@@ -102,6 +102,16 @@
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('الفروع') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="building-storefront" :href="route('colors')"
+                    :current="request()->routeIs('colors')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('اضافة الوان') }}
+                </flux:sidebar.item>
+                <flux:sidebar.item icon="building-storefront" :href="route('sizes')"
+                    :current="request()->routeIs('sizes')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('اضافة مقاس') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 

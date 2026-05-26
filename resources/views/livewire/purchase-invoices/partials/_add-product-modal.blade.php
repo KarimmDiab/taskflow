@@ -1,211 +1,128 @@
-{{-- ══════════════════════════════════════════════════════════
-     MODAL — ADD NEW PRODUCT
-══════════════════════════════════════════════════════════ --}}
 @if ($showModal)
-    <div class="pi-modal-bg" x-data x-init="$el.style.opacity = 0;
-    requestAnimationFrame(() => {
-        $el.style.transition = 'opacity .2s';
-        $el.style.opacity = 1;
-    })" wire:click.self="closeModal"
+    <div class="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm" wire:click.self="closeModal"
         @keydown.escape.window="$wire.closeModal()">
-        <div class="pi-modal" x-data x-init="$el.style.transform = 'scale(0.93)';
-        $el.style.opacity = 0;
-        requestAnimationFrame(() => {
-            $el.style.transition = 'all .22s cubic-bezier(.34,1.56,.64,1)';
-            $el.style.transform = 'scale(1)';
-            $el.style.opacity = 1;
-        })" wire:click.stop>
-            {{-- Modal Header --}}
-            <div class="pi-modal-hd">
-                <div style="display:flex;align-items:center;gap:10px">
-                    <div class="pi-modal-icon">
-                        <svg width="16" height="16" fill="none" stroke="white" stroke-width="2.5"
-                            viewBox="0 0 24 24">
-                            <path d="M12 5v14M5 12h14" />
-                        </svg>
-                    </div>
-                    <div>
-                        <div style="font-size:14px;font-weight:700;color:var(--tx)">إضافة منتج جديد</div>
-                        <div style="font-size:11px;color:var(--tx3)">سيتم إضافته في الصف الحالي تلقائياً</div>
-                    </div>
+        <section class="ml-auto flex h-full w-full max-w-xl flex-col bg-white shadow-2xl" wire:click.stop>
+            <header class="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-950">Quick Create Variant</h2>
+                    <p class="text-xs text-slate-500">Create product, color, size, SKU, then inject it into the current
+                        row.</p>
                 </div>
-                <button type="button" wire:click="closeModal" class="pi-modal-close">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
-                        viewBox="0 0 24 24">
-                        <path d="M18 6L6 18M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-
-            {{-- Modal Body --}}
-            <div class="pi-modal-body">
-                <div class="pi-grid2">
-
-                    {{-- Product Name --}}
-                    <div class="pi-field pi-col-full">
-                        <label class="pi-label">اسم المنتج <span class="pi-req">*</span></label>
-                        <input type="text" wire:model.live="newProductName"
-                            class="pi-input @error('newProductName') pi-input-err @enderror"
-                            placeholder="مثال: لاب توب HP ProBook 450" autofocus>
+                <button type="button" wire:click="closeModal"
+                    class="flex h-9 w-9 items-center justify-center rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50">X</button>
+            </header>
+            <div class="flex-1 overflow-y-auto p-5">
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <label class="sm:col-span-2"><span class="mb-1 block text-xs font-semibold text-slate-500">Product
+                            Name</span><input type="text" wire:model.blur="newProductName"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
                         @error('newProductName')
-                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                            <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
-
-                    {{-- Product Code --}}
-                    <div class="pi-field">
-                        <label class="pi-label">كود المنتج <span class="pi-req">*</span></label>
-                        <input type="text" wire:model.live="newProductCode"
-                            class="pi-input @error('newProductCode') pi-input-err @enderror" placeholder="HP-001"
-                            dir="ltr">
+                    </label>
+                    <label><span class="mb-1 block text-xs font-semibold text-slate-500">Base Code</span><input
+                            type="text" wire:model.blur="newProductCode" dir="ltr"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 font-mono text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
                         @error('newProductCode')
-                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                            <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
-
-                    {{-- Category --}}
-                    <div class="pi-field">
-                        <label class="pi-label">التصنيف <span class="pi-req">*</span></label>
-                        <select wire:model.live="newProductCategoryId"
-                            class="pi-input pi-select @error('newProductCategoryId') pi-input-err @enderror">
-                            <option value="">-- اختر التصنيف --</option>
+                    </label>
+                    <label><span class="mb-1 block text-xs font-semibold text-slate-500">Size</span>
+                        <select wire:model.blur="newProductSize"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                            <option value="">Select size</option>
+                            @foreach ($this->sizes as $size)
+                                <option value="{{ $size->size_name }}">{{ $size->size_name }}</option>
+                            @endforeach
+                        </select>
+                        @error('newProductSize')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
+                        @enderror
+                    </label>
+                    <label><span class="mb-1 block text-xs font-semibold text-slate-500">Category</span><select
+                            wire:model.live="newProductCategoryId"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                            <option value="">Select category</option>
                             @foreach ($this->categories as $cat)
                                 <option value="{{ $cat->id }}">{{ $cat->category_name }}</option>
                             @endforeach
                         </select>
                         @error('newProductCategoryId')
-                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                            <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
-
-                    {{-- Sub Category --}}
-                    <div class="pi-field">
-                        <label class="pi-label">التصنيف الفرعي <span class="pi-req">*</span></label>
-                        <select wire:model.live="newProductSubCategoryId"
-                            class="pi-input pi-select @error('newProductSubCategoryId') pi-input-err @enderror">
-                            <option value="">-- اختر التصنيف الفرعي --</option>
+                    </label>
+                    <label><span class="mb-1 block text-xs font-semibold text-slate-500">Sub Category</span><select
+                            wire:model.blur="newProductSubCategoryId"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                            <option value="">Select sub category</option>
                             @foreach ($this->subCategories as $subCat)
                                 <option value="{{ $subCat->id }}">{{ $subCat->sub_category_name }}</option>
                             @endforeach
                         </select>
                         @error('newProductSubCategoryId')
-                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                            <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
+                    </label>
 
-                    {{-- Size --}}
-                    <div class="pi-field">
-                        <label class="pi-label">المقاس <span class="pi-req">*</span></label>
-                        <select wire:model.live="newProductSize"
-                            class="pi-input pi-select @error('newProductSize') pi-input-err @enderror">
-                            <option value="">-- اختر المقاس --</option>
-                            <option value="XS">XS</option>
-                            <option value="S">S</option>
-                            <option value="M">M</option>
-                            <option value="L">L</option>
-                            <option value="XL">XL</option>
-                            <option value="XXL">XXL</option>
-                            <option value="XXXL">XXXL</option>
+                    {{-- Color field with select from colors table + custom option --}}
+                    <label class="sm:col-span-2">
+                        <span class="mb-1 block text-xs font-semibold text-slate-500">Color</span>
+                        <select wire:model.live="newProductColor"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                            <option value="">Select color</option>
+                            @foreach ($this->colors as $color)
+                                <option value="{{ $color->color_hex_code }}"
+                                    style="background-color: {{ $color->color_hex_code }}; color: {{ $color->color_hex_code == '#FFFFFF' ? '#000' : '#fff' }};">
+                                    {{ $color->color_name }} ({{ $color->color_hex_code }})
+                                </option>
+                            @endforeach
+                            <option value="custom">+ Custom color</option>
                         </select>
-                        @error('newProductSize')
-                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+
+                        {{-- Custom color input (shown only when "custom" is selected) --}}
+                        @if ($newProductColor === 'custom')
+                            <div class="mt-2 flex items-center gap-2">
+                                <input type="color" x-data x-on:input="$wire.newProductCustomColor = $el.value"
+                                    value="{{ $newProductCustomColor ?? '#000000' }}"
+                                    class="h-10 w-14 rounded-md border border-slate-300 p-1">
+                                <input type="text" wire:model.blur="newProductCustomColor" dir="ltr"
+                                    placeholder="#000000"
+                                    class="h-10 flex-1 rounded-md border border-slate-300 px-3 font-mono text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
+                            </div>
+                        @endif
+
+                        @error('newProductColor')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
+                        @error('newProductCustomColor')
+                            <span class="text-xs text-red-600">{{ $message }}</span>
+                        @enderror
+                    </label>
 
-{{-- Color --}}
-<div class="pi-field">
-    <label class="pi-label">اللون <span class="pi-req">*</span></label>
-    <div style="display:flex;gap:10px;align-items:center">
-        <input type="color"
-            x-data
-            x-init="$watch('$wire.newProductColor', value => $el.value = value || '#000000')"
-            x-on:input="$wire.newProductColor = $el.value"
-            class="pi-input @error('newProductColor') pi-input-err @enderror"
-            style="width:60px;height:40px;padding:4px;cursor:pointer"
-            value="{{ $newProductColor ?? '#000000' }}">
-        <input type="text"
-            readonly
-            wire:model="newProductColor"
-            class="pi-input @error('newProductColor') pi-input-err @enderror"
-            style="flex:1;background:var(--bg2);font-family:monospace;font-size:13px;direction:ltr"
-            placeholder="#000000">
-    </div>
-    @error('newProductColor')
-        <span class="pi-err-msg">⚠ {{ $message }}</span>
-    @enderror
-    <div style="font-size:10px;color:var(--tx3);margin-top:5px">
-        💡 اختر لون باستخدام منتقي الألوان
-    </div>
-</div>
-
-                    {{-- Cost Price --}}
-                    <div class="pi-field">
-                        <label class="pi-label">سعر التكلفة <span class="pi-req">*</span></label>
-                        <div style="position:relative">
-                            <input type="number" wire:model.live="newProductCost"
-                                class="pi-input @error('newProductCost') pi-input-err @enderror" min="0"
-                                step="0.01" placeholder="0.00" style="padding-left:42px" dir="ltr">
-                            <span
-                                style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--tx3);pointer-events:none">ج.م</span>
-                        </div>
+                    <label><span class="mb-1 block text-xs font-semibold text-slate-500">Cost</span><input
+                            type="number" wire:model.blur="newProductCost" min="0" step="0.01"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 text-right text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
                         @error('newProductCost')
-                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                            <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
-
-                    {{-- Selling Price --}}
-                    <div class="pi-field">
-                        <label class="pi-label">
-                            سعر البيع
-                            <span class="pi-req">*</span>
-                        </label>
-                        <div style="position:relative">
-                            <input type="number" wire:model.live="newProductSell"
-                                class="pi-input @error('newProductSell') pi-input-err @enderror" min="0"
-                                step="0.01" placeholder="0.00" style="padding-left:42px" dir="ltr">
-                            <span
-                                style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:11px;font-weight:700;color:var(--tx3);pointer-events:none">ج.م</span>
-                        </div>
+                    </label>
+                    <label><span class="mb-1 block text-xs font-semibold text-slate-500">Selling Price</span><input
+                            type="number" wire:model.blur="newProductSell" min="0" step="0.01"
+                            class="h-10 w-full rounded-md border border-slate-300 px-3 text-right text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
                         @error('newProductSell')
-                            <span class="pi-err-msg">⚠ {{ $message }}</span>
+                            <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </div>
-
-                </div>
-
-                {{-- Info hint --}}
-                <div class="pi-hint-box">
-                    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"
-                        viewBox="0 0 24 24" style="flex-shrink:0;margin-top:1px">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M12 16v-4M12 8h.01" />
-                    </svg>
-                    <span class="pi-hint-txt">بعد الحفظ سيتم إضافة المنتج تلقائياً في الصف الحالي بالفاتورة وتحديث
-                        الكميات.</span>
+                    </label>
                 </div>
             </div>
-
-            {{-- Modal Footer --}}
-            <div class="pi-modal-ft">
-                <button type="button" wire:click="closeModal" class="pi-btn-sec"
-                    style="padding:8px 16px;font-size:12px">إلغاء</button>
-                <button type="button" wire:click="saveNewProduct" wire:loading.attr="disabled" class="pi-btn-pri"
-                    style="padding:8px 16px;font-size:12px">
-                    <span wire:loading.remove wire:target="saveNewProduct">
-                        <svg width="13" height="13" fill="none" stroke="white" stroke-width="2.5"
-                            viewBox="0 0 24 24">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        حفظ المنتج
-                    </span>
-                    <span wire:loading wire:target="saveNewProduct">
-                        <span class="pi-spinner"></span>
-                        جاري الحفظ...
-                    </span>
-                </button>
-            </div>
-        </div>
+            <footer class="flex items-center justify-end gap-2 border-t border-slate-200 px-5 py-4">
+                <button type="button" wire:click="closeModal"
+                    class="h-9 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Cancel</button>
+                <button type="button" wire:click="saveNewProduct" wire:loading.attr="disabled"
+                    class="h-9 rounded-md bg-slate-950 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-60"><span
+                        wire:loading.remove wire:target="saveNewProduct">Create and Select</span><span wire:loading
+                        wire:target="saveNewProduct">Creating...</span></button>
+            </footer>
+        </section>
     </div>
 @endif
-
-</div>{{-- /pi-root --}}

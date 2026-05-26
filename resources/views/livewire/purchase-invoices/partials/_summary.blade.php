@@ -1,124 +1,40 @@
-{{-- ══════════════════════════════════════════════════════════
-     SECTION 3 — SUMMARY + PAYMENT
-══════════════════════════════════════════════════════════ --}}
-<div class="pi-bottom-grid">
-
-    {{-- Summary Cards --}}
-    <div class="pi-sum-cards">
-        <div class="pi-sum-card">
-            <div class="pi-sum-lbl">إجمالي الفاتورة</div>
-            <div class="pi-sum-val pi-sum-acc">{{ number_format($this->invoiceTotal, 2) }}</div>
-            <div class="pi-sum-unit">جنيه مصري</div>
-        </div>
-        <div class="pi-sum-card">
-            <div class="pi-sum-lbl">المبلغ المدفوع</div>
-            <div class="pi-sum-val pi-sum-grn">{{ number_format($paid_amount, 2) }}</div>
-            <div class="pi-sum-unit">جنيه مصري</div>
-        </div>
-        <div
-            class="pi-sum-card pi-sum-card-remaining {{ $this->remainingAmount > 0 ? 'pi-sum-card-warn' : 'pi-sum-card-ok' }}">
-            <div class="pi-sum-lbl">المتبقي</div>
-            <div class="pi-sum-val {{ $this->remainingAmount > 0 ? 'pi-sum-yel' : 'pi-sum-grn' }}">
-                {{ number_format($this->remainingAmount, 2) }}</div>
-            <div class="pi-sum-unit">جنيه مصري</div>
+<section class="mx-auto grid max-w-[1800px] gap-4 px-4 pb-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:px-6">
+    <div class="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+        <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Payment</h2>
+        <div class="grid gap-3 md:grid-cols-4">
+            <div class="rounded-md bg-slate-50 p-3"><div class="text-xs text-slate-500">Subtotal</div><div class="font-mono text-xl font-bold text-slate-950">{{ number_format($this->invoiceTotal, 2) }}</div></div>
+            <div class="rounded-md bg-slate-50 p-3"><div class="text-xs text-slate-500">Total quantity</div><div class="font-mono text-xl font-bold text-slate-950">{{ number_format(collect($rows)->sum(fn($r) => (float) ($r['qty'] ?? 0)), 2) }}</div></div>
+            <label><span class="mb-1 block text-xs font-semibold text-slate-500">Payment Method</span><select wire:model.blur="payment_method" class="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200"><option value="">Select method</option>@foreach ($this->paymentMethods as $method)<option value="{{ $method->id }}">{{ $method->payment_method_name }}</option>@endforeach</select></label>
+            <label><span class="mb-1 block text-xs font-semibold text-slate-500">Paid Amount</span><input type="number" wire:model.blur="paid_amount" min="0" step="0.01" class="h-10 w-full rounded-md border border-slate-300 bg-white px-3 text-right text-sm font-semibold focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">@error('paid_amount') <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror</label>
         </div>
     </div>
 
-    {{-- Payment Panel --}}
-    <div class="pi-card pi-payment-card">
-        <div class="pi-sec-mini-title">
-            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-                <rect x="1" y="4" width="22" height="16" rx="2" />
-                <path d="M1 10h22" />
-            </svg>
-            بيانات الدفع
-        </div>
-
-        <div class="pi-field" style="margin-bottom:10px">
-            <label class="pi-label">إجمالي الفاتورة</label>
-            <div class="pi-readonly-field">{{ number_format($this->invoiceTotal, 2) }} ج.م</div>
-        </div>
-
-        <div class="pi-field" style="margin-bottom:10px">
-
-            <label class="pi-label">
-                طريقة الدفع
-                <span class="pi-req">*</span>
-            </label>
-
-            <select wire:model.live="payment_method" class="pi-input pi-select">
-
-                <option value="">اختر طريقة الدفع</option>
-
-                @foreach ($this->paymentMethods as $method)
-                    <option value="{{ $method->id }}">
-                        {{ $method->payment_method_name }}
-                    </option>
-                @endforeach
-
-            </select>
-
-        </div>
-
-        <div class="pi-field" style="margin-bottom:10px">
-            <label class="pi-label">المبلغ المدفوع <span class="pi-req">*</span></label>
-            <div style="position:relative">
-                <input type="number" wire:model.live="paid_amount"
-                    class="pi-input @error('paid_amount') pi-input-err @enderror" min="0" step="0.01"
-                    placeholder="0.00" style="padding-left:42px" dir="ltr">
-                <span
-                    style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:12px;font-weight:700;color:var(--tx3);pointer-events:none">ج.م</span>
+    <aside class="space-y-4 lg:row-start-1 lg:col-start-2">
+        <section class="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Invoice Summary</h2>
+            <div class="space-y-3">
+                <div class="flex justify-between text-sm"><span class="text-slate-500">Subtotal</span><span class="font-mono font-bold">{{ number_format($this->invoiceTotal, 2) }}</span></div>
+                <div class="flex justify-between text-sm"><span class="text-slate-500">Paid</span><span class="font-mono font-bold text-emerald-700">{{ number_format($paid_amount, 2) }}</span></div>
+                <div class="rounded-md bg-slate-950 p-3 text-white"><div class="text-xs uppercase tracking-wide text-slate-300">Remaining</div><div class="mt-1 font-mono text-2xl font-bold">{{ number_format($this->remainingAmount, 2) }}</div></div>
             </div>
-            @error('paid_amount')
-                <span class="pi-err-msg">⚠ {{ $message }}</span>
-            @enderror
-        </div>
-
-        <div class="pi-field">
-            <label class="pi-label">المتبقي</label>
-            <div class="pi-remaining-field {{ $this->remainingAmount > 0 ? 'pi-rem-yel' : 'pi-rem-grn' }}">
-                {{ number_format($this->remainingAmount, 2) }} ج.م
+        </section>
+        <section class="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Supplier Summary</h2>
+            @php($selectedSupplier = $this->suppliers->firstWhere('id', $supplier_id))
+            <div class="rounded-md bg-slate-50 p-3 text-sm"><div class="font-semibold text-slate-950">{{ $selectedSupplier?->supplier_name ?? 'No supplier selected' }}</div><div class="mt-1 text-xs text-slate-500">Warehouse: {{ $this->branches->firstWhere('id', $branch_id)?->branch_name ?? 'not selected' }}</div></div>
+        </section>
+        <section class="rounded-md border border-slate-200 bg-white p-4 shadow-sm">
+            <h2 class="mb-3 text-sm font-bold uppercase tracking-wide text-slate-500">Invoice Image</h2>
+            <div x-data="{ dragging: false }" @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="dragging = false; $event.dataTransfer.files.length && $wire.upload('invoice_image', $event.dataTransfer.files[0])" class="rounded-md border-2 border-dashed border-slate-300 bg-slate-50 p-4 text-center" :class="dragging ? 'border-slate-900 bg-white' : ''">
+                @if (!$imagePreview)
+                    <input id="invoice-image-input" type="file" wire:model.live="invoice_image" accept="image/*" class="hidden">
+                    <button type="button" onclick="document.getElementById('invoice-image-input').click()" class="mx-auto h-10 rounded-md border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50">Upload image</button>
+                    <div class="mt-2 text-xs text-slate-500">Drop receipt image or click to upload. PNG or JPG up to 5MB.</div>
+                @else
+                    <div class="relative overflow-hidden rounded-md border border-slate-200 bg-white"><img src="{{ $imagePreview }}" alt="Invoice preview" class="max-h-56 w-full object-contain"><button type="button" wire:click="removeImage" class="absolute right-2 top-2 rounded-md bg-slate-950/80 px-2 py-1 text-xs font-semibold text-white">Remove</button></div>
+                @endif
             </div>
-        </div>
-    </div>
-
-</div>{{-- /bottom-grid --}}
-
-{{-- ══════════════════════════════════════════════════════════
-     ACTION FOOTER
-══════════════════════════════════════════════════════════ --}}
-<div class="pi-card pi-footer-card">
-    <div class="pi-footer-inner">
-        <div class="pi-footer-meta">
-            <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
-                viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4l3 3" />
-            </svg>
-            آخر تحديث: الآن
-        </div>
-        <div class="pi-footer-btns">
-            <a href="{{ route('purchaseInvoices') }}" wire:navigate class="pi-btn-sec">
-                <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"
-                    viewBox="0 0 24 24">
-                    <path d="M18 6L6 18M6 6l12 12" />
-                </svg>
-                إلغاء
-            </a>
-            <button type="button" wire:click="saveInvoice" wire:loading.attr="disabled" class="pi-btn-pri">
-                <span wire:loading.remove wire:target="saveInvoice">
-                    <svg width="14" height="14" fill="none" stroke="white" stroke-width="2.5"
-                        viewBox="0 0 24 24">
-                        <polyline points="20 6 9 17 4 12" />
-                    </svg>
-                    حفظ الفاتورة
-                </span>
-                <span wire:loading wire:target="saveInvoice">
-                    <span class="pi-spinner"></span>
-                    جاري الحفظ...
-                </span>
-            </button>
-        </div>
-    </div>
-</div>
+            @error('invoice_image') <span class="mt-1 block text-xs text-red-600">{{ $message }}</span> @enderror
+        </section>
+    </aside>
+</section>

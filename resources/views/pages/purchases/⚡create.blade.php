@@ -32,6 +32,9 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
     #[Validate('required|exists:suppliers,id')]
     public ?int $supplier_id = null;
 
+    #[Validate('required|exists:branches,id')]
+    public ?int $branch_id = null;
+
     #[Validate('nullable|image|max:5120')]
     public $invoice_image = null;
 
@@ -96,6 +99,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
     {
         $this->purchase_invoice_date = now()->format('Y-m-d');
         $this->invoice_number = $this->generateInvoiceNumber();
+        $this->branch_id = auth()->user()?->branch_id ?? Branches::query()->orderBy('id')->value('id');
         $this->addRow();
     }
 
@@ -184,10 +188,32 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
             'cost' => 0,
             'sell' => null,
             'total' => 0,
-            'branch_id' => null,
+            'branch_id' => $this->branch_id,
+            'color_name' => '',
+            'color_hex' => '',
+            'size_name' => '',
+            'sku' => '',
+            'stock' => 0,
+            'image_url' => null,
         ];
         $idx = (int) array_key_last($this->rows);
         $this->searchQueries[$idx] = '';
+        $this->searchResults[$idx] = [];
+        $this->openDropdowns[$idx] = false;
+    }
+
+    public function duplicateRow(int $index): void
+    {
+        if (!isset($this->rows[$index])) {
+            return;
+        }
+
+        $row = $this->rows[$index];
+        $row['id'] = uniqid('row_', true);
+        $this->rows[] = $row;
+
+        $idx = (int) array_key_last($this->rows);
+        $this->searchQueries[$idx] = $this->searchQueries[$index] ?? ($row['sku'] ?: $row['product_name']);
         $this->searchResults[$idx] = [];
         $this->openDropdowns[$idx] = false;
     }
@@ -227,14 +253,81 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
         $this->rows[$index]['branch_id'] = $value ? (int) $value : null;
     }
 
+    public function updatedBranchId(mixed $value): void
+    {
+        $branchId = $value ? (int) $value : null;
+
+        foreach ($this->rows as $index => $row) {
+            $this->rows[$index]['branch_id'] = $branchId;
+        }
+    }
+
     public function updatedSearchQueries(mixed $value, string $key): void
     {
         $index = (int) $key;
         $query = is_string($value) ? trim($value) : '';
+        $variantFirstSearch = true;
 
         if (strlen($query) < 1) {
             $this->searchResults[$index] = [];
             $this->openDropdowns[$index] = false;
+            return;
+        }
+
+        if ($variantFirstSearch) {
+            $terms = preg_split('/\s+/', $query, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+            $branchId = $this->rows[$index]['branch_id'] ?? $this->branch_id;
+
+            $this->searchResults[$index] = ProductVariant::query()
+                ->with([
+                    'product:id,product_name,product_code,product_cost,product_price',
+                    'product.primaryImage',
+                    'color:id,color_name,color_hex_code',
+                    'size:id,size_name',
+                    'inventories' => fn ($q) => $branchId ? $q->where('branch_id', $branchId) : $q,
+                ])
+                ->where('is_active', true)
+                ->where(function ($q) use ($terms, $query) {
+                    foreach ($terms as $term) {
+                        $q->where(function ($sq) use ($term) {
+                            $sq->where('sku', 'like', '%' . $term . '%')
+                                ->orWhereHas('product', function ($pq) use ($term) {
+                                    $pq->where('product_name', 'like', '%' . $term . '%')
+                                        ->orWhere('product_code', 'like', '%' . $term . '%');
+                                })
+                                ->orWhereHas('color', fn ($cq) => $cq->where('color_name', 'like', '%' . $term . '%'))
+                                ->orWhereHas('size', fn ($sizeQuery) => $sizeQuery->where('size_name', 'like', '%' . $term . '%'));
+                        });
+                    }
+
+                    $q->orWhere('sku', $query);
+                })
+                ->select('id', 'product_id', 'color_id', 'size_id', 'sku', 'variant_cost', 'variant_price')
+                ->limit(12)
+                ->get()
+                ->map(function (ProductVariant $variant) {
+                    $image = $variant->product?->primaryImage?->image_path
+                        ?? $variant->product?->primaryImage?->image
+                        ?? null;
+
+                    return [
+                        'id' => $variant->id,
+                        'product_id' => $variant->product_id,
+                        'product_name' => $variant->product?->product_name,
+                        'product_code' => $variant->product?->product_code,
+                        'sku' => $variant->sku,
+                        'color_name' => $variant->color?->color_name,
+                        'color_hex' => $variant->color?->color_hex_code,
+                        'size_name' => $variant->size?->size_name,
+                        'cost' => (float) $variant->variant_cost,
+                        'sell' => (float) $variant->variant_price,
+                        'stock' => (float) $variant->inventories->sum('quantity'),
+                        'image_url' => $image ? asset('storage/' . $image) : null,
+                    ];
+                })
+                ->toArray();
+
+            $this->openDropdowns[$index] = true;
             return;
         }
 
@@ -301,15 +394,59 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
         $this->openDropdowns[$rowIndex] = false;
     }
 
+    public function selectVariantForRow(int $rowIndex, int $variantId): void
+    {
+        $variant = ProductVariant::with(['product.primaryImage', 'color', 'size', 'inventories'])->find($variantId);
+        if (!$variant || !isset($this->rows[$rowIndex])) {
+            return;
+        }
+
+        $displayCode = $variant->sku ?: $variant->product->product_code . '-' . preg_replace('/\s+/', '-', trim($variant->size->size_name ?? '')) . '-' . ($variant->color->color_hex_code ?? '');
+        $branchId = $this->rows[$rowIndex]['branch_id'] ?? $this->branch_id;
+        $stock = $branchId
+            ? $variant->inventories->where('branch_id', $branchId)->sum('quantity')
+            : $variant->inventories->sum('quantity');
+        $image = $variant->product?->primaryImage?->image_path
+            ?? $variant->product?->primaryImage?->image
+            ?? null;
+
+        $this->rows[$rowIndex] = array_merge($this->rows[$rowIndex], [
+            'product_id' => $variant->product_id,
+            'variant_id' => $variant->id,
+            'product_name' => $variant->product->product_name,
+            'product_code' => $displayCode,
+            'sku' => $displayCode,
+            'color_name' => $variant->color->color_name ?? '',
+            'color_hex' => $variant->color->color_hex_code ?? '',
+            'size_name' => $variant->size->size_name ?? '',
+            'cost' => (float) $variant->variant_cost,
+            'sell' => (float) $variant->variant_price,
+            'stock' => (float) $stock,
+            'image_url' => $image ? asset('storage/' . $image) : null,
+            'branch_id' => $branchId,
+            'total' => $this->rows[$rowIndex]['qty'] * (float) $variant->variant_cost,
+        ]);
+
+        $this->searchQueries[$rowIndex] = $displayCode;
+        $this->searchResults[$rowIndex] = [];
+        $this->openDropdowns[$rowIndex] = false;
+        $this->showVariantModal = false;
+    }
+
     public function selectVariant(int $variantId): void
     {
+        if ($this->pendingRowIndexForVariant !== null) {
+            $this->selectVariantForRow($this->pendingRowIndexForVariant, $variantId);
+            return;
+        }
+
         $variant = ProductVariant::with(['product', 'color', 'size'])->find($variantId);
         if (!$variant) {
             return;
         }
 
         // إزالة فحص التكرار - الآن يسمح بتكرار نفس الـ variant في صفوف مختلفة
-        $displayCode = $variant->product->product_code . '-' . ($variant->size->size_code ?? $variant->size->size_name) . '-' . ($variant->color->color_hex_code ?? '');
+        $displayCode = $variant->product->product_code . '-' . preg_replace('/\s+/', '-', trim($variant->size->size_name ?? '')) . '-' . ($variant->color->color_hex_code ?? '');
 
         $this->rows[$this->pendingRowIndexForVariant] = array_merge($this->rows[$this->pendingRowIndexForVariant], [
             'product_id' => $variant->product_id,
@@ -444,8 +581,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
             // البحث عن أو إنشاء المقاس
             $size = Size::firstOrCreate(
-                ['size_name' => $this->newProductSize],
-                ['size_code' => strtoupper(substr($this->newProductSize, 0, 3))]
+                ['size_name' => $this->newProductSize]
             );
 
             // إنشاء المنتج
@@ -464,25 +600,31 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                 'product_id' => $product->id,
                 'color_id' => $color->id,
                 'size_id' => $size->id,
-                'sku' => $product->product_code . '-' . $size->size_code . '-' . $color->color_hex_code,
+                'sku' => $product->product_code . '-' . preg_replace('/\s+/', '-', strtoupper($size->size_name)) . '-' . $color->color_hex_code,
                 'variant_cost' => $this->newProductCost,
                 'variant_price' => $this->newProductSell,
                 'is_active' => true,
             ]);
 
-            $displayCode = $product->product_code . '-' . $size->size_code . '-' . $color->color_hex_code;
+            $displayCode = $product->product_code . '-' . preg_replace('/\s+/', '-', strtoupper($size->size_name)) . '-' . $color->color_hex_code;
 
             if ($this->pendingRowIndex !== null && isset($this->rows[$this->pendingRowIndex])) {
                 $this->rows[$this->pendingRowIndex] = array_merge($this->rows[$this->pendingRowIndex], [
                     'product_id' => $product->id,
                     'variant_id' => $variant->id,
-                    'product_name' => $product->product_name . ' - ' . $size->size_name . ' - ' . $color->color_name,
+                    'product_name' => $product->product_name,
                     'product_code' => $displayCode,
+                    'sku' => $displayCode,
+                    'color_name' => $color->color_name,
+                    'color_hex' => $color->color_hex_code,
+                    'size_name' => $size->size_name,
+                    'stock' => 0,
+                    'branch_id' => $this->rows[$this->pendingRowIndex]['branch_id'] ?? $this->branch_id,
                     'cost' => (float) $variant->variant_cost,
                     'sell' => (float) $variant->variant_price,
                     'total' => $this->rows[$this->pendingRowIndex]['qty'] * (float) $variant->variant_cost,
                 ]);
-                $this->searchQueries[$this->pendingRowIndex] = $product->product_name;
+                $this->searchQueries[$this->pendingRowIndex] = $displayCode;
             }
         });
 
@@ -499,6 +641,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                 'invoice_number' => ['required', 'string', 'max:100', Rule::unique('purchase_invoices', 'invoice_number')->whereNull('deleted_at')],
                 'purchase_invoice_date' => 'required|date',
                 'supplier_id' => 'required|exists:suppliers,id',
+                'branch_id' => 'required|exists:branches,id',
                 'invoice_image' => 'nullable|image|max:5120',
                 'paid_amount' => 'required|numeric|min:0',
             ],
@@ -520,7 +663,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
         }
 
         foreach ($this->rows as $i => $row) {
-            if (empty($row['product_id'])) {
+            if (empty($row['variant_id'])) {
                 $this->addError("rows.{$i}.product_id", 'يجب اختيار منتج للصف ' . ($i + 1));
                 $this->saving = false;
                 return;
@@ -561,7 +704,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                     'payment_method_id' => $this->payment_method,
                     'invoice_image' => $imagePath,
                     'supplier_id' => $this->supplier_id,
-                    'branch_id' => auth()->user()?->branch_id ?? 1,
+                    'branch_id' => $this->branch_id,
                     'user_id' => auth()->id(),
                 ]);
 
@@ -655,7 +798,7 @@ TOAST NOTIFICATION
 
     @include('livewire.purchase-invoices.partials._header')
 
-    <div class="pi-body">
+    <div class="pi-body" style="max-width: none; max">
         @include('livewire.purchase-invoices.partials._basic-info')
         @include('livewire.purchase-invoices.partials._products-table')
         @include('livewire.purchase-invoices.partials._summary')
@@ -664,7 +807,7 @@ TOAST NOTIFICATION
     @include('livewire.purchase-invoices.partials._add-product-modal')
 
 {{-- Modal for Variant Selection --}}
-@if ($showVariantModal)
+@if (false && $showVariantModal)
 <div class="pi-modal-bg" wire:click.self="closeVariantModal" @keydown.escape.window="closeVariantModal">
     <div class="pi-modal" style="max-width: 550px; overflow: hidden;" wire:click.stop>
         <div class="pi-modal-hd" style="border-bottom: 1px solid var(--border);">

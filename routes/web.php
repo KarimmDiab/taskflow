@@ -50,6 +50,10 @@ Route::livewire('subCategories', 'pages::sub_categories.index')->middleware('aut
 Route::livewire('customers', 'pages::customers.index')->middleware('auth')->name('customers');
 Route::livewire('expenses_items', 'pages::expenses_item.index')->middleware('auth')->name('expenses_items');
 Route::livewire('products/create', 'product.create')->middleware('auth')->name('products.create');
+Route::livewire('colors', 'pages::colors.index')->middleware('auth')->name('colors');
+Route::livewire('sizes', 'pages::sizes.index')->middleware('auth')->name('sizes');
+
+
 
 Route::livewire('product/edit/{id}', 'product.edit')->middleware('auth')->name('products.edit');
 

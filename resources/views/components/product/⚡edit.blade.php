@@ -107,7 +107,7 @@ new class extends Component {
         $this->product_quantity = $product->product_quantity;
         $this->product_cost = $product->product_cost;
         $this->product_price = $product->product_price;
-        $this->product_desc = $product->product_desc;
+        $this->product_desc = $product->product_desc ?? "لا يوجد وصف لهذا المنتج";
         $this->is_active = $product->is_active;
 
         // existing images
