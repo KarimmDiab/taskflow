@@ -87,6 +87,12 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
     #[Validate('required|regex:/^#[a-fA-F0-9]{6}$/', as: 'اللون', onUpdate: false)]
     public string $newProductColor = '';
 
+    public ?int $newProductColorId = null;
+
+    public ?int $newProductSizeId = null;
+
+    public string $generatedSku = '';
+
     public bool $saving = false;
 
     // متغيرات لعرض متغيرات المنتج
@@ -279,24 +285,17 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
             $branchId = $this->rows[$index]['branch_id'] ?? $this->branch_id;
 
             $this->searchResults[$index] = ProductVariant::query()
-                ->with([
-                    'product:id,product_name,product_code,product_cost,product_price',
-                    'product.primaryImage',
-                    'color:id,color_name,color_hex_code',
-                    'size:id,size_name',
-                    'inventories' => fn ($q) => $branchId ? $q->where('branch_id', $branchId) : $q,
-                ])
+                ->with(['product:id,product_name,product_code,product_cost,product_price', 'product.primaryImage', 'color:id,color_name,color_hex_code', 'size:id,size_name', 'inventories' => fn($q) => $branchId ? $q->where('branch_id', $branchId) : $q])
                 ->where('is_active', true)
                 ->where(function ($q) use ($terms, $query) {
                     foreach ($terms as $term) {
                         $q->where(function ($sq) use ($term) {
                             $sq->where('sku', 'like', '%' . $term . '%')
                                 ->orWhereHas('product', function ($pq) use ($term) {
-                                    $pq->where('product_name', 'like', '%' . $term . '%')
-                                        ->orWhere('product_code', 'like', '%' . $term . '%');
+                                    $pq->where('product_name', 'like', '%' . $term . '%')->orWhere('product_code', 'like', '%' . $term . '%');
                                 })
-                                ->orWhereHas('color', fn ($cq) => $cq->where('color_name', 'like', '%' . $term . '%'))
-                                ->orWhereHas('size', fn ($sizeQuery) => $sizeQuery->where('size_name', 'like', '%' . $term . '%'));
+                                ->orWhereHas('color', fn($cq) => $cq->where('color_name', 'like', '%' . $term . '%'))
+                                ->orWhereHas('size', fn($sizeQuery) => $sizeQuery->where('size_name', 'like', '%' . $term . '%'));
                         });
                     }
 
@@ -306,9 +305,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                 ->limit(12)
                 ->get()
                 ->map(function (ProductVariant $variant) {
-                    $image = $variant->product?->primaryImage?->image_path
-                        ?? $variant->product?->primaryImage?->image
-                        ?? null;
+                    $image = $variant->product?->primaryImage?->image_path ?? ($variant->product?->primaryImage?->image ?? null);
 
                     return [
                         'id' => $variant->id,
@@ -334,17 +331,16 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
         // بحث في المنتجات مع الـ variants - نزيل فحص التكرار من البحث
         $this->searchResults[$index] = Product::query()
             ->where(function ($q) use ($query) {
-                $q->where('product_name', 'like', '%' . $query . '%')
-                  ->orWhere('product_code', 'like', '%' . $query . '%');
+                $q->where('product_name', 'like', '%' . $query . '%')->orWhere('product_code', 'like', '%' . $query . '%');
             })
             ->with(['category:id,category_name', 'productVariants.color', 'productVariants.size'])
             ->select('id', 'product_name', 'product_code', 'product_cost', 'product_price', 'category_id')
             ->limit(8)
             ->get()
-            ->map(function($product) {
+            ->map(function ($product) {
                 $variantsInfo = '';
                 if ($product->productVariants->isNotEmpty()) {
-                    $variantsInfo = ' (متوفر: ' . $product->productVariants->map(fn($v) => $v->size->size_name ?? '' . '/' . $v->color->color_name ?? '')->implode(', ') . ')';
+                    $variantsInfo = ' (متوفر: ' . $product->productVariants->map(fn($v) => $v->size->size_name ?? ('' . '/' . $v->color->color_name ?? ''))->implode(', ') . ')';
                 }
                 $product->display_name = $product->product_name . $variantsInfo;
                 return $product;
@@ -403,12 +399,8 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
         $displayCode = $variant->sku ?: $variant->product->product_code . '-' . preg_replace('/\s+/', '-', trim($variant->size->size_name ?? '')) . '-' . ($variant->color->color_hex_code ?? '');
         $branchId = $this->rows[$rowIndex]['branch_id'] ?? $this->branch_id;
-        $stock = $branchId
-            ? $variant->inventories->where('branch_id', $branchId)->sum('quantity')
-            : $variant->inventories->sum('quantity');
-        $image = $variant->product?->primaryImage?->image_path
-            ?? $variant->product?->primaryImage?->image
-            ?? null;
+        $stock = $branchId ? $variant->inventories->where('branch_id', $branchId)->sum('quantity') : $variant->inventories->sum('quantity');
+        $image = $variant->product?->primaryImage?->image_path ?? ($variant->product?->primaryImage?->image ?? null);
 
         $this->rows[$rowIndex] = array_merge($this->rows[$rowIndex], [
             'product_id' => $variant->product_id,
@@ -574,15 +566,10 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
         DB::transaction(function () {
             // البحث عن أو إنشاء اللون
-            $color = Color::firstOrCreate(
-                ['color_hex_code' => $this->newProductColor],
-                ['color_name' => $this->getColorNameFromHex($this->newProductColor)]
-            );
+            $color = Color::firstOrCreate(['color_hex_code' => $this->newProductColor], ['color_name' => $this->getColorNameFromHex($this->newProductColor)]);
 
             // البحث عن أو إنشاء المقاس
-            $size = Size::firstOrCreate(
-                ['size_name' => $this->newProductSize]
-            );
+            $size = Size::firstOrCreate(['size_name' => $this->newProductSize]);
 
             // إنشاء المنتج
             $product = Product::create([
@@ -726,7 +713,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                         ],
                         [
                             'quantity' => DB::raw('COALESCE(quantity, 0) + ' . $row['qty']),
-                        ]
+                        ],
                     );
 
                     // تحديث سعر التكلفة وسعر البيع في الـ variant
@@ -748,10 +735,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
                 foreach ($productIds as $productId) {
                     // حساب الكمية الإجمالية للمنتج من جميع الفروع والمتغيرات
-                    $totalQuantity = DB::table('inventories')
-                        ->join('product_variants', 'inventories.product_variant_id', '=', 'product_variants.id')
-                        ->where('product_variants.product_id', $productId)
-                        ->sum('inventories.quantity');
+                    $totalQuantity = DB::table('inventories')->join('product_variants', 'inventories.product_variant_id', '=', 'product_variants.id')->where('product_variants.product_id', $productId)->sum('inventories.quantity');
 
                     // تحديث الكمية في جدول المنتجات
                     Product::where('id', $productId)->update(['product_quantity' => $totalQuantity]);
@@ -806,39 +790,40 @@ TOAST NOTIFICATION
 
     @include('livewire.purchase-invoices.partials._add-product-modal')
 
-{{-- Modal for Variant Selection --}}
-@if (false && $showVariantModal)
-<div class="pi-modal-bg" wire:click.self="closeVariantModal" @keydown.escape.window="closeVariantModal">
-    <div class="pi-modal" style="max-width: 550px; overflow: hidden;" wire:click.stop>
-        <div class="pi-modal-hd" style="border-bottom: 1px solid var(--border);">
-            <div style="display:flex;align-items:center;gap:12px">
-                <div class="pi-modal-icon" style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);">
-                    <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24">
-                        <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-                        <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-                    </svg>
-                </div>
-                <div>
-                    <div style="font-size:16px;font-weight:700;color:var(--tx)">اختر المقاس واللون</div>
-                    <div style="font-size:12px;color:var(--tx3);margin-top:2px">
-                        {{ $selectedProductForVariant?->product_name }}
+    {{-- Modal for Variant Selection --}}
+    @if (false && $showVariantModal)
+        <div class="pi-modal-bg" wire:click.self="closeVariantModal" @keydown.escape.window="closeVariantModal">
+            <div class="pi-modal" style="max-width: 550px; overflow: hidden;" wire:click.stop>
+                <div class="pi-modal-hd" style="border-bottom: 1px solid var(--border);">
+                    <div style="display:flex;align-items:center;gap:12px">
+                        <div class="pi-modal-icon"
+                            style="background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);">
+                            <svg width="18" height="18" fill="none" stroke="white" stroke-width="2.5"
+                                viewBox="0 0 24 24">
+                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
+                            </svg>
+                        </div>
+                        <div>
+                            <div style="font-size:16px;font-weight:700;color:var(--tx)">اختر المقاس واللون</div>
+                            <div style="font-size:12px;color:var(--tx3);margin-top:2px">
+                                {{ $selectedProductForVariant?->product_name }}
+                            </div>
+                        </div>
                     </div>
+                    <button type="button" wire:click="closeVariantModal" class="pi-modal-close">
+                        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5"
+                            viewBox="0 0 24 24">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-            </div>
-            <button type="button" wire:click="closeVariantModal" class="pi-modal-close">
-                <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-            </button>
-        </div>
 
-        <div class="pi-modal-body" style="padding: 20px; max-height: 450px; overflow-y: auto;">
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                @foreach($availableVariants as $variant)
-                <button type="button"
-                    wire:click="selectVariant({{ $variant['id'] }})"
-                    class="variant-card"
-                    style="
+                <div class="pi-modal-body" style="padding: 20px; max-height: 450px; overflow-y: auto;">
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        @foreach ($availableVariants as $variant)
+                            <button type="button" wire:click="selectVariant({{ $variant['id'] }})" class="variant-card"
+                                style="
                         width: 100%;
                         background: var(--bg2);
                         border: 1.5px solid var(--border);
@@ -852,14 +837,15 @@ TOAST NOTIFICATION
                         justify-content: space-between;
                         gap: 12px;
                     "
-                    onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateX(-4px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
-                    onmouseout="this.style.borderColor='var(--border)'; this.style.transform='translateX(0)'; this.style.boxShadow='none'">
+                                onmouseover="this.style.borderColor='var(--primary)'; this.style.transform='translateX(-4px)'; this.style.boxShadow='0 4px 12px rgba(0,0,0,0.1)'"
+                                onmouseout="this.style.borderColor='var(--border)'; this.style.transform='translateX(0)'; this.style.boxShadow='none'">
 
-                    {{-- Right side: Color and Size info --}}
-                    <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
-                        {{-- Color preview circle --}}
-                        <div style="position: relative;">
-                            <div style="
+                                {{-- Right side: Color and Size info --}}
+                                <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
+                                    {{-- Color preview circle --}}
+                                    <div style="position: relative;">
+                                        <div
+                                            style="
                                 width: 48px;
                                 height: 48px;
                                 border-radius: 12px;
@@ -867,9 +853,11 @@ TOAST NOTIFICATION
                                 border: 2px solid var(--border);
                                 box-shadow: 0 2px 8px rgba(0,0,0,0.1);
                                 transition: transform 0.2s ease;
-                            "></div>
-                            @if(isset($variant['color']['color_hex_code']))
-                            <div style="
+                            ">
+                                        </div>
+                                        @if (isset($variant['color']['color_hex_code']))
+                                            <div
+                                                style="
                                 position: absolute;
                                 bottom: -4px;
                                 right: -4px;
@@ -882,24 +870,27 @@ TOAST NOTIFICATION
                                 align-items: center;
                                 justify-content: center;
                             ">
-                                <svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10"/>
-                                </svg>
-                            </div>
-                            @endif
-                        </div>
+                                                <svg width="10" height="10" fill="none" stroke="currentColor"
+                                                    stroke-width="2" viewBox="0 0 24 24">
+                                                    <circle cx="12" cy="12" r="10" />
+                                                </svg>
+                                            </div>
+                                        @endif
+                                    </div>
 
-                        {{-- Size and Color names --}}
-                        <div style="flex: 1;">
-                            <div style="
+                                    {{-- Size and Color names --}}
+                                    <div style="flex: 1;">
+                                        <div
+                                            style="
                                 font-size: 16px;
                                 font-weight: 700;
                                 color: var(--tx);
                                 margin-bottom: 4px;
                             ">
-                                {{ $variant['size']['size_name'] ?? 'بدون مقاس' }}
-                            </div>
-                            <div style="
+                                            {{ $variant['size']['size_name'] ?? 'بدون مقاس' }}
+                                        </div>
+                                        <div
+                                            style="
                                 display: inline-block;
                                 background: var(--bg3);
                                 padding: 4px 10px;
@@ -907,22 +898,25 @@ TOAST NOTIFICATION
                                 font-size: 12px;
                                 color: var(--tx2);
                             ">
-                                🎨 {{ $variant['color']['color_name'] ?? 'لون مخصص' }}
-                            </div>
-                        </div>
-                    </div>
+                                            🎨 {{ $variant['color']['color_name'] ?? 'لون مخصص' }}
+                                        </div>
+                                    </div>
+                                </div>
 
-                    {{-- Left side: Price information --}}
-                    <div style="text-align: left; direction: ltr;">
-                        <div style="
+                                {{-- Left side: Price information --}}
+                                <div style="text-align: left; direction: ltr;">
+                                    <div
+                                        style="
                             font-size: 18px;
                             font-weight: 800;
                             color: var(--primary);
                             margin-bottom: 4px;
                         ">
-                            {{ number_format($variant['variant_cost'], 2) }} <span style="font-size: 12px;">ج.م</span>
-                        </div>
-                        <div style="
+                                        {{ number_format($variant['variant_cost'], 2) }} <span
+                                            style="font-size: 12px;">ج.م</span>
+                                    </div>
+                                    <div
+                                        style="
                             font-size: 11px;
                             color: var(--tx3);
                             display: flex;
@@ -930,59 +924,63 @@ TOAST NOTIFICATION
                             gap: 4px;
                             justify-content: flex-end;
                         ">
-                            <span>سعر البيع:</span>
-                            <span style="color: var(--success); font-weight: 600;">{{ number_format($variant['variant_price'], 2) }} ج.م</span>
-                        </div>
+                                        <span>سعر البيع:</span>
+                                        <span
+                                            style="color: var(--success); font-weight: 600;">{{ number_format($variant['variant_price'], 2) }}
+                                            ج.م</span>
+                                    </div>
+                                </div>
+
+                                {{-- Arrow icon --}}
+                                <div style="color: var(--tx3); transition: transform 0.2s ease;">
+                                    <svg width="20" height="20" fill="none" stroke="currentColor"
+                                        stroke-width="2" viewBox="0 0 24 24">
+                                        <path d="M5 12h14M12 5l7 7-7 7" />
+                                    </svg>
+                                </div>
+                            </button>
+                        @endforeach
                     </div>
 
-                    {{-- Arrow icon --}}
-                    <div style="color: var(--tx3); transition: transform 0.2s ease;">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                            <path d="M5 12h14M12 5l7 7-7 7"/>
-                        </svg>
-                    </div>
-                </button>
-                @endforeach
-            </div>
-
-            @if(empty($availableVariants))
-            <div style="
+                    @if (empty($availableVariants))
+                        <div
+                            style="
                 text-align: center;
                 padding: 40px 20px;
                 background: var(--bg2);
                 border-radius: 12px;
             ">
-                <svg width="48" height="48" fill="none" stroke="var(--tx3)" stroke-width="1.5" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 8v4M12 16h.01"/>
-                </svg>
-                <div style="margin-top: 12px; color: var(--tx3);">
-                    لا توجد متغيرات متاحة لهذا المنتج
+                            <svg width="48" height="48" fill="none" stroke="var(--tx3)" stroke-width="1.5"
+                                viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" />
+                                <path d="M12 8v4M12 16h.01" />
+                            </svg>
+                            <div style="margin-top: 12px; color: var(--tx3);">
+                                لا توجد متغيرات متاحة لهذا المنتج
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <div class="pi-modal-ft" style="border-top: 1px solid var(--border); background: var(--bg);">
+                    <button type="button" wire:click="closeVariantModal" class="pi-btn-sec"
+                        style="padding: 8px 20px; font-size: 13px; font-weight: 500;">
+                        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"
+                            viewBox="0 0 24 24" style="margin-left: 6px;">
+                            <path d="M18 6L6 18M6 6l12 12" />
+                        </svg>
+                        إلغاء
+                    </button>
                 </div>
             </div>
-            @endif
         </div>
 
-        <div class="pi-modal-ft" style="border-top: 1px solid var(--border); background: var(--bg);">
-            <button type="button"
-                wire:click="closeVariantModal"
-                class="pi-btn-sec"
-                style="padding: 8px 20px; font-size: 13px; font-weight: 500;">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" style="margin-left: 6px;">
-                    <path d="M18 6L6 18M6 6l12 12"/>
-                </svg>
-                إلغاء
-            </button>
-        </div>
-    </div>
-</div>
-
-<style>
-    .variant-card:hover svg:last-child {
-        transform: translateX(4px);
-        color: var(--primary);
-    }
-</style>
-@endif
+        <style>
+            .variant-card:hover svg:last-child {
+                transform: translateX(4px);
+                color: var(--primary);
+            }
+        </style>
+    @endif
 
 </div>

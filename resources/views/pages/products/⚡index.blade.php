@@ -83,8 +83,8 @@ new #[Title('إدارة المنتجات')] class extends Component {
     public function getInventoryValueProperty()
     {
         return Product::all()->sum(function ($product) {
-            $avgPrice = ($product->product_cost + $product->product_price) / 2;
-            return $avgPrice * $product->product_quantity;
+            //$avgPrice = ($product->product_cost + $product->product_price) / 2;
+            return $product->product_cost * $product->product_quantity;
         });
     }
 
@@ -671,5 +671,5 @@ new #[Title('إدارة المنتجات')] class extends Component {
         </div>
     </div>
 
-  
+
 </div>

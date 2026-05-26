@@ -38,7 +38,7 @@
                         @error('newProductSize')
                             <span class="text-xs text-red-600">{{ $message }}</span>
                         @enderror
-                    </label>
+                    </label>    
                     <label><span class="mb-1 block text-xs font-semibold text-slate-500">Category</span><select
                             wire:model.live="newProductCategoryId"
                             class="h-10 w-full rounded-md border border-slate-300 px-3 text-sm focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-200">
