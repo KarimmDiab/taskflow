@@ -35,6 +35,8 @@ new class extends Component {
     public array $color_media = [];
     public array $existing_images = [];
     public ?string $primary_upload = null;
+    public $size_chart_image = null;
+    public $existing_size_chart = null;
     public ProductForm $form;
 
     public function getCategoriesProperty()
@@ -44,10 +46,7 @@ new class extends Component {
 
     public function getSubCategoriesProperty()
     {
-        return SubCategory::select('id', 'sub_category_name', 'category_id')
-            ->when($this->category_id, fn ($query) => $query->where('category_id', $this->category_id))
-            ->orderBy('sub_category_name')
-            ->get();
+        return SubCategory::select('id', 'sub_category_name', 'category_id')->when($this->category_id, fn($query) => $query->where('category_id', $this->category_id))->orderBy('sub_category_name')->get();
     }
 
     public function getCollectionsProperty()
@@ -107,33 +106,41 @@ new class extends Component {
         $this->product_quantity = $product->product_quantity;
         $this->product_cost = $product->product_cost;
         $this->product_price = $product->product_price;
-        $this->product_desc = $product->product_desc ?? "لا يوجد وصف لهذا المنتج";
+        $this->product_desc = $product->product_desc ?? 'لا يوجد وصف لهذا المنتج';
         $this->is_active = $product->is_active;
 
         // existing images
-        $this->existing_images = $product->images->map(fn ($img) => [
-            'id' => $img->id,
-            'image_path' => $img->image_path,
-            'color_id' => $img->color_id,
-            'is_primary' => $img->is_primary,
-        ])->toArray();
+        $this->existing_images = $product->images
+            ->map(
+                fn($img) => [
+                    'id' => $img->id,
+                    'image_path' => $img->image_path,
+                    'color_id' => $img->color_id,
+                    'is_primary' => $img->is_primary,
+                ],
+            )
+            ->toArray();
 
         // variants and inventory
-        $this->variants = $product->productVariants->map(fn ($variant) => [
-            'id' => $variant->id,
-            'color_id' => $variant->color_id,
-            'size_id' => $variant->size_id,
-            'sku' => $variant->sku,
-            'variant_cost' => $variant->variant_cost,
-            'variant_price' => $variant->variant_price,
-            'quantity' => $variant->inventories->first()?->quantity ?? 0,
-            'branch_id' => $variant->inventories->first()?->branch_id ?? '',
-            'is_active' => $variant->is_active,
-            'label' => trim(
-                ($variant->color_id ? ($variant->color?->color_name ?? 'لون') : 'افتراضي') .
-                ($variant->size_id ? ' / ' . ($variant->size?->size_name ?? 'مقاس') : '')
-            ),
-        ])->toArray();
+        $this->variants = $product->productVariants
+            ->map(
+                fn($variant) => [
+                    'id' => $variant->id,
+                    'color_id' => $variant->color_id,
+                    'size_id' => $variant->size_id,
+                    'sku' => $variant->sku,
+                    'variant_cost' => $variant->variant_cost,
+                    'variant_price' => $variant->variant_price,
+                    'quantity' => $variant->inventories->first()?->quantity ?? 0,
+                    'branch_id' => $variant->inventories->first()?->branch_id ?? '',
+                    'is_active' => $variant->is_active,
+                    'label' => trim(($variant->color_id ? $variant->color?->color_name ?? 'لون' : 'افتراضي') . ($variant->size_id ? ' / ' . ($variant->size?->size_name ?? 'مقاس') : '')),
+                ],
+            )
+            ->toArray();
+
+        // load existing size chart
+        $this->existing_size_chart = $product->sizeChart;
     }
 
     public function updatedCategoryId(): void
@@ -185,7 +192,7 @@ new class extends Component {
 
     public function removeExistingImage(int $imageId): void
     {
-        $this->existing_images = array_filter($this->existing_images, fn ($img) => $img['id'] !== $imageId);
+        $this->existing_images = array_filter($this->existing_images, fn($img) => $img['id'] !== $imageId);
     }
 
     public function removeColorMedia(int $colorId, int $index): void
@@ -207,7 +214,7 @@ new class extends Component {
 
     private function normalizePrimaryUploadAfterRemoval(string $group, int $removedIndex, ?int $colorId = null): void
     {
-        if (! $this->primary_upload) {
+        if (!$this->primary_upload) {
             return;
         }
 
@@ -239,6 +246,21 @@ new class extends Component {
             if ($removedIndex < $selectedIndex) {
                 $this->primary_upload = "color_media:$colorId:" . ($selectedIndex - 1);
             }
+        }
+    }
+
+    public function deleteSizeChart()
+    {
+        // التأكد من وجود الصورة
+        if ($this->existing_size_chart) {
+            // حذف الملف من التخزين
+            \Storage::disk('public')->delete($this->existing_size_chart->image_path);
+            // حذف السجل من قاعدة البيانات
+            $this->existing_size_chart->delete();
+            // إعادة تعيين المتغير
+            $this->existing_size_chart = null;
+
+            session()->flash('success', 'تم حذف جدول المقاسات بنجاح.');
         }
     }
 
@@ -276,6 +298,7 @@ new class extends Component {
                 'color_media' => ['array'],
                 'color_media.*' => ['array'],
                 'color_media.*.*' => ['image', 'mimes:png,jpg,jpeg,webp,avif', 'max:4096'],
+                'size_chart_image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,avif', 'max:4096'],
             ],
             [
                 'media.*.image' => 'يجب أن تكون الصورة من نوع صورة صحيح.',
@@ -284,7 +307,10 @@ new class extends Component {
                 'color_media.*.*.image' => 'يجب أن تكون الصورة من نوع صورة صحيح.',
                 'color_media.*.*.mimes' => 'الصيغ المقبولة: PNG, JPG, JPEG, WEBP, AVIF فقط.',
                 'color_media.*.*.max' => 'حجم الملف يجب أن لا يتجاوز 4 ميجابايت.',
-            ]
+                'size_chart_image.image' => 'يجب أن تكون صورة حجم المقاس من نوع صورة صحيح.',
+                'size_chart_image.mimes' => 'الصيغ المقبولة لحجم المقاس: PNG, JPG, JPEG, WEBP, AVIF فقط.',
+                'size_chart_image.max' => 'حجم ملف صورة حجم المقاس يجب أن لا يتجاوز 4 ميجابايت.',
+            ],
         );
 
         // معالجة branch_id للخيارات
@@ -319,10 +345,7 @@ new class extends Component {
 
                         // تحديث المخزون
                         if (!empty($variant['branch_id'])) {
-                            $existingVariant->inventory()->updateOrCreate(
-                                ['branch_id' => $variant['branch_id']],
-                                ['quantity' => $variant['quantity']]
-                            );
+                            $existingVariant->inventory()->updateOrCreate(['branch_id' => $variant['branch_id']], ['quantity' => $variant['quantity']]);
                         }
                     }
                 }
@@ -370,30 +393,79 @@ new class extends Component {
             }
         }
 
+        // Handle size chart image
+        if ($this->size_chart_image) {
+            $original = $this->size_chart_image->getClientOriginalName();
+            $safeName = preg_replace('/[^A-Za-z0-9\-\_\.]/', '_', $original);
+            $filename = time() . '_' . uniqid() . '_' . $safeName;
+            // Handle size chart image
+            if ($this->size_chart_image) {
+                // 1. جلب أسماء التصنيف والتصنيف الفرعي والمنتج
+                $category = Category::find($product->category_id);
+                $subCategory = SubCategory::find($product->sub_category_id);
+
+                // 2. تحويل الأسماء إلى slugs صالحة للمجلدات
+                $categorySlug = $category ? Str::slug($category->category_name) : 'no-category';
+                $subCategorySlug = $subCategory ? Str::slug($subCategory->sub_category_name) : 'no-subcategory';
+                $productSlug = Str::slug($product->product_name);
+
+                // 3. بناء المسار: category/subcategory/product_name/
+                $relativePath = "size_charts/{$categorySlug}/{$subCategorySlug}/{$productSlug}";
+
+                // 4. إنشاء اسم ملف فريد وآمن
+                $original = $this->size_chart_image->getClientOriginalName();
+                $safeName = preg_replace('/[^A-Za-z0-9\-\_\.]/', '_', pathinfo($original, PATHINFO_FILENAME));
+                $extension = $this->size_chart_image->getClientOriginalExtension();
+                $filename = time() . '_' . uniqid() . '_' . $safeName . '.' . $extension;
+
+                // 5. تخزين الصورة في المسار الجديد
+                $path = $this->size_chart_image->storeAs($relativePath, $filename, 'public');
+
+                // Delete old size chart if exists
+                if ($product->sizeChart) {
+                    \Storage::disk('public')->delete($product->sizeChart->chart_image_path);
+                    $product->sizeChart->delete();
+                }
+
+                \App\Models\SizeChart::create([
+                    'product_id' => $product->id,
+                    'image_path' => $path,
+                ]);
+            }
+        }
+
         session()->flash('success', 'تم تحديث المنتج بنجاح.');
         return redirect()->route('products');
     }
 
     private function makeSku($colorId, $sizeId, int $counter): string
     {
-        $base = $this->product_code ?: str($this->product_name ?: 'PRODUCT')->slug('-')->upper()->limit(24, '');
-        $suffix = collect([$colorId ? 'C' . $colorId : null, $sizeId ? 'S' . $sizeId : null, $counter])->filter()->implode('-');
+        $base =
+            $this->product_code ?:
+            str($this->product_name ?: 'PRODUCT')
+                ->slug('-')
+                ->upper()
+                ->limit(24, '');
+        $suffix = collect([$colorId ? 'C' . $colorId : null, $sizeId ? 'S' . $sizeId : null, $counter])
+            ->filter()
+            ->implode('-');
 
         return trim($base . '-' . $suffix, '-');
     }
 };
 ?>
 
-<div
-    x-data="{ dropActive: false, sidebarOpen: true }"
-    class="min-h-screen bg-[#f6f6f3] text-slate-900"
->
+<div x-data="{ dropActive: false, sidebarOpen: true }" class="min-h-screen bg-[#f6f6f3] text-slate-900">
     <x-flash-message />
+    <script>
+        document.title = {!! json_encode($product_name ? $product_name . ' - تعديل ' : 'تعديل المنتج') !!};
+    </script>
 
     <div class="sticky top-0 z-30 border-b border-slate-200 bg-white/95 backdrop-blur" style="border-radius:10px; ">
         <div class="mx-auto flex items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
             <div class="flex min-w-0 items-center gap-3">
-                <a href="{{ route('products') }}" wire:navigate class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
+                <a href="{{ route('products') }}" wire:navigate
+                    class="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">
                     <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
                     </svg>
@@ -405,16 +477,13 @@ new class extends Component {
             </div>
 
             <div class="flex items-center gap-2">
-                <button type="button" class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50" @click="sidebarOpen = ! sidebarOpen">
+                <button type="button"
+                    class="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                    @click="sidebarOpen = ! sidebarOpen">
                     ملخص
                 </button>
-                <button
-                    type="submit"
-                    form="edit-product-form"
-                    wire:loading.attr="disabled"
-                    wire:target="update"
-                    class="rounded-lg bg-[#008060] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#006e52] disabled:cursor-not-allowed disabled:opacity-60"
-                >
+                <button type="submit" form="edit-product-form" wire:loading.attr="disabled" wire:target="update"
+                    class="rounded-lg bg-[#008060] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#006e52] disabled:cursor-not-allowed disabled:opacity-60">
                     <span wire:loading.remove wire:target="update">حفظ التعديلات</span>
                     <span wire:loading wire:target="update">جاري الحفظ...</span>
                 </button>
@@ -422,7 +491,8 @@ new class extends Component {
         </div>
     </div>
 
-    <form id="edit-product-form" wire:submit.prevent="update" class="mx-auto grid grid-cols-1 gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+    <form id="edit-product-form" wire:submit.prevent="update"
+        class="mx-auto grid grid-cols-1 gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
         <main class="space-y-5">
             <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-100 px-5 py-4">
@@ -433,24 +503,36 @@ new class extends Component {
                 <div class="grid gap-4 p-5">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700">اسم المنتج</label>
-                        <input type="text" wire:model.live="product_name" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15" placeholder="قميص أكسفورد كلاسيكي">
-                        @error('product_name') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        <input type="text" wire:model.live="product_name"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15"
+                            placeholder="قميص أكسفورد كلاسيكي">
+                        @error('product_name')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div class="grid gap-4 md:grid-cols-3">
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-slate-700">رمز المنتج</label>
-                            <input type="text" wire:model.live="product_code" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm uppercase outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15" placeholder="OXF-001">
-                            @error('product_code') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <input type="text" wire:model.live="product_code"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm uppercase outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15"
+                                placeholder="OXF-001">
+                            @error('product_code')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-slate-700">الكمية</label>
-                            <input type="number" min="0" wire:model.live="product_quantity" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
-                            @error('product_quantity') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <input type="number" min="0" wire:model.live="product_quantity"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                            @error('product_quantity')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-slate-700">الحالة</label>
-                            <select wire:model="is_active" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                            <select wire:model="is_active"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
                                 <option value="1">نشط</option>
                                 <option value="0">مسودة</option>
                             </select>
@@ -460,19 +542,27 @@ new class extends Component {
                     <div class="grid gap-4 md:grid-cols-2">
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-slate-700">التكلفة</label>
-                            <input type="number" min="0" step="0.01" wire:model.live="product_cost" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
-                            @error('product_cost') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <input type="number" min="0" step="0.01" wire:model.live="product_cost"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                            @error('product_cost')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                         <div>
                             <label class="mb-1.5 block text-sm font-medium text-slate-700">سعر البيع</label>
-                            <input type="number" min="0" step="0.01" wire:model.live="product_price" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
-                            @error('product_price') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                            <input type="number" min="0" step="0.01" wire:model.live="product_price"
+                                class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                            @error('product_price')
+                                <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                            @enderror
                         </div>
                     </div>
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700">الوصف</label>
-                        <textarea rows="4" wire:model="product_desc" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15" placeholder="الخامة، المقاس، تعليمات العناية، ملاحظات داخلية."></textarea>
+                        <textarea rows="4" wire:model="product_desc"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15"
+                            placeholder="الخامة، المقاس، تعليمات العناية، ملاحظات داخلية."></textarea>
                     </div>
                 </div>
             </section>
@@ -480,21 +570,27 @@ new class extends Component {
             <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-100 px-5 py-4">
                     <h2 class="text-sm font-semibold text-slate-950">الصور الموجودة</h2>
-                    <p class="mt-1 text-sm text-slate-500">الصور المرفوعة حالياً للمنتج. يمكنك حذفها أو إضافة صور جديدة.</p>
+                    <p class="mt-1 text-sm text-slate-500">الصور المرفوعة حالياً للمنتج. يمكنك حذفها أو إضافة صور جديدة.
+                    </p>
                 </div>
 
                 @if ($existing_images)
                     <div class="p-5">
                         <div class="grid grid-cols-2 gap-3 sm:grid-cols-4">
                             @foreach ($existing_images as $image)
-                                <div class="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-                                    <img src="{{ asset('storage/' . $image['image_path']) }}" class="h-full w-full object-cover" alt="صورة المنتج">
+                                <div
+                                    class="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                                    <img src="{{ asset('storage/' . $image['image_path']) }}"
+                                        class="h-full w-full object-cover" alt="صورة المنتج">
 
-                                    <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-black/40 px-2 py-2 text-xs text-white">
+                                    <div
+                                        class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-black/40 px-2 py-2 text-xs text-white">
                                         @if ($image['is_primary'])
-                                            <span class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-amber-300">أساسي</span>
+                                            <span
+                                                class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-amber-300">أساسي</span>
                                         @endif
-                                        <button type="button" wire:click="removeExistingImage({{ $image['id'] }})" class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-rose-100 hover:bg-white/20 ms-auto">
+                                        <button type="button" wire:click="removeExistingImage({{ $image['id'] }})"
+                                            class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-rose-100 hover:bg-white/20 ms-auto">
                                             حذف
                                         </button>
                                     </div>
@@ -519,19 +615,21 @@ new class extends Component {
 
                     <label
                         class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition"
-                        :class="dropActive ? 'border-[#008060] bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:bg-slate-100'"
-                        @dragover.prevent="dropActive = true"
-                        @dragleave.prevent="dropActive = false"
-                        @drop="dropActive = false"
-                    >
+                        :class="dropActive ? 'border-[#008060] bg-emerald-50' :
+                            'border-slate-300 bg-slate-50 hover:bg-slate-100'"
+                        @dragover.prevent="dropActive = true" @dragleave.prevent="dropActive = false"
+                        @drop="dropActive = false">
                         <input type="file" multiple accept="image/*" wire:model="media" class="hidden">
-                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm">
+                        <span
+                            class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm">
                             <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
                             </svg>
                         </span>
                         <span class="mt-3 text-sm font-medium text-slate-800">اسحب الصور هنا أو انقر للرفع</span>
-                        <span class="mt-1 text-xs text-slate-500">PNG, JPG, WEBP, أو AVIF بحد أقصى 4 ميجابايت لكل ملف</span>
+                        <span class="mt-1 text-xs text-slate-500">PNG, JPG, WEBP, أو AVIF بحد أقصى 4 ميجابايت لكل
+                            ملف</span>
                     </label>
                     @if ($errors->has('media.*') || $errors->has('media'))
                         <div class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
@@ -555,19 +653,93 @@ new class extends Component {
                     @if ($media)
                         <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
                             @foreach ($media as $index => $image)
-                                <div class="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-                                    <img src="{{ $image->temporaryUrl() }}" class="h-full w-full object-cover" alt="معاينة رفع المنتج">
+                                <div
+                                    class="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                                    <img src="{{ $image->temporaryUrl() }}" class="h-full w-full object-cover"
+                                        alt="معاينة رفع المنتج">
 
-                                    <div class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-black/40 px-2 py-2 text-xs text-white">
-                                        <button type="button" wire:click="setPrimaryUpload('media:{{ $index }}')" class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold hover:bg-white/20 {{ $primary_upload === 'media:' . $index ? 'text-amber-300' : '' }}">
+                                    <div
+                                        class="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-black/40 px-2 py-2 text-xs text-white">
+                                        <button type="button"
+                                            wire:click="setPrimaryUpload('media:{{ $index }}')"
+                                            class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold hover:bg-white/20 {{ $primary_upload === 'media:' . $index ? 'text-amber-300' : '' }}">
                                             {{ $primary_upload === 'media:' . $index ? 'أساسي' : 'تعيين كأساسي' }}
                                         </button>
-                                        <button type="button" wire:click="removeMedia({{ $index }})" class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-rose-100 hover:bg-white/20">
+                                        <button type="button" wire:click="removeMedia({{ $index }})"
+                                            class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-rose-100 hover:bg-white/20">
                                             حذف
                                         </button>
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+                    @endif
+                </div>
+            </section>
+
+            <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-5 py-4">
+                    <h2 class="text-sm font-semibold text-slate-950">جدول المقاسات</h2>
+                    <p class="mt-1 text-sm text-slate-500">رفع أو تحديث صورة جدول المقاسات.</p>
+                </div>
+
+                <div class="p-5">
+                    @if ($existing_size_chart)
+                        <div class="mb-4">
+                            <h3 class="mb-3 text-sm font-medium text-slate-800">الصورة الحالية</h3>
+                            <div class="relative inline-block w-48">
+                                <img src="{{ asset('storage/' . $existing_size_chart->image_path) }}"
+                                    class="h-auto w-full rounded-lg border border-slate-200" alt="جدول المقاسات">
+                                <button type="button" wire:click="deleteSizeChart"
+                                    class="absolute right-2 top-2 rounded-lg bg-red-500 px-2 py-1 text-xs font-semibold text-white hover:bg-red-600">
+                                    حذف
+                                </button>
+                            </div>
+                        </div>
+                    @endif
+
+                    <label
+                        class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition"
+                        :class="dropActive ? 'border-[#008060] bg-emerald-50' :
+                            'border-slate-300 bg-slate-50 hover:bg-slate-100'"
+                        @dragover.prevent="dropActive = true" @dragleave.prevent="dropActive = false"
+                        @drop="dropActive = false">
+                        <input type="file" accept="image/*" wire:model="size_chart_image" class="hidden">
+                        <span
+                            class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                            </svg>
+                        </span>
+                        <span class="mt-3 text-sm font-medium text-slate-800">اسحب الصورة هنا أو انقر للرفع</span>
+                        <span class="mt-1 text-xs text-slate-500">PNG, JPG, WEBP، أو AVIF بحد أقصى 4 ميجابايت</span>
+                    </label>
+                    @if ($errors->has('size_chart_image'))
+                        <div class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+                            @foreach ($errors->get('size_chart_image') as $message)
+                                <p class="text-xs text-red-700 flex items-start gap-2">
+                                    <span class="text-red-500 mt-0.5">⚠</span>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if ($size_chart_image)
+                        <div class="mt-4 flex justify-center">
+                            <div
+                                class="relative aspect-square w-48 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                                <img src="{{ $size_chart_image->temporaryUrl() }}" class="h-full w-full object-cover"
+                                    alt="معاينة جدول المقاسات">
+                                <div
+                                    class="absolute inset-x-0 bottom-0 flex items-center justify-end gap-2 bg-black/40 px-2 py-2 text-xs text-white">
+                                    <button type="button" wire:click="$set('size_chart_image', null)"
+                                        class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-rose-100 hover:bg-white/20">
+                                        حذف
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -598,35 +770,47 @@ new class extends Component {
                                 <tr>
                                     <td class="px-4 py-3 font-medium text-slate-800">{{ $variant['label'] }}</td>
                                     <td class="px-4 py-3">
-                                        <input type="text" wire:model="variants.{{ $index }}.sku" class="w-40 rounded-md border border-slate-300 px-2 py-1.5 text-xs font-mono outline-none focus:border-[#008060]">
+                                        <input type="text" wire:model="variants.{{ $index }}.sku"
+                                            class="w-40 rounded-md border border-slate-300 px-2 py-1.5 text-xs font-mono outline-none focus:border-[#008060]">
                                     </td>
                                     <td class="px-4 py-3">
-                                        <input type="number" min="0" step="0.01" wire:model="variants.{{ $index }}.variant_cost" class="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
+                                        <input type="number" min="0" step="0.01"
+                                            wire:model="variants.{{ $index }}.variant_cost"
+                                            class="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
                                     </td>
                                     <td class="px-4 py-3">
-                                        <input type="number" min="0" step="0.01" wire:model="variants.{{ $index }}.variant_price" class="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
+                                        <input type="number" min="0" step="0.01"
+                                            wire:model="variants.{{ $index }}.variant_price"
+                                            class="w-24 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
                                     </td>
                                     <td class="px-4 py-3">
-                                        <input type="number" min="0" wire:model="variants.{{ $index }}.quantity" class="w-20 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
+                                        <input type="number" min="0"
+                                            wire:model="variants.{{ $index }}.quantity"
+                                            class="w-20 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
                                     </td>
                                     <td class="px-4 py-3">
-                                        <select wire:model="variants.{{ $index }}.branch_id" class="w-36 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
+                                        <select wire:model="variants.{{ $index }}.branch_id"
+                                            class="w-36 rounded-md border border-slate-300 px-2 py-1.5 text-xs outline-none focus:border-[#008060]">
                                             <option value="">الفرع الافتراضي</option>
                                             @foreach ($this->branches as $branch)
-                                                <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
+                                                <option value="{{ $branch->id }}">{{ $branch->branch_name }}
+                                                </option>
                                             @endforeach
                                         </select>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <input type="checkbox" wire:model="variants.{{ $index }}.is_active" class="rounded border-slate-300 text-[#008060] focus:ring-[#008060]">
+                                        <input type="checkbox" wire:model="variants.{{ $index }}.is_active"
+                                            class="rounded border-slate-300 text-[#008060] focus:ring-[#008060]">
                                     </td>
                                     <td class="px-4 py-3 text-right">
-                                        <button type="button" wire:click="removeVariant({{ $index }})" class="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">إزالة</button>
+                                        <button type="button" wire:click="removeVariant({{ $index }})"
+                                            class="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50">إزالة</button>
                                     </td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">لا توجد خيارات محفوظة حالياً.</td>
+                                    <td colspan="8" class="px-4 py-10 text-center text-sm text-slate-500">لا توجد
+                                        خيارات محفوظة حالياً.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -643,7 +827,8 @@ new class extends Component {
                 <div class="grid gap-4 p-5 md:grid-cols-2">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700">الفرع الافتراضي</label>
-                        <select wire:model="branch_id" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                        <select wire:model="branch_id"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
                             <option value="">لا تقم بإنشاء مخزون الآن</option>
                             @foreach ($this->branches as $branch)
                                 <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
@@ -653,16 +838,14 @@ new class extends Component {
                 </div>
             </section>
 
-            <div class="flex items-center justify-end gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
-                <a href="{{ route('products') }}" wire:navigate class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
+            <div
+                class="flex items-center justify-end gap-3 rounded-xl border border-slate-200 bg-white px-5 py-4 shadow-sm">
+                <a href="{{ route('products') }}" wire:navigate
+                    class="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50">
                     إلغاء
                 </a>
-                <button
-                    type="submit"
-                    wire:loading.attr="disabled"
-                    wire:target="update"
-                    class="rounded-lg bg-[#008060] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#006e52] disabled:cursor-not-allowed disabled:opacity-60"
-                >
+                <button type="submit" wire:loading.attr="disabled" wire:target="update"
+                    class="rounded-lg bg-[#008060] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[#006e52] disabled:cursor-not-allowed disabled:opacity-60">
                     <span wire:loading.remove wire:target="update">حفظ التعديلات</span>
                     <span wire:loading wire:target="update">جاري الحفظ...</span>
                 </button>
@@ -677,11 +860,13 @@ new class extends Component {
                 <div class="space-y-3 p-5 text-sm">
                     <div class="flex justify-between gap-3">
                         <span class="text-slate-500">المنتج</span>
-                        <span class="max-w-40 truncate font-medium text-slate-900">{{ $product_name ?: 'بدون عنوان' }}</span>
+                        <span
+                            class="max-w-40 truncate font-medium text-slate-900">{{ $product_name ?: 'بدون عنوان' }}</span>
                     </div>
                     <div class="flex justify-between gap-3">
                         <span class="text-slate-500">الحالة</span>
-                        <span class="font-medium {{ $is_active ? 'text-[#008060]' : 'text-amber-700' }}">{{ $is_active ? 'نشط' : 'مسودة' }}</span>
+                        <span
+                            class="font-medium {{ $is_active ? 'text-[#008060]' : 'text-amber-700' }}">{{ $is_active ? 'نشط' : 'مسودة' }}</span>
                     </div>
                     <div class="flex justify-between gap-3">
                         <span class="text-slate-500">الخيارات</span>
@@ -705,18 +890,22 @@ new class extends Component {
                 <div class="space-y-4 p-5">
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700">التصنيف</label>
-                        <select wire:model.live="category_id" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                        <select wire:model.live="category_id"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
                             <option value="">اختر التصنيف</option>
                             @foreach ($this->categories as $category)
                                 <option value="{{ $category->id }}">{{ $category->category_name }}</option>
                             @endforeach
                         </select>
-                        @error('category_id') <p class="mt-1 text-xs text-red-600">{{ $message }}</p> @enderror
+                        @error('category_id')
+                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                        @enderror
                     </div>
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700">التصنيف الفرعي</label>
-                        <select wire:model="sub_category_id" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                        <select wire:model="sub_category_id"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
                             <option value="">بدون تصنيف فرعي</option>
                             @foreach ($this->subCategories as $subCategory)
                                 <option value="{{ $subCategory->id }}">{{ $subCategory->sub_category_name }}</option>
@@ -726,7 +915,8 @@ new class extends Component {
 
                     <div>
                         <label class="mb-1.5 block text-sm font-medium text-slate-700">المجموعة</label>
-                        <select wire:model="collection_id" class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
+                        <select wire:model="collection_id"
+                            class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-[#008060] focus:ring-2 focus:ring-[#008060]/15">
                             <option value="">بدون مجموعة</option>
                             @foreach ($this->collections as $collection)
                                 <option value="{{ $collection->id }}">{{ $collection->collection_name }}</option>

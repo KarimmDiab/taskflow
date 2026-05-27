@@ -112,6 +112,11 @@
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('اضافة مقاس') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="building-storefront" :href="route('payment_methods')"
+                    :current="request()->routeIs('payment_methods')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('طرق الدفع') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 

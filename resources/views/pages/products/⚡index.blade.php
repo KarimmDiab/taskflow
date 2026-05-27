@@ -526,7 +526,8 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                 </td>
                                 <td class="px-4 py-3">
                                     @php
-                                        $qty = $product->product_quantity;
+                                        // Sum quantities across all inventories for all variants of this product
+                                        $qty = $product->productVariants->flatMap(fn($v) => $v->inventories)->sum('quantity');
                                         $statusLabel = $qty == 0 ? 'نفد' : ($qty < 10 ? 'منخفض' : 'متوفر');
                                         $statusClass =
                                             $qty == 0
@@ -535,10 +536,8 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                                     ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
                                                     : 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400');
                                     @endphp
-                                    <div class="font-semibold text-gray-900 dark:text-white">{{ number_format($qty) }}
-                                        قطعة</div>
-                                    <span
-                                        class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium {{ $statusClass }} mt-1">
+                                    <div class="font-semibold text-gray-900 dark:text-white">{{ number_format($qty) }} قطعة</div>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium {{ $statusClass }} mt-1">
                                         {{ $statusLabel }}
                                     </span>
                                 </td>

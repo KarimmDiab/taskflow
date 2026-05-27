@@ -32,6 +32,7 @@ new #[Title('إنشاء منتج')] class extends Component {
     public array $media = [];
     public array $color_media = [];
     public ?string $primary_upload = null;
+    public $size_chart_image = null;
     public ProductForm $form;
 
     public function getCategoriesProperty()
@@ -202,6 +203,7 @@ new #[Title('إنشاء منتج')] class extends Component {
                 'color_media' => ['array'],
                 'color_media.*' => ['array'],
                 'color_media.*.*' => ['image', 'mimes:png,jpg,jpeg,webp,avif', 'max:4096'],
+                'size_chart_image' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp,avif', 'max:4096'],
             ],
             [
                 'media.*.image' => 'يجب أن تكون الصورة من نوع صورة صحيح.',
@@ -210,6 +212,9 @@ new #[Title('إنشاء منتج')] class extends Component {
                 'color_media.*.*.image' => 'يجب أن تكون الصورة من نوع صورة صحيح.',
                 'color_media.*.*.mimes' => 'الصيغ المقبولة: PNG, JPG, JPEG, WEBP, AVIF فقط.',
                 'color_media.*.*.max' => 'حجم الملف يجب أن لا يتجاوز 4 ميجابايت.',
+                'size_chart_image.image' => 'يجب أن تكون صورة حجم المقاس من نوع صورة صحيح.',
+                'size_chart_image.mimes' => 'الصيغ المقبولة لحجم المقاس: PNG, JPG, JPEG, WEBP, AVIF فقط.',
+                'size_chart_image.max' => 'حجم ملف صورة حجم المقاس يجب أن لا يتجاوز 4 ميجابايت.',
             ]
         );
 
@@ -227,13 +232,30 @@ new #[Title('إنشاء منتج')] class extends Component {
             $validated['variants'] = $this->variants;
         }
 
-        $this->form->storeWithRelations(
+        $product = $this->form->storeWithRelations(
             productData: $validated,
             variants: $validated['variants'],
             media: $this->media,
             colorMedia: $this->color_media,
             primaryUpload: $this->primary_upload,
         );
+
+        // Save size chart image if provided
+        if ($this->size_chart_image && $product) {
+            $original = $this->size_chart_image->getClientOriginalName();
+            $safeName = preg_replace('/[^A-Za-z0-9\-\_\.]/', '_', $original);
+            $filename = time() . '_' . uniqid() . '_' . $safeName;
+            $path = $this->size_chart_image->storeAs(
+                'size_charts/' . $product->id,
+                $filename,
+                'public'
+            );
+
+            \App\Models\SizeChart::create([
+                'product_id' => $product->id,
+                'image_path' => $path,
+            ]);
+        }
 
         session()->flash('success', 'تم إنشاء المنتج بنجاح.');
 
@@ -477,6 +499,55 @@ new #[Title('إنشاء منتج')] class extends Component {
                             </div>
                         @endif
                     </div>
+                </div>
+            </section>
+
+            <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
+                <div class="border-b border-slate-100 px-5 py-4">
+                    <h2 class="text-sm font-semibold text-slate-950">جدول المقاسات</h2>
+                    <p class="mt-1 text-sm text-slate-500">رفع صورة جدول المقاسات التي سيتم حفظها في جدول size_charts.</p>
+                </div>
+
+                <div class="p-5">
+                    <label
+                        class="flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed px-6 py-10 text-center transition"
+                        :class="dropActive ? 'border-[#008060] bg-emerald-50' : 'border-slate-300 bg-slate-50 hover:bg-slate-100'"
+                        @dragover.prevent="dropActive = true"
+                        @dragleave.prevent="dropActive = false"
+                        @drop="dropActive = false"
+                    >
+                        <input type="file" accept="image/*" wire:model="size_chart_image" class="hidden">
+                        <span class="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white text-slate-600 shadow-sm">
+                            <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 16V4m0 0L8 8m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
+                            </svg>
+                        </span>
+                        <span class="mt-3 text-sm font-medium text-slate-800">اسحب الصورة هنا أو انقر للرفع</span>
+                        <span class="mt-1 text-xs text-slate-500">PNG, JPG, WEBP, أو AVIF بحد أقصى 4 ميجابايت</span>
+                    </label>
+                    @if ($errors->has('size_chart_image'))
+                        <div class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
+                            @foreach ($errors->get('size_chart_image') as $message)
+                                <p class="text-xs text-red-700 flex items-start gap-2">
+                                    <span class="text-red-500 mt-0.5">⚠</span>
+                                    <span>{{ $message }}</span>
+                                </p>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    @if ($size_chart_image)
+                        <div class="mt-4 flex justify-center">
+                            <div class="relative aspect-square w-48 overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
+                                <img src="{{ $size_chart_image->temporaryUrl() }}" class="h-full w-full object-cover" alt="معاينة جدول المقاسات">
+                                <div class="absolute inset-x-0 bottom-0 flex items-center justify-end gap-2 bg-black/40 px-2 py-2 text-xs text-white">
+                                    <button type="button" wire:click="$set('size_chart_image', null)" class="rounded border border-white/20 bg-white/10 px-2 py-1 text-[10px] font-semibold text-rose-100 hover:bg-white/20">
+                                        حذف
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
                 </div>
             </section>
 

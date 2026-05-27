@@ -98,4 +98,9 @@ class Product extends Model
     {
         return $this->belongsTo(Collection::class);
     }
+
+    public function sizeChart()
+    {
+        return $this->hasOne(SizeChart::class);
+    }
 }

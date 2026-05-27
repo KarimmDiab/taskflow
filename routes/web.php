@@ -52,6 +52,8 @@ Route::livewire('expenses_items', 'pages::expenses_item.index')->middleware('aut
 Route::livewire('products/create', 'product.create')->middleware('auth')->name('products.create');
 Route::livewire('colors', 'pages::colors.index')->middleware('auth')->name('colors');
 Route::livewire('sizes', 'pages::sizes.index')->middleware('auth')->name('sizes');
+Route::livewire('payment_methods', 'pages::payment_method.index')->middleware('auth')->name('payment_methods');
+
 
 
 
