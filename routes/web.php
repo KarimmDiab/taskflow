@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
 use App\Models\Product;
 use App\Http\Controllers\CollectionController;
@@ -23,7 +24,10 @@ Route::view('/privacy-policy', 'ryo-privacy-policy')->name('privacy-policy');
 Route::view('/all_products', 'ryo-shop')->name('all-products');
 Route::get('/ryo-product/{product}', [ProductController::class, 'show'])
     ->name('product');
-Route::view('/ryo-checkout', 'ryo-checkout')->name('checkout');
+//Route::view('/ryo-checkout', 'ryo-checkout')->name('checkout');
+
+Route::get('/ryo-checkout', [CheckoutController::class, 'index'])->name('checkout');
+
 Route::get('/ryo-collections', [ProductController::class, 'showAllCollection'])->name('collections');
 //Route::view('/ryo-cart', 'ryo-cart')->name('cart');
 
@@ -53,6 +57,8 @@ Route::livewire('products/create', 'product.create')->middleware('auth')->name('
 Route::livewire('colors', 'pages::colors.index')->middleware('auth')->name('colors');
 Route::livewire('sizes', 'pages::sizes.index')->middleware('auth')->name('sizes');
 Route::livewire('payment_methods', 'pages::payment_method.index')->middleware('auth')->name('payment_methods');
+Route::livewire('shipping', 'pages::shipping.index')->middleware('auth')->name('shipping');
+
 
 
 
