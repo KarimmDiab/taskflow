@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\Color;
 use App\Models\Product;
 use App\Models\ProductImage;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,7 +28,7 @@ class ProductImageFactory extends Factory
             'is_primary' => false,
 
             'sort_order' => fake()->numberBetween(0, 5),
-
+            'color_id' => Color::inRandomOrder()->first()?->id,
         ];
     }
 }

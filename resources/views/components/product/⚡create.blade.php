@@ -240,23 +240,41 @@ new #[Title('إنشاء منتج')] class extends Component {
             primaryUpload: $this->primary_upload,
         );
 
-        // Save size chart image if provided
-        if ($this->size_chart_image && $product) {
-            $original = $this->size_chart_image->getClientOriginalName();
-            $safeName = preg_replace('/[^A-Za-z0-9\-\_\.]/', '_', $original);
-            $filename = time() . '_' . uniqid() . '_' . $safeName;
-            $path = $this->size_chart_image->storeAs(
-                'size_charts/' . $product->id,
-                $filename,
-                'public'
-            );
+// Save size chart image if provided
+if ($this->size_chart_image && $product) {
+    // جلب slugs التصنيف والتصنيف الفرعي واسم المنتج
+    $categorySlug = optional($product->category)->category_name
+        ? Str::slug($product->category->category_name)
+        : 'no-category';
+    $subCategorySlug = optional($product->subCategory)->sub_category_name
+        ? Str::slug($product->subCategory->sub_category_name)
+        : 'no-subcategory';
+    $productSlug = $product->product_name ? Str::slug($product->product_name) : (string) $product->id;
 
-            \App\Models\SizeChart::create([
-                'product_id' => $product->id,
-                'image_path' => $path,
-            ]);
-        }
+    // بناء المسار الكامل للمجلد
+    $directory = "size_charts/{$categorySlug}/{$subCategorySlug}/{$productSlug}";
 
+    // إنشاء اسم ملف فريد وآمن
+    $original = $this->size_chart_image->getClientOriginalName();
+    $safeName = preg_replace('/[^A-Za-z0-9\-_\.]/', '_', pathinfo($original, PATHINFO_FILENAME));
+    $extension = $this->size_chart_image->getClientOriginalExtension();
+    $filename = time() . '_' . uniqid() . '_' . $safeName . '.' . $extension;
+
+    // تخزين الملف في المسار الجديد
+    $path = $this->size_chart_image->storeAs($directory, $filename, 'public');
+
+    // حذف الصورة القديمة إن وجدت
+    if ($product->sizeChart) {
+        \Storage::disk('public')->delete($product->sizeChart->image_path);
+        $product->sizeChart->delete();
+    }
+
+    // إنشاء سجل جديد
+    \App\Models\SizeChart::create([
+        'product_id' => $product->id,
+        'image_path' => $path,
+    ]);
+}
         session()->flash('success', 'تم إنشاء المنتج بنجاح.');
 
         return redirect()->route('products');

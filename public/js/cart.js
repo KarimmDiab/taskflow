@@ -508,7 +508,6 @@
     // ═══════════════════════════════════════════════════════════════
 
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM loaded - initializing cart page');
 
         renderCart();
         checkLayout();

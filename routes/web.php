@@ -3,12 +3,16 @@
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ProductController;
 use App\Models\Product;
+
 use App\Http\Controllers\CollectionController;
+use App\Http\Controllers\HomePageController;
+
 
 use Illuminate\Support\Facades\Route;
 
 
-Route::view('/', 'ryo-homepage')->name('home');
+Route::get('/', [HomePageController::class, 'index'])->name('home');
+
 Route::view('/shipping-policy', 'ryo-shipping-policy')->name('Shipping-Policy');
 Route::view('/contact-us', 'ryo-contact-us')->name('contact-us');
 Route::view('/about-us', 'ryo-about-us')->name('about-us');
@@ -24,12 +28,10 @@ Route::view('/privacy-policy', 'ryo-privacy-policy')->name('privacy-policy');
 Route::view('/all_products', 'ryo-shop')->name('all-products');
 Route::get('/ryo-product/{product}', [ProductController::class, 'show'])
     ->name('product');
-//Route::view('/ryo-checkout', 'ryo-checkout')->name('checkout');
 
 Route::get('/ryo-checkout', [CheckoutController::class, 'index'])->name('checkout');
 
 Route::get('/ryo-collections', [ProductController::class, 'showAllCollection'])->name('collections');
-//Route::view('/ryo-cart', 'ryo-cart')->name('cart');
 
 Route::get('/ryo-cart', [ProductController::class, 'index'])->name('cart');
 

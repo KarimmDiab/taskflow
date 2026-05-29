@@ -77,7 +77,7 @@
         <div style="display:flex;width:max-content;" class="marquee-track">
             <span
                 style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#9C9A96;white-space:nowrap;padding-right:60px;">Free
-                Shipping on Orders Over EGP 2,000</span>
+                Free Shipping on Orders Over EGP 1,500 EGP</span>
             <span
                 style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#3D3D3A;padding-right:60px;">✦</span>
             <span
@@ -93,7 +93,7 @@
             <!-- Duplicate for seamless loop -->
             <span
                 style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#9C9A96;white-space:nowrap;padding-right:60px;">Free
-                Shipping on Orders Over EGP 2,000</span>
+                Free Shipping on Orders Over EGP 1,500 EGP</span>
             <span
                 style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#3D3D3A;padding-right:60px;">✦</span>
             <span
@@ -258,7 +258,6 @@
     <section id="collections" style="padding:0 40px 120px;max-width:1440px;margin:0 auto;">
         <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:48px;" class="reveal">
             <div>
-                <p class="section-eyebrow">SS25 — Just Dropped</p>
                 <h2 class="section-title" style="font-size:clamp(32px,4vw,56px);">New Arrivals</h2>
             </div>
             <a href="shop.html" class="btn-outline-dark hidden md:inline-flex">View All</a>
@@ -267,94 +266,36 @@
         <!-- Product Grid -->
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:32px 24px;">
 
-            <!-- Product 1 -->
-            <div class="product-card reveal reveal-delay-1">
-                <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                    <img src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=600&q=80"
-                        alt="Oversized Tee">
-                    <img class="hover-img" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=600&q=80"
-                        alt="Oversized Tee alt">
-                    <span class="product-badge badge-new">New</span>
-                    <button class="wishlist-btn" aria-label="Wishlist">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A"
-                            stroke-width="1.5">
-                            <path
-                                d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                        </svg>
-                    </button>
-                    <button class="product-quick-add">Quick Add — S / M / L / XL</button>
-                </div>
-                <div class="product-meta">
-                    <p class="product-name">Oversized Essential Tee</p>
-                    <p class="product-price">EGP 2,200</p>
-                </div>
-            </div>
 
-            <!-- Product 2 -->
-            <div class="product-card reveal reveal-delay-2">
-                <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                    <img src="https://images.unsplash.com/photo-1556821840-3a63f15732ce?w=600&q=80" alt="Cargo Pants">
-                    <img class="hover-img"
-                        src="https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&q=80" alt="Cargo alt">
-                    <span class="product-badge badge-new">New</span>
-                    <button class="wishlist-btn" aria-label="Wishlist">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A"
-                            stroke-width="1.5">
-                            <path
-                                d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                        </svg>
-                    </button>
-                    <button class="product-quick-add">Quick Add — 30 / 32 / 34</button>
-                </div>
-                <div class="product-meta">
-                    <p class="product-name">Wide Leg Cargo Pant</p>
-                    <p class="product-price">EGP 3,800</p>
-                </div>
-            </div>
+            @foreach ($newArrivalProducts as $product)
+                @php
+                    // الصورة الأساسية
+                    $primaryImage = $product->primaryImage;
+                    $imageUrl = $primaryImage
+                        ? Storage::url($primaryImage->image_path)
+                        : asset('images/placeholder.jpg');
 
-            <!-- Product 3 -->
-            <div class="product-card reveal reveal-delay-3">
-                <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                    <img src="https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=600&q=80" alt="Jacket">
-                    <img class="hover-img" src="https://images.unsplash.com/photo-1544441893-675973e31985?w=600&q=80"
-                        alt="Jacket alt">
-                    <span class="product-badge badge-new">New</span>
-                    <button class="wishlist-btn" aria-label="Wishlist">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A"
-                            stroke-width="1.5">
-                            <path
-                                d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                        </svg>
-                    </button>
-                    <button class="product-quick-add">Quick Add — S / M / L</button>
-                </div>
-                <div class="product-meta">
-                    <p class="product-name">Utility Coach Jacket</p>
-                    <p class="product-price">EGP 5,500</p>
-                </div>
-            </div>
+                    // الصورة الثانية (أول صورة غير أساسية من علاقة images)
+                    $secondaryImage = $product->images->filter(fn($img) => !$img->is_primary)->first();
+                    $hoverImageUrl = $secondaryImage ? Storage::url($secondaryImage->image_path) : $imageUrl;
+                @endphp
 
-            <!-- Product 4 -->
-            <div class="product-card reveal reveal-delay-4">
-                <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                    <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=600&q=80" alt="Hoodie">
-                    <img class="hover-img"
-                        src="https://images.unsplash.com/photo-1578681994506-b8f463449011?w=600&q=80"
-                        alt="Hoodie alt">
-                    <button class="wishlist-btn" aria-label="Wishlist">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A"
-                            stroke-width="1.5">
-                            <path
-                                d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                        </svg>
-                    </button>
-                    <button class="product-quick-add">Quick Add — S / M / L / XL</button>
+                <div class="product-card reveal reveal-delay-1">
+                    <a href="{{ route('product', $product) }}" class="product-link">
+                        <div class="product-img-wrap" style="aspect-ratio:3/4;">
+                            <img src="{{ $imageUrl }}" alt="{{ $product->product_name }}">
+                            <img class="hover-img" src="{{ $hoverImageUrl }}" alt="{{ $product->product_name }} hover">
+                            <span class="product-badge badge-new">New</span>
+                        </div>
+                        <div class="product-meta">
+                            <p class="product-name">{{ $product->product_name }}</p>
+                            <p class="product-price">EGP {{ number_format($product->product_price, 0) }}</p>
+                        </div>
+                    </a>
                 </div>
-                <div class="product-meta">
-                    <p class="product-name">Relaxed Heavy Hoodie</p>
-                    <p class="product-price">EGP 4,200</p>
-                </div>
-            </div>
+            @endforeach
+
+
         </div>
 
         <div class="md:hidden" style="margin-top:32px;text-align:center;">

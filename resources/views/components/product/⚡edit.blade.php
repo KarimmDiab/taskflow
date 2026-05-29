@@ -139,6 +139,7 @@ new class extends Component {
             )
             ->toArray();
 
+        $this->selected_colors = $product->productVariants->pluck('color_id')->unique()->filter()->values()->toArray();
         // load existing size chart
         $this->existing_size_chart = $product->sizeChart;
     }
@@ -384,7 +385,8 @@ new class extends Component {
                     $filename = time() . '_' . uniqid() . '_' . $safeName;
                     $path = $image->storeAs($colorDir, $filename, 'public');
 
-                    $product->productImages()->create([
+                    // ✅ التصحيح: استخدام images() بدلاً من productImages()
+                    $product->images()->create([
                         'image_path' => $path,
                         'color_id' => $colorId,
                         'is_primary' => $this->primary_upload === "color_media:$colorId:$index",
@@ -676,6 +678,113 @@ new class extends Component {
                     @endif
                 </div>
             </section>
+
+            {{-- صور الألوان --}}
+            @if (!empty($selected_colors))
+                <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-100 px-5 py-4">
+                        <h2 class="text-sm font-semibold text-slate-950">صور الألوان</h2>
+                        <p class="mt-1 text-sm text-slate-500">أضف صوراً خاصة بكل لون (تظهر عندما يختار العميل اللون).
+                        </p>
+                    </div>
+
+                    <div class="p-5 space-y-6">
+                        @foreach ($selected_colors as $colorId)
+                            @php
+                                $color = $this->colors->firstWhere('id', $colorId);
+                                if (!$color) {
+                                    continue;
+                                }
+                            @endphp
+                            <div class="rounded-lg border border-slate-200 p-4">
+                                <div class="mb-3 flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <span class="h-4 w-4 rounded-full border border-slate-300"
+                                            style="background: {{ $color->color_hex_code ?: '#e2e8f0' }}"></span>
+                                        <span
+                                            class="text-sm font-semibold text-slate-800">{{ $color->color_name }}</span>
+                                    </div>
+                                    <span class="text-xs text-slate-500">معرف {{ $color->id }}</span>
+                                </div>
+
+                                {{-- عرض الصور الموجودة لهذا اللون --}}
+                                @php
+                                    $existingColorImages = array_filter(
+                                        $existing_images,
+                                        fn($img) => $img['color_id'] == $colorId,
+                                    );
+                                @endphp
+                                @if (!empty($existingColorImages))
+                                    <div class="mb-3">
+                                        <p class="text-xs font-medium text-slate-600 mb-2">الصور الحالية:</p>
+                                        <div class="grid grid-cols-3 gap-3">
+                                            @foreach ($existingColorImages as $img)
+                                                <div
+                                                    class="relative aspect-square rounded-md border border-slate-200 overflow-hidden">
+                                                    <img src="{{ asset('storage/' . $img['image_path']) }}"
+                                                        class="h-full w-full object-cover">
+                                                    <button type="button"
+                                                        wire:click="removeExistingImage({{ $img['id'] }})"
+                                                        class="absolute top-1 right-1 rounded-full bg-black/50 p-1 text-white text-xs hover:bg-red-600">
+                                                        <svg class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+                                                            stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- رفع صور جديدة لهذا اللون --}}
+                                <label
+                                    class="flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-slate-300 bg-slate-50 px-4 py-4 text-center hover:bg-slate-100 transition">
+                                    <input type="file" multiple accept="image/*"
+                                        wire:model="color_media.{{ $colorId }}" class="hidden">
+                                    <svg class="h-6 w-6 text-slate-500" fill="none" viewBox="0 0 24 24"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v16m8-8H4" />
+                                    </svg>
+                                    <span class="mt-1 text-xs text-slate-600">رفع صور للون
+                                        {{ $color->color_name }}</span>
+                                </label>
+                                @error('color_media.' . $colorId . '.*')
+                                    <div class="mt-2 text-xs text-red-600">
+                                        فشل رفع الصورة: {{ $message }}
+                                    </div>
+                                @enderror
+
+                                {{-- معاينة الصور المرفوعة حديثاً لهذا اللون --}}
+                                @if (!empty($color_media[$colorId]))
+                                    <div class="mt-3 grid grid-cols-3 gap-3">
+                                        @foreach ($color_media[$colorId] as $index => $img)
+                                            <div
+                                                class="relative aspect-square rounded-md border border-slate-200 overflow-hidden">
+                                                <img src="{{ $img->temporaryUrl() }}"
+                                                    class="h-full w-full object-cover">
+                                                <div
+                                                    class="absolute inset-x-0 bottom-0 flex justify-between gap-1 bg-black/50 p-1 text-[10px] text-white">
+                                                    <button type="button"
+                                                        wire:click="setPrimaryUpload('color_media:{{ $colorId }}:{{ $index }}')"
+                                                        class="rounded px-1 py-0.5 bg-white/20 hover:bg-white/40 {{ $primary_upload === "color_media:{$colorId}:{$index}" ? 'text-amber-300' : '' }}">
+                                                        {{ $primary_upload === "color_media:{$colorId}:{$index}" ? 'أساسي' : 'أساسي' }}
+                                                    </button>
+                                                    <button type="button"
+                                                        wire:click="removeColorMedia({{ $colorId }}, {{ $index }})"
+                                                        class="rounded px-1 py-0.5 bg-white/20 hover:bg-red-500">حذف</button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
 
             <section class="rounded-xl border border-slate-200 bg-white shadow-sm">
                 <div class="border-b border-slate-100 px-5 py-4">

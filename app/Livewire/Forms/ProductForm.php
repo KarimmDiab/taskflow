@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms;
 
+use App\Models\Color;
 use App\Models\Inventory;
 use App\Models\Product;
 use App\Models\ProductImage;
@@ -9,6 +10,7 @@ use App\Models\ProductVariant;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\Form;
 
@@ -218,22 +220,41 @@ class ProductForm extends Form
         int $sortOrder,
         bool $isPrimary,
         ?int $colorId = null,
-        ?string $sku = null,
+        ?string $slug = null,
     ): void {
-
+        // 1. الحصول على أسماء التصنيفات (مع قيمة افتراضية)
         $categoryName = optional($product->category)->category_name ?? 'uncategorized';
-
         $subCategoryName = optional($product->subCategory)->sub_category_name ?? 'general';
+        $productName = $product->product_name ?? 'general';  // ← التصحيح هنا
 
-        $categorySlug = str($categoryName)->slug();
-        $subCategorySlug = str($subCategoryName)->slug();
+        // 2. تحويل الأسماء إلى slugs صالحة للمجلدات
+        $categorySlug = Str::slug($categoryName);
+        $subCategorySlug = Str::slug($subCategoryName);
+        $productSlug = Str::slug($productName);
 
-        $skuFolder = str($sku ?? $product->id)->slug();
+        // 3. slug المنتج (إما المستلم أو id المنتج)
+        // $productSlug = $slug ? Str::slug($slug) : (string) $product->id;
 
-        $directory = "products/{$categorySlug}/{$subCategorySlug}/{$skuFolder}";
+        // 4. اسم مجلد اللون (إذا كان colorId موجوداً)
+        $colorSlug = 'general'; // default if no color
+        if ($colorId) {
+            $color = Color::find($colorId);
+            $colorSlug = $color ? Str::slug($color->color_name) : 'unknown-color';
+        }
 
-        $path = $file->store($directory, 'public');
+        // 5. بناء المسار الكامل (بدون اسم الملف)
+        $directory = "products/{$categorySlug}/{$subCategorySlug}/{$productSlug}/{$colorSlug}";
 
+        // 6. إنشاء اسم ملف فريد وآمن
+        $originalName = $file->getClientOriginalName();
+        $safeName = preg_replace('/[^A-Za-z0-9\-_]/', '_', pathinfo($originalName, PATHINFO_FILENAME));
+        $extension = $file->getClientOriginalExtension();
+        $filename = time().'_'.uniqid().'_'.$safeName.'.'.$extension;
+
+        // 7. حفظ الملف باستخدام storeAs (تحديد المسار الكامل)
+        $path = $file->storeAs($directory, $filename, 'public');
+
+        // 8. إنشاء السجل في قاعدة البيانات
         $imageData = [
             'product_id' => $product->id,
             'image_path' => $path,
@@ -241,6 +262,7 @@ class ProductForm extends Form
             'sort_order' => $sortOrder,
         ];
 
+        // إذا كان الجدول يحتوي على عمود color_id وكان هناك لون محدد
         if (Schema::hasColumn('product_images', 'color_id') && $colorId !== null) {
             $imageData['color_id'] = $colorId;
         }

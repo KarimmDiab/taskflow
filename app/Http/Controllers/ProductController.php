@@ -65,8 +65,9 @@ class ProductController extends Controller
         },
         ])->where('slug', $product->slug)
             ->firstOrFail();
+        $productImage= $product->load('images', 'productVariants.color', 'productVariants.size');
 
-        return view('ryo-product', compact('selectedProdcut'));
+        return view('ryo-product', compact('selectedProdcut', 'productImage'));
     }
 
     public function showAllCollection()
