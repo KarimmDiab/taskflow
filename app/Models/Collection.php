@@ -17,6 +17,7 @@ class Collection extends Model
         'slug',
         'collection_desc',
         'is_active',
+        'main_image'
     ];
 
     protected $casts = [

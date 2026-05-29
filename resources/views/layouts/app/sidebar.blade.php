@@ -122,6 +122,11 @@
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('محافظات الشحن') }}
                 </flux:sidebar.item>
+                <flux:sidebar.item icon="building-storefront" :href="route('all_collections')"
+                    :current="request()->routeIs('all_collections')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('كولكشن') }}
+                </flux:sidebar.item>
             </flux:sidebar.group>
         </flux:sidebar.nav>
 

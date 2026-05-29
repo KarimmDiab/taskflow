@@ -60,6 +60,8 @@ Route::livewire('colors', 'pages::colors.index')->middleware('auth')->name('colo
 Route::livewire('sizes', 'pages::sizes.index')->middleware('auth')->name('sizes');
 Route::livewire('payment_methods', 'pages::payment_method.index')->middleware('auth')->name('payment_methods');
 Route::livewire('shipping', 'pages::shipping.index')->middleware('auth')->name('shipping');
+Route::livewire('all_collections', 'pages::collection.index')->middleware('auth')->name('all_collections');
+
 
 
 
