@@ -15,6 +15,9 @@ class Category extends Model
     protected $fillable = [
         'category_name',
         'category_description',
+        'is_active',
+        'is_featured',
+        'image_path'
     ];
 
     protected $casts = [

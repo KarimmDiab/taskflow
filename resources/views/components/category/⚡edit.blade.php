@@ -1,12 +1,15 @@
 <?php
 
 use Livewire\Component;
+use Livewire\WithFileUploads;   // 🟢 ADD THIS
 use App\Livewire\Forms\CategoryForm;
 use Livewire\Attributes\On;
 use App\Models\Category;
 
 new class extends Component
 {
+    use WithFileUploads;   // 🟢 ADD THIS TRAIT
+
     public CategoryForm $form;
     public bool $isUpdating = false;
 
@@ -50,11 +53,14 @@ new class extends Component
 };
 ?>
 
+
+
+
 <div>
 
-<flux:modal name="edit-category" class="md:w-[580px] overflow-hidden rounded-2xl" style="padding: 0;">
+<flux:modal name="edit-category" class="md:w-[600px] overflow-hidden rounded-2xl" style="padding: 0;">
 
-    <form wire:submit.prevent="updateCategory" class="relative">
+    <form wire:submit.prevent="updateCategory" enctype="multipart/form-data" class="relative">
 
         {{-- Background overlay --}}
         <div class="absolute inset-0 bg-gradient-to-br from-amber-50/50 via-orange-50/30 to-yellow-50/50 dark:from-amber-950/10 dark:via-orange-950/5 dark:to-yellow-950/10 pointer-events-none"></div>
@@ -97,7 +103,7 @@ new class extends Component
 
             <!-- Category Name -->
             <div class="group">
-                <flux:label style="z-index: 1;" class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <flux:label class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <svg class="w-4 h-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
                     </svg>
@@ -127,6 +133,48 @@ new class extends Component
                 @enderror
             </div>
 
+            <!-- Image Upload -->
+            <div>
+                <flux:label class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    صورة التصنيف
+                    <span class="text-slate-400 text-xs font-normal">(اختياري)</span>
+                </flux:label>
+                <div class="flex items-center gap-4 flex-wrap">
+                    <label class="cursor-pointer">
+                        <input type="file" wire:model="form.image_path" accept="image/*" class="hidden" />
+                        <div class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            اختر صورة جديدة
+                        </div>
+                    </label>
+                    @if($form->image_path && !$form->existing_image)
+                        <span class="text-xs text-emerald-600 dark:text-emerald-400">✓ سيتم رفع الصورة الجديدة</span>
+                    @elseif($form->existing_image && !$form->image_path)
+                        <span class="text-xs text-slate-500 dark:text-slate-400">الصورة الحالية محفوظة</span>
+                    @elseif($form->image_path && $form->existing_image)
+                        <span class="text-xs text-amber-600 dark:text-amber-400">سيتم استبدال الصورة القديمة</span>
+                    @endif
+                </div>
+                @if($form->existing_image && !$form->image_path)
+                    <div class="mt-2">
+                        <img src="{{ Storage::url($form->existing_image) }}" class="w-20 h-20 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                    </div>
+                @endif
+                @if($form->image_path)
+                    <div class="mt-2">
+                        <img src="{{ $form->image_path->temporaryUrl() }}" class="w-20 h-20 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                    </div>
+                @endif
+                @error('form.image_path')
+                    <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Category Description -->
             <div class="group">
                 <flux:label class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
@@ -140,13 +188,60 @@ new class extends Component
                     placeholder="أدخل وصفاً موجزاً للتصنيف..."
                     wire:model="form.category_description"
                     wire:dirty.class="border-amber-400 ring-4 ring-amber-400/20"
-                    rows="4"
+                    rows="3"
                     class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-orange-400 focus:ring-4 focus:ring-orange-400/20 transition-all duration-200 resize-none"
                 />
                 @error('form.category_description')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
+
+            <!-- Active Status & Featured Toggle -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Active Toggle -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <flux:label class="font-semibold text-slate-700 dark:text-slate-300">
+                            حالة التصنيف
+                        </flux:label>
+                        <flux:text class="text-xs text-slate-500 dark:text-slate-400">
+                            نشط / غير نشط
+                        </flux:text>
+                    </div>
+                    <div class="relative">
+                        <input type="checkbox"
+                               wire:model="form.is_active"
+                               id="is_active_toggle_edit"
+                               class="sr-only peer">
+                        <label for="is_active_toggle_edit"
+                               class="block w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer-checked:bg-emerald-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:right-auto peer-checked:after:left-[2px] cursor-pointer">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Featured Toggle -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <flux:label class="font-semibold text-slate-700 dark:text-slate-300">
+                            تصنيف مميز
+                        </flux:label>
+                        <flux:text class="text-xs text-slate-500 dark:text-slate-400">
+                            عرض في الصفحة الرئيسية
+                        </flux:text>
+                    </div>
+                    <div class="relative">
+                        <input type="checkbox"
+                               wire:model="form.is_featured"
+                               id="is_featured_toggle_edit"
+                               class="sr-only peer">
+                        <label for="is_featured_toggle_edit"
+                               class="block w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer-checked:bg-amber-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:right-auto peer-checked:after:left-[2px] cursor-pointer">
+                        </label>
+                    </div>
+                </div>
+            </div>
+            @error('form.is_active') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            @error('form.is_featured') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
 
             <!-- Dirty Indicator & Character counter -->
             <div class="flex items-center justify-between">
@@ -159,7 +254,7 @@ new class extends Component
                     </div>
                 </div>
                 <div>
-                    <span class="text-xs text-slate-400" x-data="{ text: $wire.entangle('form.category_description') }" x-text="`${(text || '').length} / 200 حرف`"></span>
+                    <span class="text-xs text-slate-400" x-data="{ text: $wire.entangle('form.category_description') }" x-text="`${(text || '').length} / 500 حرف`"></span>
                 </div>
             </div>
 

@@ -1,9 +1,13 @@
 <?php
 
 use Livewire\Component;
+use Livewire\WithFileUploads;
 use App\Livewire\Forms\CategoryForm;
+use Flux\Flux;
 
 new class extends Component {
+    use WithFileUploads;
+
     public CategoryForm $form;
     public bool $isSaving = false;
 
@@ -24,11 +28,12 @@ new class extends Component {
 };
 ?>
 
+
 <div>
 
-<flux:modal name="add-category" class="md:w-[580px] overflow-hidden rounded-2xl" style="padding: 0;">
+<flux:modal name="add-category" class="md:w-[600px] overflow-hidden rounded-2xl" style="padding: 0;">
 
-    <form wire:submit.prevent="save" class="relative">
+    <form wire:submit.prevent="save" enctype="multipart/form-data" class="relative">
 
         {{-- Background overlay --}}
         <div class="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-indigo-50/30 to-slate-50/50 dark:from-blue-950/10 dark:via-indigo-950/5 dark:to-slate-950/10 pointer-events-none"></div>
@@ -70,7 +75,7 @@ new class extends Component {
         <div class="relative px-6 space-y-5" style="z-index: 1;">
 
             <!-- Category Name -->
-            <div class="group" >
+            <div class="group">
                 <flux:label class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                     <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
@@ -78,18 +83,11 @@ new class extends Component {
                     اسم التصنيف
                     <span class="text-red-500">*</span>
                 </flux:label>
-                <div class="relative">
-                    <flux:input
-                        placeholder="مثال: منتجات إلكترونية"
-                        wire:model="form.category_name"
-                        class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all duration-200"
-                    />
-                    <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                        <svg class="w-4 h-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                    </div>
-                </div>
+                <flux:input
+                    placeholder="مثال: منتجات إلكترونية"
+                    wire:model="form.category_name"
+                    class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-blue-400 focus:ring-4 focus:ring-blue-400/20 transition-all duration-200"
+                />
                 @error('form.category_name')
                     <p class="mt-1.5 text-sm text-red-600 dark:text-red-400 flex items-center gap-1">
                         <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -97,6 +95,39 @@ new class extends Component {
                         </svg>
                         {{ $message }}
                     </p>
+                @enderror
+            </div>
+
+            <!-- Image Upload -->
+            <div>
+                <flux:label class="mb-2 text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    صورة التصنيف
+                    <span class="text-slate-400 text-xs font-normal">(اختياري)</span>
+                </flux:label>
+                <div class="flex items-center gap-4 flex-wrap">
+                    <label class="cursor-pointer">
+                        <input type="file" wire:model="form.image_path" accept="image/*" class="hidden" />
+                        <div class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center gap-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            اختر صورة
+                        </div>
+                    </label>
+                    @if($form->image_path)
+                        <span class="text-xs text-emerald-600 dark:text-emerald-400">✓ سيتم رفع الصورة</span>
+                    @endif
+                </div>
+                @if($form->image_path)
+                    <div class="mt-2">
+                        <img src="{{ $form->image_path->temporaryUrl() }}" class="w-20 h-20 object-cover rounded-lg border border-slate-200 dark:border-slate-700">
+                    </div>
+                @endif
+                @error('form.image_path')
+                    <p class="mt-1.5 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                 @enderror
             </div>
 
@@ -112,7 +143,7 @@ new class extends Component {
                 <flux:textarea
                     placeholder="أدخل وصفاً موجزاً للتصنيف..."
                     wire:model="form.category_description"
-                    rows="4"
+                    rows="3"
                     class="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-400/20 transition-all duration-200 resize-none"
                 />
                 @error('form.category_description')
@@ -120,10 +151,52 @@ new class extends Component {
                 @enderror
             </div>
 
-            <!-- Character counter -->
-            <div class="flex justify-end">
-                <span class="text-xs text-slate-400" x-data="{ text: $wire.entangle('form.category_description') }" x-text="`${(text || '').length} / 200 حرف`"></span>
+            <!-- Active Status & Featured Toggle -->
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Active Toggle -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <flux:label class="font-semibold text-slate-700 dark:text-slate-300">
+                            حالة التصنيف
+                        </flux:label>
+                        <flux:text class="text-xs text-slate-500 dark:text-slate-400">
+                            نشط / غير نشط
+                        </flux:text>
+                    </div>
+                    <div class="relative">
+                        <input type="checkbox"
+                               wire:model="form.is_active"
+                               id="is_active_toggle"
+                               class="sr-only peer">
+                        <label for="is_active_toggle"
+                               class="block w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer-checked:bg-emerald-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:right-auto peer-checked:after:left-[2px] cursor-pointer">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Featured Toggle -->
+                <div class="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <flux:label class="font-semibold text-slate-700 dark:text-slate-300">
+                            تصنيف مميز
+                        </flux:label>
+                        <flux:text class="text-xs text-slate-500 dark:text-slate-400">
+                            عرض في الصفحة الرئيسية
+                        </flux:text>
+                    </div>
+                    <div class="relative">
+                        <input type="checkbox"
+                               wire:model="form.is_featured"
+                               id="is_featured_toggle"
+                               class="sr-only peer">
+                        <label for="is_featured_toggle"
+                               class="block w-11 h-6 bg-slate-300 dark:bg-slate-600 rounded-full peer-checked:bg-amber-500 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:right-auto peer-checked:after:left-[2px] cursor-pointer">
+                        </label>
+                    </div>
+                </div>
             </div>
+            @error('form.is_active') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+            @error('form.is_featured') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
 
         </div>
 
@@ -171,7 +244,7 @@ new class extends Component {
         </div>
 
         {{-- Decorative elements --}}
-    <div style="z-index: 0;" class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-100/40 to-indigo-100/40 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-tr-full pointer-events-none z-0"></div>
+        <div style="z-index: 0;" class="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-tr from-blue-100/40 to-indigo-100/40 dark:from-blue-900/10 dark:to-indigo-900/10 rounded-tr-full pointer-events-none z-0"></div>
         <div style="z-index: 0;" class="absolute top-20 right-0 w-20 h-20 bg-gradient-to-bl from-slate-100/40 to-blue-100/40 dark:from-slate-900/5 dark:to-blue-900/5 rounded-bl-full pointer-events-none"></div>
 
     </form>

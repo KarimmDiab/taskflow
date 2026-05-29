@@ -36,6 +36,16 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
         return Category::count();
     }
 
+    public function getActiveCategoriesCountProperty()
+    {
+        return Category::where('is_active', true)->count();
+    }
+
+    public function getFeaturedCategoriesCountProperty()
+    {
+        return Category::where('is_featured', true)->count();
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();
@@ -50,6 +60,20 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
             $this->sortDirection = 'asc';
         }
         $this->resetPage();
+    }
+
+    public function toggleActive($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->update(['is_active' => !$category->is_active]);
+        session()->flash('success', 'تم تحديث حالة التصنيف بنجاح');
+    }
+
+    public function toggleFeatured($id)
+    {
+        $category = Category::findOrFail($id);
+        $category->update(['is_featured' => !$category->is_featured]);
+        session()->flash('success', 'تم تحديث حالة المميز بنجاح');
     }
 
     public function edit($id)
@@ -244,21 +268,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                 <div class="flex items-center gap-1">
                                     #
                                     @if ($sortBy === 'id')
-                                        <svg class="w-3 h-3 transition-transform" fill="none"
-                                            stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}">
-                                            </path>
-                                        </svg>
-                                    @endif
-                                </div>
-                            </th>
-                            <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition group"
-                                wire:click="sortByColumn('category_name')">
-                                <div class="flex items-center gap-1">
-                                    اسم التصنيف
-                                    @if ($sortBy === 'category_name')
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                        <svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}">
@@ -269,7 +279,52 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                             </th>
                             <th
                                 class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                الصورة
+                            </th>
+                            <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition group"
+                                wire:click="sortByColumn('category_name')">
+                                <div class="flex items-center gap-1">
+                                    اسم التصنيف
+                                    @if ($sortBy === 'category_name')
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}">
+                                            </path>
+                                        </svg>
+                                    @endif
+                                </div>
+                            </th>
+                            <th
+                                class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 الوصف
+                            </th>
+                            <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition group"
+                                wire:click="sortByColumn('is_active')">
+                                <div class="flex items-center gap-1">
+                                    الحالة
+                                    @if ($sortBy === 'is_active')
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}">
+                                            </path>
+                                        </svg>
+                                    @endif
+                                </div>
+                            </th>
+                            <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition group"
+                                wire:click="sortByColumn('is_featured')">
+                                <div class="flex items-center gap-1">
+                                    مميز
+                                    @if ($sortBy === 'is_featured')
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="{{ $sortDirection === 'asc' ? 'M5 15l7-7 7 7' : 'M19 9l-7 7-7-7' }}">
+                                            </path>
+                                        </svg>
+                                    @endif
+                                </div>
                             </th>
                             <th class="px-6 py-4 text-start text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:text-gray-700 transition group"
                                 wire:click="sortByColumn('created_at')">
@@ -289,9 +344,8 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                 class="px-6 py-4 text-end text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                                 الإجراءات
                             </th>
-                            </>
+                        </tr>
                     </thead>
-
                     <tbody class="divide-y divide-gray-50 dark:divide-gray-800/50">
                         @forelse ($this->categories as $category)
                             <tr wire:key="category-{{ $category->id }}"
@@ -300,23 +354,31 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                     {{ $loop->iteration + ($this->categories->currentPage() - 1) * $this->categories->perPage() }}
                                 </td>
 
+                                {{-- image_path Column --}}
                                 <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
+                                    @if ($category->image_path)
+                                        <img src="{{ Storage::url($category->image_path) }}"
+                                            alt="{{ $category->category_name }}"
+                                            class="w-10 h-10 rounded-xl object-cover shadow-sm ring-1 ring-gray-200 dark:ring-gray-700 group-hover:scale-105 transition-transform">
+                                    @else
                                         <div
                                             class="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-pink-100 dark:from-purple-900/40 dark:to-pink-900/40 flex items-center justify-center text-sm font-bold text-purple-700 dark:text-purple-300 shadow-sm group-hover:scale-105 transition-transform">
                                             {{ mb_substr($category->category_name, 0, 2) }}
                                         </div>
-                                        <div>
-                                            <p class="font-semibold text-gray-900 dark:text-white">
-                                                {{ $category->category_name }}
-                                            </p>
-                                            <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">
-                                                #{{ $category->id }}
-                                            </p>
-                                        </div>
+                                    @endif
+                                </td>
+
+                                {{-- Name Column --}}
+                                <td class="px-6 py-4">
+                                    <div>
+                                        <p class="font-semibold text-gray-900 dark:text-white">
+                                            {{ $category->category_name }}</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-0.5 font-mono">
+                                            #{{ $category->id }}</p>
                                     </div>
                                 </td>
 
+                                {{-- Description Column --}}
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2 text-gray-600 dark:text-gray-400">
                                         <svg class="w-3.5 h-3.5 shrink-0 text-gray-400" fill="none"
@@ -329,17 +391,59 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                     </div>
                                 </td>
 
+                                {{-- Active Toggle --}}
+                                <td class="px-6 py-4">
+                                    <button wire:click="toggleActive({{ $category->id }})"
+                                        class="focus:outline-none">
+                                        @if ($category->is_active)
+                                            <span
+                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                                                نشط
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-gray-400"></span>
+                                                غير نشط
+                                            </span>
+                                        @endif
+                                    </button>
+                                </td>
+
+                                {{-- Featured Toggle --}}
+                                <td class="px-6 py-4">
+                                    <button wire:click="toggleFeatured({{ $category->id }})"
+                                        class="focus:outline-none">
+                                        @if ($category->is_featured)
+                                            <span
+                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300">
+                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path
+                                                        d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                                مميز
+                                            </span>
+                                        @else
+                                            <span
+                                                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                                                غير مميز
+                                            </span>
+                                        @endif
+                                    </button>
+                                </td>
+
+                                {{-- Created At --}}
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col gap-0.5">
-                                        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                            {{ $category->created_at->translatedFormat('d F Y') }}
-                                        </span>
-                                        <span class="text-xs text-gray-400 dark:text-gray-500">
-                                            {{ $category->created_at->diffForHumans() }}
-                                        </span>
+                                        <span
+                                            class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ $category->created_at->translatedFormat('d F Y') }}</span>
+                                        <span
+                                            class="text-xs text-gray-400 dark:text-gray-500">{{ $category->created_at->diffForHumans() }}</span>
                                     </div>
                                 </td>
 
+                                {{-- Actions --}}
                                 <td class="px-6 py-4">
                                     <div class="flex justify-end items-center gap-2">
                                         <button wire:click="edit({{ $category->id }})"
@@ -366,7 +470,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="py-20 text-center">
+                                <td colspan="8" class="py-20 text-center">
                                     <div class="flex flex-col items-center gap-4">
                                         <div
                                             class="w-24 h-24 rounded-2xl bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center">
