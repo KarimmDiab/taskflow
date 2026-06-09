@@ -132,16 +132,7 @@
                     style="font-family:'Cormorant Garamond',serif;font-size:clamp(28px,3vw,40px);font-weight:300;margin-bottom:32px;letter-spacing:-.01em;">
                     Contact Information</h2>
 
-                <!-- Guest / Login toggle -->
-                <div
-                    style="display:flex;align-items:center;gap:24px;margin-bottom:28px;padding:16px 20px;background:#EDEDEB;">
-                    <span style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#3D3D3A;">Already
-                        have an
-                        account?</span>
-                    <a href="login.html"
-                        style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#0A0A0A;text-decoration:none;border-bottom:1px solid #0A0A0A;padding-bottom:1px;">Login
-                        for faster checkout</a>
-                </div>
+
 
                 <!-- Contact -->
                 <div class="form-panel reveal">

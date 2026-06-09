@@ -4,7 +4,7 @@
   <footer style="background:#0A0A0A;border-top:1px solid #1a1a1a;padding:64px 40px 32px;">
       <div style="max-width:1440px;margin:0 auto;">
           <!-- Footer Top Grid -->
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:64px;">
+          <div style="display:grid;grid-template-columns:2fr 2fr 2fr ;gap:48px;margin-bottom:64px;">
               <!-- Brand Column -->
               <div>
                   <p
@@ -50,21 +50,31 @@
                   </div>
               </div>
 
+                            @php
+    use App\Models\Category;
+
+    $footerCategories = Category::where('is_featured', true)
+        ->where('is_active', true)
+        ->take(5)
+        ->get();
+@endphp
+
               <!-- Shop Links -->
               <div>
                   <p
                       style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#F8F6F2;margin-bottom:24px;">
                       Shop</p>
-                  <nav style="display:flex;flex-direction:column;gap:12px;">
-                      <a href="shop.html" class="footer-link">New Arrivals</a>
-                      <a href="#" class="footer-link">Best Sellers</a>
-                      <a href="#" class="footer-link">Tops & Tees</a>
-                      <a href="#" class="footer-link">Bottoms</a>
-                      <a href="#" class="footer-link">Outerwear</a>
-                      <a href="#" class="footer-link">Accessories</a>
-                      <a href="#" class="footer-link">Sale</a>
+                      <nav style="display:flex;flex-direction:column;gap:12px;">
+                    @foreach ( $footerCategories as $category )
+                      <a href="{{ route('all-products', ['category' => $category?->category_name]) }}" class="footer-link">{{ $category->category_name }}</a>
+                    @endforeach
+
                   </nav>
               </div>
+
+
+
+
 
               <!-- Info Links -->
               <div>
@@ -78,19 +88,7 @@
                   </nav>
               </div>
 
-              <!-- Account Links -->
-              <div>
-                  <p
-                      style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:#F8F6F2;margin-bottom:24px;">
-                      Account</p>
-                  <nav style="display:flex;flex-direction:column;gap:12px;">
-                      <a href="#" class="footer-link">My Orders</a>
-                      <a href="#" class="footer-link">Track Order</a>
-                      <a href="#" class="footer-link">Returns</a>
-                      <a href="login.html" class="footer-link">Login</a>
-                      <a href="register.html" class="footer-link">Register</a>
-                  </nav>
-              </div>
+
           </div>
 
           <!-- Footer Bottom -->

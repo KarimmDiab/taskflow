@@ -1,8 +1,8 @@
 <!-- ═══════════════════════════════════════════
      INSTAGRAM / GALLERY SECTION
 ═══════════════════════════════════════════ -->
-<section style="padding:0 0 120px;max-width:1440px;margin:0 auto;">
-  <div style="padding:0 40px;margin-bottom:40px;display:flex;align-items:flex-end;justify-content:space-between;" class="reveal">
+<section style="max-width:1440px;margin:0 auto;">
+  <div style="display:flex;align-items:flex-end;justify-content:space-between;" class="reveal">
     <div>
       <p class="section-eyebrow">Community</p>
       <h2 class="section-title" style="font-size:clamp(32px,4vw,56px);">Wear RYO</h2>
@@ -14,30 +14,43 @@
   </div>
 
   <!-- Gallery Grid -->
-  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;padding:0 40px;" class="reveal reveal-delay-1">
-    <div class="gallery-item" style="aspect-ratio:1;">
-      <img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=400&q=80" alt="Gallery 1">
-      <div class="gallery-overlay">
-        <div class="gallery-ig-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-        </div>
-      </div>
-    </div>
-    <div class="gallery-item" style="aspect-ratio:1;">
-      <img src="https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=400&q=80" alt="Gallery 2">
-      <div class="gallery-overlay"><div class="gallery-ig-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div></div>
-    </div>
-    <div class="gallery-item" style="aspect-ratio:1;">
-      <img src="https://images.unsplash.com/photo-1485968579580-b6d095142e6e?w=400&q=80" alt="Gallery 3">
-      <div class="gallery-overlay"><div class="gallery-ig-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div></div>
-    </div>
-    <div class="gallery-item" style="aspect-ratio:1;">
-      <img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=400&q=80" alt="Gallery 4">
-      <div class="gallery-overlay"><div class="gallery-ig-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div></div>
-    </div>
-    <div class="gallery-item" style="aspect-ratio:1;">
-      <img src="https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&q=80" alt="Gallery 5">
-      <div class="gallery-overlay"><div class="gallery-ig-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div></div>
-    </div>
-  </div>
+
+    <script>
+        if (!document.querySelector('#ftr8ldtxzf')) {
+
+        var wrapper = document.createElement('div');
+
+        wrapper.style.display = 'flex';
+        wrapper.style.justifyContent = 'center';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.width = '100%';
+        wrapper.style.margin = '0 auto';
+
+        var newDiv = document.createElement('div');
+
+        newDiv.setAttribute('key', 'Grid Instagram Feed');
+        newDiv.setAttribute('class', 'ft');
+        newDiv.setAttribute('id', 'ftr8ldtxzf');
+
+        // optional width control
+        newDiv.style.width = '100%';
+        newDiv.style.maxWidth = '1400px';
+
+        var newScript = document.createElement('script');
+
+        newScript.setAttribute(
+            'src',
+            'https://wdg.fouita.com/widgets/0x497858.js'
+        );
+
+        newDiv.appendChild(newScript);
+
+        wrapper.appendChild(newDiv);
+
+        document.body.appendChild(wrapper);
+    }
+    </script>
+
 </section>
+
+

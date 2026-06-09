@@ -77,7 +77,7 @@ new class extends Component {
             <!-- 🔹 وصف التصنيف الفرعي -->
             <flux:input label="وصف التصنيف الفرعي" placeholder="الوصف" wire:model="form.sub_category_description" />
 
-          
+
             <!-- 🔹 الأزرار -->
             <div class="grid grid-cols-3 items-center">
 

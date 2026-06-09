@@ -214,7 +214,7 @@
                                 </h3>
 
                                 <p class="uppercase tracking-[0.18em] text-[11px] text-ryo-gray-400 font-label mt-2">
-                                    Pieces
+                                    Variants
                                 </p>
 
                             </div>
@@ -321,7 +321,7 @@
                                     <div
                                         class="border border-white/15 bg-white/10 backdrop-blur-sm px-5 py-3 text-[11px] uppercase tracking-[0.18em] font-label">
 
-                                        {{ $collection->products_count }} Products
+                                        {{ $collection->products_count }} Variants
 
                                     </div>
 

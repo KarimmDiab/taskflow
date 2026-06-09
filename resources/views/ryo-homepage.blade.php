@@ -267,29 +267,34 @@
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:32px 24px;">
 
 
-            @foreach ($newArrivalProducts as $product)
+            @foreach ($newArrivalProducts as $variant)
                 @php
                     // الصورة الأساسية
-                    $primaryImage = $product->primaryImage;
-                    $imageUrl = $primaryImage
-                        ? Storage::url($primaryImage->image_path)
+                    $product = $variant->product;
+                    $variantImage = $product?->images?->firstWhere('color_id', $variant->color_id)
+                        ?? $product?->primaryImage
+                        ?? $product?->images?->first();
+                    $imageUrl = $variantImage?->image_path
+                        ? Storage::url($variantImage->image_path)
                         : asset('images/placeholder.jpg');
 
                     // الصورة الثانية (أول صورة غير أساسية من علاقة images)
-                    $secondaryImage = $product->images->filter(fn($img) => !$img->is_primary)->first();
-                    $hoverImageUrl = $secondaryImage ? Storage::url($secondaryImage->image_path) : $imageUrl;
+                    $hoverImage = $product?->images?->where('id', '!=', $variantImage?->id)->first();
+                    $hoverImageUrl = $hoverImage?->image_path ? Storage::url($hoverImage->image_path) : $imageUrl;
+                    $variantLabel = collect([$variant->color?->color_name])->filter()->implode(' / ');
                 @endphp
 
                 <div class="product-card reveal reveal-delay-1">
-                    <a href="{{ route('product', $product) }}" class="product-link">
+                    <a href="{{ $product ? route('product', $product->slug) : '#' }}" class="product-link">
                         <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                            <img src="{{ $imageUrl }}" alt="{{ $product->product_name }}">
-                            <img class="hover-img" src="{{ $hoverImageUrl }}" alt="{{ $product->product_name }} hover">
+                            <img src="{{ $imageUrl }}" alt="{{ $product?->product_name }} {{ $variantLabel }}">
+                            <img class="hover-img" src="{{ $hoverImageUrl }}" alt="{{ $product?->product_name }} hover">
                             <span class="product-badge badge-new">New</span>
                         </div>
                         <div class="product-meta">
-                            <p class="product-name">{{ $product->product_name }}</p>
-                            <p class="product-price">EGP {{ number_format($product->product_price, 0) }}</p>
+                            <p class="product-name">{{ $product?->product_name }}</p>
+                            <p class="product-color">{{ $variantLabel ?: 'Default variant' }}</p>
+                            <p class="product-price">EGP {{ number_format($variant->variant_price ?? $product?->product_price ?? 0, 0) }}</p>
                         </div>
                     </a>
                 </div>
@@ -352,34 +357,42 @@
 
         <!-- Horizontal scroll on mobile, grid on desktop -->
         <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:24px;">
-            @foreach ($bestSeller as $best)
+            @foreach ($bestSeller as $variant)
                 @php
                     // الصورة الأساسية
-                    $primaryImage = $best->primaryImage;
-                    $imageUrl = $primaryImage
-                        ? Storage::url($primaryImage->image_path)
+                    $product = $variant->product;
+                    $variantImage = $product?->images?->firstWhere('color_id', $variant->color_id)
+                        ?? $product?->primaryImage
+                        ?? $product?->images?->first();
+                    $imageUrl = $variantImage?->image_path
+                        ? Storage::url($variantImage->image_path)
                         : asset('images/placeholder.jpg');
 
                     // الصورة الثانية (أول صورة غير أساسية من علاقة images)
-                    $secondaryImage = $best->images->filter(fn($img) => !$img->is_primary)->first();
-                    $hoverImageUrl = $secondaryImage ? Storage::url($secondaryImage->image_path) : $imageUrl;
+                    $hoverImage = $product?->images?->where('id', '!=', $variantImage?->id)->first();
+                    $hoverImageUrl = $hoverImage?->image_path ? Storage::url($hoverImage->image_path) : $imageUrl;
+                    $variantLabel = collect([$variant->color?->color_name])->filter()->implode(' / ');
                 @endphp
                 <div class="product-card reveal reveal-delay-1">
-                    <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                        <img src="{{ $imageUrl }}" alt="{{ $product->product_name }}">
-                        <span class="product-badge badge-sale">Best Seller</span>
-                        <button class="wishlist-btn" aria-label="Wishlist">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A"
-                                stroke-width="1.5">
-                                <path
-                                    d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
-                            </svg>
-                        </button>
-                    </div>
-                    <div class="product-meta">
-                        <p class="product-name">{{ $product->product_name }}</p>
-                        <p class="product-price">EGP {{ number_format($product->product_price, 0) }}</p>
-                    </div>
+                    <a href="{{ $product ? route('product', $product->slug) : '#' }}" class="product-link">
+                        <div class="product-img-wrap" style="aspect-ratio:3/4;">
+                            <img src="{{ $imageUrl }}" alt="{{ $product?->product_name }} {{ $variantLabel }}">
+                            <img class="hover-img" src="{{ $hoverImageUrl }}" alt="{{ $product?->product_name }} hover">
+                            <span class="product-badge badge-sale">Best Seller</span>
+                            <button class="wishlist-btn" aria-label="Wishlist" type="button">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A"
+                                    stroke-width="1.5">
+                                    <path
+                                        d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="product-meta">
+                            <p class="product-name">{{ $product?->product_name }}</p>
+                            <p class="product-color">{{ $variantLabel ?: 'Default variant' }}</p>
+                            <p class="product-price">EGP {{ number_format($variant->variant_price ?? $product?->product_price ?? 0, 0) }}</p>
+                        </div>
+                    </a>
                 </div>
             @endforeach
 
@@ -395,12 +408,18 @@
 
         @foreach ($featuredCollections as $featuredCollection)
         @endforeach
-        <img src="{{ Storage::url($featuredCollection->main_image) }}" alt="Editorial Campaign"
-            style="width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);"
-            id="editorialImg">
+        @php
+            $featuredCollectionUrl = isset($featuredCollection)
+                ? route('collection.show', $featuredCollection->slug)
+                : route('collections');
+        @endphp
+        <a href="{{ $featuredCollectionUrl }}" aria-label="Open featured collection"
+            style="position:absolute;inset:0;z-index:1;"></a>
+        <img src="{{ $featuredCollection->main_image && Storage::disk('public')->exists($featuredCollection->main_image) ? Storage::url($featuredCollection->main_image) : 'https://placehold.co/800x600' }}"
+            alt="Editorial Campaign" id="editorialImg">
         <div style="position:absolute;inset:0;background:rgba(10,10,10,0.35);"></div>
         <div
-            style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;">
+            style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:2;pointer-events:none;">
             <p
                 style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:0.25em;text-transform:uppercase;color:#C8C6C2;margin-bottom:20px;">
                 The Drop</p>
@@ -416,7 +435,7 @@
                 <em>{{ $secondPart ?: 'Essentials' }}</em><br>
                 {{-- يمكنك إزالة السطر الثالث أو استبداله بشيء آخر --}}
             </h2>
-            <a href="shop.html" class="btn-primary">Shop the Drop</a>
+            <a href="{{ $featuredCollectionUrl }}" class="btn-primary" style="pointer-events:auto;">Shop the Drop</a>
         </div>
     </section>
 
@@ -460,9 +479,11 @@
                     }
                 @endphp
 
-                <div class="category-card" style="position:relative;overflow:hidden;{{ $gridClass }}">
-                    <img src="{{ $category->image ?? 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&q=80' }}"
-                        alt="{{ $category->category_name }}" style="width:100%;height:100%;object-fit:cover;">
+                <a href="{{ route('all-products', ['category' => $category->category_name]) }}" class="category-card"
+                    style="display:block;position:relative;overflow:hidden;text-decoration:none;{{ $gridClass }}">
+                    <img src="{{ $category->image_path ? Storage::url($category->image_path) : asset('images/default-category.jpg') }}"
+                        alt="{{ $category->name ?? 'Category image' }}"
+                        style="width:100%; height:100%; object-fit:cover;">
                     <div
                         style="position:absolute;inset:0;background:linear-gradient(to top,rgba(10,10,10,0.5) 0%,transparent 50%);">
                     </div>
@@ -476,7 +497,7 @@
                             {{ $category->category_name }}
                         </h3>
                     </div>
-                </div>
+                </a>
             @endforeach
 
         </div>
@@ -493,6 +514,7 @@
 
     {{-- Footer --}}
     @include('partials.footer')
+
 
 
 

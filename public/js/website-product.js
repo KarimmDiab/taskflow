@@ -1,4 +1,6 @@
 (function () {
+    if (document.getElementById("product-data")) return;
+
     // ---------- IMAGES ----------
     const GALLERY_IMAGES = [
         "https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=900&q=85",

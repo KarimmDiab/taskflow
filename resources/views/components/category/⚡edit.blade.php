@@ -21,20 +21,14 @@ new class extends Component
         Flux::modal('edit-category')->show();
     }
 
-    public function updateCategory()
-    {
-        $this->isUpdating = true;
+public function updateCategory()
+{
+    $this->form->update(); // This will throw ValidationException if validation fails
 
-        try {
-            $this->form->update();
-            Flux::modal('edit-category')->close();
-            session()->flash('warning', 'تم تحديث بيانات التصنيف بنجاح');
-            $this->redirectRoute('categories', navigate: true);
-        } catch (\Exception $e) {
-            session()->flash('error', 'حدث خطأ أثناء تحديث التصنيف');
-            $this->isUpdating = false;
-        }
-    }
+    Flux::modal('edit-category')->close();
+    session()->flash('warning', 'تم تحديث بيانات التصنيف بنجاح');
+    $this->redirectRoute('categories', navigate: true);
+}
 
     public function confirmDelete($id)
     {

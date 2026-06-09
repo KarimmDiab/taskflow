@@ -417,25 +417,40 @@
         const card = btnElement.closest('.upsell-card');
         if (!card) return;
 
+        const variantId = Number.parseInt(card.dataset.upsellVariantId, 10);
         const name = card.dataset.upsellName;
         const price = parseInt(card.dataset.upsellPrice);
         const img = card.dataset.upsellImg;
+        const color = card.dataset.upsellColor || 'Default';
+        const size = card.dataset.upsellSize || 'OS';
+        const stock = Number.parseInt(card.dataset.upsellStock, 10) || 0;
+        const productUrl = card.dataset.upsellUrl || SHOP_URL;
+
+        if (!variantId || stock < 1) {
+            showToastMessage('This variant is out of stock', true);
+            return;
+        }
 
         const cart = loadCart();
-        const existingIndex = cart.findIndex(item => item.productName === name);
+        const existingIndex = cart.findIndex(item => Number(item.variantId) === variantId);
 
         if (existingIndex !== -1) {
+            if (cart[existingIndex].quantity >= stock) {
+                showToastMessage('No more stock available for this variant', true);
+                return;
+            }
             cart[existingIndex].quantity += 1;
             showToastMessage(name + ' quantity updated');
         } else {
             cart.push({
-                variantId: Date.now(),
+                variantId: variantId,
                 productName: name,
-                colorName: 'Default',
-                sizeName: 'One Size',
+                colorName: color,
+                sizeName: size,
                 price: price,
                 quantity: 1,
-                imageUrl: img
+                imageUrl: img,
+                productUrl: productUrl
             });
             showToastMessage(name + ' added to bag');
         }

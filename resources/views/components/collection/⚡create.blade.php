@@ -223,32 +223,94 @@ new class extends Component {
     </form>
 
 </flux:modal>
+
 <style>
+
     @keyframes slideIn {
+
         from {
             opacity: 0;
             transform: scale(0.96) translateY(-10px);
         }
+
         to {
             opacity: 1;
             transform: scale(1) translateY(0);
         }
     }
 
+
     [flux\:modal="add-collection"] {
+
         animation: slideIn 0.2s ease-out;
     }
 
-    /* Improved focus styles */
-    input:focus, textarea:focus {
-        outline: none;
-        ring: 2px solid rgb(16 185 129);
-        ring-offset: 2px;
+
+    /* Focus styles */
+
+    input:focus,
+    textarea:focus {
+
+        outline: none !important;
+
+        border-color: rgb(16 185 129) !important;
+
+        box-shadow:
+            0 0 0 2px rgba(16, 185, 129, 0.15) !important;
     }
 
+
     /* Smooth transitions */
-    button, input, textarea {
-        transition: all 0.2s ease;
+
+    button,
+    input,
+    textarea,
+    label {
+
+        transition:
+            all 0.2s ease;
     }
+
+
+    /* Image preview */
+
+    img {
+
+        transition:
+            transform 0.3s ease,
+            opacity 0.3s ease;
+    }
+
+    img:hover {
+
+        transform: scale(1.03);
+    }
+
+
+    /* Modal scrollbar */
+
+    .overflow-hidden {
+
+        scrollbar-width: thin;
+    }
+
+
+    /* Better disabled state */
+
+    button:disabled {
+
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+
+    /* File upload hover */
+
+    label.cursor-pointer:hover div {
+
+        transform: translateY(-1px);
+    }
+
 </style>
-</div>
+
+

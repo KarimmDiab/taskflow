@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCollectionRequest;
 use App\Http\Requests\UpdateCollectionRequest;
+use App\Models\Category;
 use App\Models\Collection;
+use App\Models\ProductVariant;
 
 class CollectionController extends Controller
 {
@@ -41,17 +43,34 @@ class CollectionController extends Controller
             ->with('products')
             ->firstOrFail();
 
-        $countCollectionProducts = $collection->products()->count();
-        $collectionProducts = $collection->products()->with(['images', 'category', 'subCategory', 'productVariants' => function ($query) {
-            $query->with([
-                'color',
-                'size',
-                'inventories',
-            ])->where('is_active', true);
-        },
-        ])->get();
+        $colorVariantIds = ProductVariant::query()
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->where('products.collection_id', $collection->id)
+            ->where('product_variants.is_active', true)
+            ->where('products.is_active', true)
+            ->whereNull('products.deleted_at')
+            ->selectRaw('MIN(product_variants.id)')
+            ->groupBy('product_variants.product_id', 'product_variants.color_id');
 
-        return view('ryo-explore-collections', compact('collection', 'countCollectionProducts', 'collectionProducts'));
+        $collectionProducts = ProductVariant::with([
+            'color',
+            'size',
+            'inventories',
+            'product.images',
+            'product.category',
+            'product.subCategory',
+        ])
+            ->whereIn('id', $colorVariantIds)
+            ->latest()
+            ->get();
+
+        $countCollectionProducts = $collectionProducts->count();
+
+        $categories = Category::where('is_featured', true)
+            ->where('is_active', true)
+            ->paginate(5);
+
+        return view('ryo-explore-collections', compact('collection', 'countCollectionProducts', 'collectionProducts', 'categories'));
     }
 
     /**

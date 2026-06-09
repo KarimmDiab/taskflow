@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Collection;
-use App\Models\Product;
+use App\Models\ProductVariant;
 
 // use Illuminate\Http\Request;
 
@@ -12,21 +12,35 @@ class HomePageController extends Controller
 {
     public function index()
     {
-        $newArrivalProducts = Product::with(
-            'category', 'subCategory', 'images',
-            'primaryImage', 'productVariants.color',
-            'collection', 'productVariants.size')
-            ->where('is_active', true)
-            ->latest()
-            ->paginate(4);
+        $colorVariantIds = ProductVariant::query()
+            ->join('products', 'product_variants.product_id', '=', 'products.id')
+            ->where('product_variants.is_active', true)
+            ->where('products.is_active', true)
+            ->whereNull('products.deleted_at')
+            ->selectRaw('MIN(product_variants.id)')
+            ->groupBy('product_variants.product_id', 'product_variants.color_id');
 
-        $bestSeller = Product::with(
-            'category', 'subCategory', 'images',
-            'primaryImage', 'productVariants.color',
-            'collection', 'productVariants.size')
-            ->where('is_active', true)
+        $variantRelations = [
+            'color',
+            'size',
+            'product.category',
+            'product.subCategory',
+            'product.images',
+            'product.primaryImage',
+            'product.collection',
+        ];
+
+        $newArrivalProducts = ProductVariant::with($variantRelations)
+            ->whereIn('id', clone $colorVariantIds)
+            ->orderByDesc('created_at')
+            ->take(4)
+            ->get();
+
+        $bestSeller = ProductVariant::with($variantRelations)
+            ->whereIn('id', clone $colorVariantIds)
             ->inRandomOrder()
-            ->paginate(5);
+            ->take(5)
+            ->get();
 
         $collections = Collection::paginate(2);
 
@@ -34,7 +48,8 @@ class HomePageController extends Controller
         ->paginate(1);
 
         $categories = Category::where('is_featured', true)
-        ->paginate(4);
+        ->where('is_active', true)
+        ->paginate(5);
 
         return view('ryo-homepage', compact('newArrivalProducts', 'collections', 'bestSeller', 'featuredCollections', 'categories'));
     }

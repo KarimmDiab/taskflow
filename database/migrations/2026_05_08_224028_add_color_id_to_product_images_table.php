@@ -12,7 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('product_images', function (Blueprint $table) {
-            $table->foreignId('color_id')->constrained('colors')->after('product_id')->onDelete('restrict')->onUpdate('cascade')->nullable();
+
+            $table->foreignId('color_id')
+                ->nullable()
+                ->after('product_id')
+                ->constrained('colors')
+                ->restrictOnDelete()
+                ->cascadeOnUpdate();
+
         });
     }
 

@@ -148,31 +148,30 @@
                     style="font-family:'Space Grotesk',sans-serif;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:#9C9A96;margin-bottom:20px;">
                     Complete Your Look</p>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="upsellGrid">
-                    @foreach ($completeLookProducts as $product)
+                    @foreach ($completeLookProducts as $variant)
                         @php
-                            $image = $product->images->first()?->image_path
-                                ? asset('storage/' . $product->images->first()->image_path)
+                            $product = $variant->product;
+                            $variantImage =
+                                $product?->images?->firstWhere('color_id', $variant->color_id) ??
+                                ($product?->primaryImage ?? $product?->images?->first());
+                            $image = $variantImage?->image_path
+                                ? Storage::url($variantImage->image_path)
                                 : 'https://images.unsplash.com/photo-1591047139829-d91aecb6caea?w=300&q=80';
-                            $colors = $product->productVariants
-                                ->pluck('color.color_name')
-                                ->filter()
-                                ->unique()
-                                ->take(3)
-                                ->implode(' / ');
-                            $sizes = $product->productVariants
-                                ->pluck('size.size_name')
-                                ->filter()
-                                ->unique()
-                                ->implode(' - ');
-                            $price =
-                                $product->productVariants->where('variant_price', '>', 0)->min('variant_price') ??
-                                ($product->product_price ?? 0);
+                            $color = $variant->color?->color_name ?? 'Default';
+                            $size = $variant->size?->size_name ?? 'OS';
+                            $price = $variant->variant_price ?? ($product?->product_price ?? 0);
+                            $stock = $variant->inventories->sum('quantity');
+                            $productUrl = $product ? route('product', $product->slug) : route('all-products');
                         @endphp
-                        <div class="upsell-card" data-upsell-name="{{ $product->product_name }}"
-                            data-upsell-price="{{ $price }}" data-upsell-img="{{ $image }}">
+                        <div class="upsell-card" data-upsell-variant-id="{{ $variant->id }}"
+                            data-upsell-name="{{ $product?->product_name }}" data-upsell-price="{{ $price }}"
+                            data-upsell-img="{{ $image }}" data-upsell-color="{{ $color }}"
+                            data-upsell-size="{{ $size }}" data-upsell-stock="{{ $stock }}"
+                            data-upsell-url="{{ $productUrl }}">
                             {{-- IMAGE --}}
                             <div class="upsell-img">
-                                <img src="{{ $image }}" alt="{{ $product->product_name }}">
+                                <img src="{{ $image }}"
+                                    alt="{{ $product?->product_name }} {{ $color }} {{ $size }}">
                             </div>
                             {{-- CONTENT --}}
                             <div style="flex:1;min-width:0;">
@@ -182,36 +181,39 @@
                                         font-size:12px;
                                         font-weight:400;
                                         margin-bottom:3px;">
-                                    {{ $product->product_name }}
+                                    {{ $product?->product_name }}
                                 </p>
                                 {{-- COLORS --}}
-                                @if ($colors)
+                                @if ($color)
                                     <p
                                         style="font-family:'DM Sans',sans-serif;
                                             font-size:11px;
                                             color:#9C9A96;
                                             margin-bottom:2px;">
-                                        {{ $colors }}
+                                        {{ $color }}
                                     </p>
                                 @endif
                                 {{-- SIZES --}}
-                                @if ($sizes)
+                                @if ($size)
                                     <p
                                         style="font-family:'DM Sans',sans-serif;
                                             font-size:10px;
                                             color:#B0AAA2;
                                             margin-bottom:4px;">
-                                        Sizes: {{ $sizes }}
+                                        Size: {{ $size }}
                                     </p>
                                 @endif
                                 {{-- PRICE --}}
-                                <p style="font-family:'DM Sans',sans-serif;
+                                <p
+                                    style="font-family:'DM Sans',sans-serif;
                                     font-size:12px;">
                                     EGP {{ number_format($price, 0) }}
                                 </p>
                             </div>
                             {{-- ADD --}}
-                            <button class="upsell-add" onclick="event.stopPropagation(); addUpsellItem(this)">
+                            <button class="upsell-add" onclick="event.stopPropagation(); addUpsellItem(this)"
+                                {{ $stock < 1 ? 'disabled' : '' }}
+                                aria-label="Add {{ $product?->product_name }} to cart">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                                     stroke="currentColor" stroke-width="1.8">
                                     <line x1="12" y1="5" x2="12" y2="19" />
@@ -290,23 +292,33 @@
                         style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;">or</span>
                     <div style="flex:1;height:1px;background:#D5D3CF;"></div>
                 </div>
-                <a href="{{ route('checkout') }}" id="guestCheckoutBtn"
+                <a href="{{ route('all-products') }}" id="guestCheckoutBtn"
                     style="display:flex;align-items:center;justify-content:center;gap:10px;border:1px solid #D5D3CF;color:#0A0A0A;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px;text-decoration:none;">Continue
-                    as Guest</a>
-                <div style="margin-top:20px;padding-top:16px;border-top:1px solid #D5D3CF;">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><svg width="13"
-                            height="13" viewBox="0 0 24 24" fill="none" stroke="#9C9A96" stroke-width="1.5">
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                        </svg><span style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;">SSL
-                            Encrypted · Secure Payment</span></div>
-                    <div style="display:flex;align-items:center;gap:8px;"><svg width="13" height="13"
-                            viewBox="0 0 24 24" fill="none" stroke="#9C9A96" stroke-width="1.5">
-                            <polyline points="17 1 21 5 17 9" />
-                            <path d="M3 11V9a4 4 0 014-4h14" />
-                            <polyline points="7 23 3 19 7 15" />
-                            <path d="M21 13v2a4 4 0 01-4 4H3" />
-                        </svg><span style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;">Free returns
-                            within 14 days</span></div>
+                    shopping</a>
+                <!-- Policies -->
+                <div style="margin-top:28px;padding-top:20px;border-top:1px solid #D5D3CF;">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C9A96"
+                            stroke-width="1.5">
+                            <path d="M5 12h14" />
+                            <path d="M12 5l7 7-7 7" />
+                        </svg>
+                        <p style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;font-weight:300;">Free
+                            returns within
+                            7 days</p>
+                    </div>
+
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C9A96"
+                            stroke-width="1.5">
+                            <circle cx="12" cy="12" r="10" />
+                            <polyline points="12 6 12 12 16 14" />
+                        </svg>
+                        <p style="font-family:'DM Sans',sans-serif;font-size:11px;color:#9C9A96;font-weight:300;"
+                            id="estimated-days-text2">Delivered
+                            in 3–5
+                            business days</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -338,6 +350,7 @@
         let currentPromoCode = '';
     </script>
     <script src="{{ asset('js/cart.js') }}"></script>
+
 
 </body>
 

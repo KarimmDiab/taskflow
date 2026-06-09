@@ -2,10 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Category;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
 
@@ -26,6 +28,16 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         Carbon::setLocale('ar');
+
+        View::composer('partials.footer', function ($view) {
+
+            $footerCategories = Category::where('is_featured', true)
+                ->where('is_active', true)
+                ->take(5)
+                ->get();
+
+            $view->with('footerCategories', $footerCategories);
+        });
 
     }
 
@@ -50,4 +62,5 @@ class AppServiceProvider extends ServiceProvider
             : null,
         );
     }
+
 }

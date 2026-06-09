@@ -216,7 +216,7 @@
     function quickAddToCart(btn) {
         const productId = parseInt(btn.dataset.productId);
         const productName = btn.dataset.productName;
-        const productPrice = parseInt(btn.dataset.productPrice);
+        const productPrice = parseFloat(btn.dataset.productPrice);
         const productImage = btn.dataset.productImage;
         const productColor = btn.dataset.productColor || 'Default';
         const productSize = btn.dataset.productSize || 'M';

@@ -33,51 +33,92 @@
 
     <?php
     use App\Models\Product;
+    use App\Models\ProductVariant;
     use App\Models\Category;
 
-    // الحصول على التصنيف المختار من URL
-    $selectedCategory = request('category', 'all');
-    $perPage = request('per_page', 12);
-    $sort = request('sort', '');
-    $currentPage = request('page', 1);
+// الحصول على التصنيف المختار من URL
+$selectedCategory = request('category', 'all');
+$perPage = request('per_page', 12);
+$sort = request('sort', '');
+$currentPage = request('page', 1);
 
-    // جلب جميع التصنيفات مع عدد المنتجات في كل تصنيف
-    $categories = Category::withCount([
-        'products' => function ($query) {
-            $query->whereHas('productVariants');
-        },
+// جلب التصنيفات النشطة فقط
+// مع عدد المنتجات النشطة فقط
+$categories = Category::where('is_active', true)
+    ->orderBy('category_name')
+    ->get();
+
+$variantCountsByCategory = ProductVariant::query()
+    ->join('products', 'product_variants.product_id', '=', 'products.id')
+    ->join('categories', 'products.category_id', '=', 'categories.id')
+    ->where('product_variants.is_active', true)
+    ->where('products.is_active', true)
+    ->where('categories.is_active', true)
+    ->whereNull('products.deleted_at')
+    ->whereNull('categories.deleted_at')
+    ->selectRaw("products.category_id, COUNT(DISTINCT CONCAT(product_variants.product_id, ':', COALESCE(product_variants.color_id, 0))) as aggregate")
+    ->groupBy('products.category_id')
+    ->pluck('aggregate', 'products.category_id');
+
+$categories->each(function ($category) use ($variantCountsByCategory) {
+    $category->setAttribute('products_count', (int) ($variantCountsByCategory[$category->id] ?? 0));
+});
+
+// حساب إجمالي المنتجات
+$totalProducts = 0;
+foreach ($categories as $cat) {
+    $totalProducts += $cat->products_count;
+}
+
+// بناء استعلام المنتجات
+$colorVariantIdsQuery = ProductVariant::query()
+    ->join('products', 'product_variants.product_id', '=', 'products.id')
+    ->join('categories', 'products.category_id', '=', 'categories.id')
+    ->where('product_variants.is_active', true)
+    ->where('products.is_active', true)
+    ->where('categories.is_active', true)
+    ->whereNull('products.deleted_at')
+    ->whereNull('categories.deleted_at')
+    ->selectRaw('MIN(product_variants.id)')
+    ->groupBy('product_variants.product_id', 'product_variants.color_id');
+
+$productsQuery = ProductVariant::with([
+        'color',
+        'size',
+        'product.category',
+        'product.images',
+        'product.primaryImage',
+        'product.productVariants.size',
     ])
-        ->orderBy('category_name')
-        ->get();
+    ->whereIn('id', $colorVariantIdsQuery)
+    ->whereHas('product', function ($q) {
+        $q->where('is_active', true)
+            ->whereHas('category', function ($categoryQuery) {
+                $categoryQuery->where('is_active', true);
+            });
+    });
 
-    $totalProducts = 0;
-    foreach ($categories as $cat) {
-        $totalProducts += $cat->products_count;
-    }
-
-    // بناء الاستعلام للمنتجات
-    $productsQuery = Product::with(['productVariants.color', 'productVariants.size'])->whereHas('productVariants');
-
-    // تطبيق فلترة التصنيف
-    if ($selectedCategory !== 'all') {
-        $productsQuery->whereHas('category', function ($q) use ($selectedCategory) {
-            $q->where('category_name', $selectedCategory);
-        });
-    }
+// تطبيق فلترة التصنيف
+if ($selectedCategory !== 'all') {
+    $productsQuery->whereHas('product.category', function ($q) use ($selectedCategory) {
+        $q->where('category_name', $selectedCategory)
+          ->where('is_active', true);
+    });
+}
 
     // تطبيق الترتيب
     switch ($sort) {
         case 'price-asc':
-            $productsQuery->orderBy('product_price', 'asc');
+            $productsQuery->orderBy('variant_price', 'asc');
             break;
         case 'price-desc':
-            $productsQuery->orderBy('product_price', 'desc');
+            $productsQuery->orderBy('variant_price', 'desc');
             break;
         case 'name-asc':
-            $productsQuery->orderBy('product_name', 'asc');
+            $productsQuery->orderBy(Product::select('product_name')->whereColumn('products.id', 'product_variants.product_id'), 'asc');
             break;
         case 'name-desc':
-            $productsQuery->orderBy('product_name', 'desc');
+            $productsQuery->orderBy(Product::select('product_name')->whereColumn('products.id', 'product_variants.product_id'), 'desc');
             break;
         default:
             $productsQuery->latest();
@@ -89,10 +130,10 @@
     $currentCategoryCount = $products->total();
 
     // الحصول على اسم التصنيف الحالي
-    $currentCategoryName = 'All Products';
+    $currentCategoryName = 'All Colors';
     if ($selectedCategory !== 'all') {
         $currentCat = Category::where('category_name', $selectedCategory)->first();
-        $currentCategoryName = $currentCat ? $currentCat->category_name : 'Products';
+        $currentCategoryName = $currentCat ? $currentCat->category_name : 'Colors';
     }
     ?>
 
@@ -117,7 +158,7 @@
                 </h1>
                 <p id="productsCount"
                     style="font-family:'DM Sans',sans-serif;font-size:13px;color:#9C9A96;font-weight:300;">
-                    {{ $currentCategoryCount }} {{ $currentCategoryCount == 1 ? 'product' : 'products' }}
+                    {{ $currentCategoryCount }} {{ $currentCategoryCount == 1 ? 'color' : 'colors' }}
                 </p>
             </div>
 
@@ -161,7 +202,7 @@
 
                 <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;" class="hidden md:block">
                     Displaying {{ $products->firstItem() ?? 0 }} – {{ $products->lastItem() ?? 0 }} From
-                    {{ $products->total() }} Product
+                    {{ $products->total() }} Color
                 </span>
 
                 <div style="display:flex;align-items:center;gap:16px;">
@@ -222,10 +263,10 @@
 
                         <select class="sort-select" id="sortSelect" onchange="changePerPage(this.value)"
                             style="padding: 8px 12px; border-radius: 8px; border: 1px solid #e0e0e0; width: 120px;">
-                            <option value="12" {{ $perPage == 12 ? 'selected' : '' }}>12 Products</option>
-                            <option value="24" {{ $perPage == 24 ? 'selected' : '' }}>24 Products</option>
-                            <option value="36" {{ $perPage == 36 ? 'selected' : '' }}>36 Products</option>
-                            <option value="48" {{ $perPage == 48 ? 'selected' : '' }}>48 Products</option>
+                            <option value="12" {{ $perPage == 12 ? 'selected' : '' }}>12 Colors</option>
+                            <option value="24" {{ $perPage == 24 ? 'selected' : '' }}>24 Colors</option>
+                            <option value="36" {{ $perPage == 36 ? 'selected' : '' }}>36 Colors</option>
+                            <option value="48" {{ $perPage == 48 ? 'selected' : '' }}>48 Colors</option>
                         </select>
                     </div>
                 </div>
@@ -233,23 +274,50 @@
 
             <!-- PRODUCT GRID -->
             <div id="productGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:32px 20px;">
-                @forelse ($products as $product)
-                    <!-- Product Card -->
+                @forelse ($products as $variant)
+                    @php
+                        $product = $variant->product;
+                        $productName = $product?->product_name ?? 'Product';
+                        $colorVariants = $product?->productVariants
+                            ? $product->productVariants->where('color_id', $variant->color_id)->where('is_active', true)->values()
+                            : collect([$variant]);
+                        $defaultVariant = $colorVariants->first() ?? $variant;
+                        $colorName = $variant->color?->color_name ?? 'Default';
+                        $sizeNames = $colorVariants
+                            ->pluck('size.size_name')
+                            ->filter()
+                            ->unique()
+                            ->values()
+                            ->implode(' / ');
+                        $variantImage = $product?->images?->firstWhere('color_id', $variant->color_id)
+                            ?? $product?->primaryImage
+                            ?? $product?->images?->first();
+                        $hoverImage = $product?->images?->where('id', '!=', $variantImage?->id)->first();
+                        $imageUrl = $variantImage?->image_path
+                            ? Storage::url($variantImage->image_path)
+                            : 'https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500&q=80';
+                        $hoverImageUrl = $hoverImage?->image_path
+                            ? Storage::url($hoverImage->image_path)
+                            : $imageUrl;
+                        $price = $colorVariants->min('variant_price') ?? $variant->variant_price ?? $product?->product_price ?? 0;
+                    @endphp
+                    <!-- Color Variant Card -->
                     <div class="product-card product-item reveal"
-                        data-cat="{{ $product->category ? $product->category->slug : 'uncategorized' }}"
-                        data-price="{{ $product->productVariants->first()?->variant_price ?? ($product->product_price ?? 0) }}"
-                        data-product-id="{{ $product->id }}">
+                        data-cat="{{ $product?->category?->category_name ?? 'uncategorized' }}"
+                        data-price="{{ $price }}"
+                        data-product-id="{{ $product?->id }}"
+                        data-variant-id="{{ $defaultVariant->id }}">
                         <div class="product-img-wrap" style="aspect-ratio:3/4;">
-                            <a href="{{ route('product', $product->slug) }}">
+                            <a href="{{ $product ? route('product', $product->slug) : '#' }}">
 
-                                <img src="https://images.unsplash.com/photo-1618354691373-d851c5c3a990?w=500&q=80"
-                                    alt="{{ $product->product_name }}">
+                                <img src="{{ $imageUrl }}"
+                                    alt="{{ $productName }} {{ $colorName }}">
                                 <img class="hover-img"
-                                    src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&q=80"
-                                    alt="{{ $product->product_name }} alt">
+                                    src="{{ $hoverImageUrl }}"
+                                    alt="{{ $productName }} {{ $colorName }} alt">
                                 <span class="product-badge badge-new">New</span>
                                 <button class="wishlist-btn" aria-label="Wishlist"
-                                    onclick="addToWishlist({{ $product->id }})">
+                                    onclick="addToWishlist({{ $product?->id ?? $variant->id }})">
                                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
                                         stroke="#0A0A0A" stroke-width="1.5">
                                         <path
@@ -258,47 +326,26 @@
                                 </button>
                             </a>
 
-                            <button class="product-quick-add" data-product-id="{{ $product->id }}"
-                                data-product-name="{{ addslashes($product->product_name) }}"
-                                data-product-price="{{ $product->price }}"
-                                data-product-image="{{ $product->image_url }}" onclick="quickAddToCart(this)">
+                          <!--  <button class="product-quick-add" data-product-id="{{ $defaultVariant->id }}"
+                                data-product-name="{{ e($productName) }}"
+                                data-product-price="{{ $price }}"
+                                data-product-image="{{ $imageUrl }}"
+                                data-product-color="{{ e($colorName) }}"
+                                data-product-size="{{ e($defaultVariant->size?->size_name ?? 'OS') }}"
+                                onclick="quickAddToCart(this)">
                                 Quick Add
-                            </button>
-
-                            <script>
-                                function quickAddToCart(btn) {
-                                    const productId = btn.dataset.productId;
-                                    const productName = btn.dataset.productName;
-                                    const productPrice = parseInt(btn.dataset.productPrice);
-                                    const productImage = btn.dataset.productImage;
-
-                                    addToCart(event, productName, productId, productPrice, productImage);
-                                }
-                            </script>
+                            </button> -->
 
                         </div>
                         <div class="product-meta">
                             <p class="product-name">
-                                <a href="product.html"
-                                    style="text-decoration:none;color:inherit;">{{ $product->product_name }}</a>
+                                <a href="{{ $product ? route('product', $product->slug) : '#' }}"
+                                    style="text-decoration:none;color:inherit;">{{ $productName }}</a>
                             </p>
                             <p class="product-color">
-                                @php
-                                    $colors = $product->productVariants
-                                        ->pluck('color.color_name')
-                                        ->filter()
-                                        ->unique()
-                                        ->implode(' - ');
-                                @endphp
-                                {{ $colors ?: 'No color available' }}
+                                {{ $sizeNames ? '  Sizes: ' . $sizeNames : '' }}
                             </p>
                             <p class="product-price">
-                                @php
-                                    $firstVariant = $product->productVariants->first();
-                                    $price = $firstVariant
-                                        ? $firstVariant->variant_price
-                                        : $product->product_price ?? 0;
-                                @endphp
                                 {{ number_format($price, 2) }} ج.م
                             </p>
                         </div>
@@ -352,10 +399,10 @@
                         @endif
                     </div>
 
-                    <!-- Product count info -->
+                    <!-- Color count info -->
                     <p style="font-family:'DM Sans',sans-serif;font-size:12px;color:#9C9A96;margin-top:24px;">
                         Displaying {{ $products->firstItem() ?? 0 }} – {{ $products->lastItem() ?? 0 }} of total
-                        {{ $products->total() }} products
+                        {{ $products->total() }} colors
                     </p>
                 </div>
             @endif

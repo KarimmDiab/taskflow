@@ -8,6 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>RYO — Monochromatica Collection</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/favicon/favicon.png') }}">
 
     <meta name="description"
         content="Discover the Monochromatica collection — oversized silhouettes, muted palettes and premium minimalist streetwear.">
@@ -113,7 +114,7 @@
                             </svg>
                         </a>
 
-                        <a href="shop.html?collection={{ urlencode($collection->collection_name) }}"
+                        <a href="#shop_collection"
                             class="group inline-flex items-center gap-2 px-4 py-2 bg-white/5 backdrop-blur-sm border border-white/20 rounded-full text-[10px] font-label tracking-[0.2em] uppercase text-white/70 hover:bg-white/20 hover:border-white/40 transition-all duration-300">
                             Shop Collection
                             <svg class="w-3 h-3 group-hover:translate-x-0.5 transition-transform" fill="none"
@@ -241,7 +242,7 @@
                             </svg>
                         </a>
 
-                        <a href="shop.html?collection={{ $collection->collection_name }}"
+                        <a href="#shop_collection"
                             class="inline-flex items-center gap-2 text-ryo-gray-500 text-[11px] font-label tracking-[0.2em] uppercase hover:text-ryo-black transition-colors duration-300">
                             Shop Collection
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,7 +279,7 @@
 
 
     {{-- PRODUCTS - ENHANCED WITH QUICK ADD TO CART --}}
-    <section class="px-6 md:px-10 pb-24 md:pb-32 bg-gradient-to-b from-white to-ryo-gray-100/20">
+    <section class="px-6 md:px-10 pb-24 md:pb-32 bg-gradient-to-b from-white to-ryo-gray-100/20" id="shop_collection">
         <div class="max-w-[1440px] mx-auto">
 
             {{-- Section Header with Refined Typography --}}
@@ -301,7 +302,7 @@
                     <div class="w-px h-8 bg-ryo-gray-300 hidden md:block"></div>
                     <div
                         class="uppercase tracking-[0.2em] text-[10px] md:text-[11px] text-ryo-gray-500 font-label bg-ryo-gray-100/50 px-4 py-2 rounded-full">
-                        {{ $countCollectionProducts }} {{ $countCollectionProducts == 1 ? 'Product' : 'Products' }}
+                        {{ $countCollectionProducts }} {{ $countCollectionProducts == 1 ? 'Variant' : 'Variants' }}
                     </div>
                 </div>
             </div>
@@ -309,15 +310,14 @@
             {{-- Product Grid with Enhanced Cards --}}
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
 
-                @foreach ($collectionProducts as $product)
+                @foreach ($collectionProducts as $variant)
                     @php
-                        $primaryImage = $product->images
-                            ->sortBy([['is_primary', 'desc'], ['sort_order', 'asc']])
-                            ->first();
-                        $hoverImage = $product->images
-                            ->where('id', '!=', $primaryImage?->id)
-                            ->sortBy('sort_order')
-                            ->first();
+                        $product = $variant->product;
+                        $primaryImage = $product?->images?->firstWhere('color_id', $variant->color_id)
+                            ?? $product?->images?->sortBy([['is_primary', 'desc'], ['sort_order', 'asc']])->first();
+                        $hoverImage = $product?->images
+                            ? $product->images->where('id', '!=', $primaryImage?->id)->sortBy('sort_order')->first()
+                            : null;
                         $formatImageUrl = function ($path) {
                             if (!$path) {
                                 return null;
@@ -331,12 +331,9 @@
                             $formatImageUrl($primaryImage?->image_path) ??
                             'https://images.unsplash.com/photo-1523398002811-999ca8dec234?q=80&w=900&auto=format&fit=crop';
                         $productHoverImage = $formatImageUrl($hoverImage?->image_path);
-                        $firstAvailableVariant =
-                            $product->productVariants->first(
-                                fn($variant) => $variant->inventories->sum('quantity') > 0,
-                            ) ?? $product->productVariants->first();
-                        $price = $firstAvailableVariant?->variant_price ?? ($product->product_price ?? 0);
-                        $stock = $product->productVariants->sum(fn($variant) => $variant->inventories->sum('quantity'));
+                        $price = $variant->variant_price ?? ($product?->product_price ?? 0);
+                        $stock = $variant->inventories->sum('quantity');
+                        $variantLabel = collect([$variant->color?->color_name])->filter()->implode(' / ');
                     @endphp
                     {{-- PRODUCT CARD --}}
                     <div class="group relative opacity-0 animate-[fadeInUp_0.6s_ease-out_forwards]"
@@ -346,21 +343,21 @@
                         <div class="relative overflow-hidden bg-[#ECE8E1] rounded-[28px] transition duration-700">
 
                             {{-- PRODUCT LINK --}}
-                            <a href="{{ route('product', $product->slug) }}">
+                            <a href="{{ $product ? route('product', $product->slug) : '#' }}">
 
                                 <div class="relative overflow-hidden aspect-[3/4]">
 
                                     {{-- MAIN IMAGE --}}
                                     <img src="{{ $productImage }}"
                                         class="w-full h-full object-cover transition duration-[1400ms] ease-out group-hover:scale-[1.03]"
-                                        alt="{{ $product->product_name }}">
+                                        alt="{{ $product?->product_name }} {{ $variantLabel }}">
 
 
                                     {{-- HOVER IMAGE --}}
                                     @if ($productHoverImage)
                                         <img src="{{ $productHoverImage }}"
                                             class="absolute inset-0 w-full h-full object-cover opacity-0 group-hover:opacity-100 transition-opacity duration-700"
-                                            alt="{{ $product->product_name }}">
+                                            alt="{{ $product?->product_name }} hover">
                                     @endif
 
 
@@ -411,21 +408,21 @@
                         <div class="pt-6 px-1">
                             <div class="flex items-start justify-between gap-5">
                                 <div class="flex-1">
-                                    <a href="{{ route('product', $product->slug) }}">
+                                    <a href="{{ $product ? route('product', $product->slug) : '#' }}">
                                         <h3
                                             class="font-display text-[24px] md:text-[28px]
                                leading-[1.05]
                                tracking-[-0.03em]
                                text-ryo-black
                                transition duration-300 group-hover:text-ryo-gray-700">
-                                            {{ $product->product_name }}
+                                            {{ $product?->product_name }}
                                         </h3>
                                     </a>
                                     <p
                                         class="mt-2 text-[10px]
                            uppercase tracking-[0.18em]
                            text-ryo-gray-400 font-label">
-                                        {{ $product->material ?? 'Heavyweight Cotton' }}
+                                        {{ $variantLabel ?: ($product?->material ?? 'Heavyweight Cotton') }}
                                     </p>
                                 </div>
 
@@ -444,7 +441,7 @@
 
 
                             {{-- LINK --}}
-                            <a href="{{ route('product', $product->slug) }}"
+                            <a href="{{ $product ? route('product', $product->slug) : '#' }}"
                                 class="inline-flex items-center gap-2 mt-5
                                 uppercase tracking-[0.2em]
                                 text-[10px] font-label
