@@ -35,37 +35,51 @@
 
 
     <!-- ═══════════════════════════════════════════
-     HERO
-═══════════════════════════════════════════ -->
-    <section class="hero-section">
-        <div class="hero-bg"></div>
-        <div class="hero-img-overlay" id="heroBg"></div>
-        <div class="hero-gradient"></div>
+     HERO - Full Screen Image with Minimal Overlay
+    ═══════════════════════════════════════════ -->
+    <section class="relative h-screen max-h-[900px] min-h-[600px] flex items-center justify-center overflow-hidden">
+        <!-- Background Image (replace with dynamic if needed) -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1606902965551-dce093cda6e7?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80"
+                alt="Hero Background" class="w-full h-full object-cover object-center">
+        </div>
+        <!-- Subtle overlay -->
+        <div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/40 z-10"></div>
 
-        <div class="hero-content" style="max-width:1440px;margin:0 auto;width:100%;padding:0 40px 80px;">
-            <p class="hero-eyebrow">SS25 Collection — Now Available</p>
-            <h1 class="hero-title">
-                Wear<br>
-                the <em>silence</em>
+        <!-- Content -->
+        <div class="relative z-20 text-center px-6 max-w-4xl mx-auto">
+            <p class="text-white/80 text-xs tracking-[0.25em] uppercase mb-6 font-medium">SS25 Collection — Now
+                Available</p>
+            <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-light text-white leading-tight mb-8">
+                Wear the <em class="italic font-medium">silence</em>
             </h1>
-            <p class="hero-sub">Minimal luxury for those who speak through what they wear. Premium oversized essentials,
-                crafted for the modern generation.</p>
-            <div class="hero-cta-group">
-                <a href="shop.html" class="btn-primary">
+            <p class="text-white/80 text-lg md:text-xl font-light max-w-xl mx-auto mb-10">
+                Minimal luxury for those who speak through what they wear.
+                Premium oversized essentials, crafted for the modern generation.
+            </p>
+            <div class="flex flex-wrap gap-4 justify-center">
+                <a href="shop.html"
+                    class="inline-flex items-center gap-2 bg-white text-gray-900 px-8 py-3 text-sm font-medium tracking-wide uppercase hover:bg-gray-100 transition-colors duration-300">
                     Shop Collection
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
                         <path d="M5 12h14M12 5l7 7-7 7" />
                     </svg>
                 </a>
-                <a href="#collections" class="btn-outline-light">Explore Drops</a>
+                <a href="#collections"
+                    class="inline-flex items-center gap-2 border border-white/40 text-white px-8 py-3 text-sm font-medium tracking-wide uppercase hover:bg-white/10 transition-colors duration-300">
+                    Explore Drops
+                </a>
             </div>
         </div>
 
         <!-- Scroll Indicator -->
-        <div class="hero-scroll">
-            <div class="scroll-line"></div>
-            <span>Scroll</span>
+        <div
+            class="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center gap-2 text-white/60">
+            <span class="text-xs tracking-widest uppercase">Scroll</span>
+            <div class="w-px h-8 bg-white/40 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-full bg-white animate-pulse"></div>
+            </div>
         </div>
     </section>
 
@@ -111,146 +125,36 @@
 
 
     <!-- ═══════════════════════════════════════════
-     BRAND STATEMENT
-═══════════════════════════════════════════ -->
-    <section style="
-    position:relative;
-    padding:75px 40px;
-    background:#F8F6F2;
-    overflow:hidden;
-">
-
-        <!-- Background Accent -->
-        <div
-            style="
-        position:absolute;
-        top:-120px;
-        right:-120px;
-        width:420px;
-        height:420px;
-        border-radius:50%;
-        background:rgba(10,10,10,0.03);
-        pointer-events:none;
-    ">
-        </div>
-
-        <div
-            style="
-        position:relative;
-        max-width:1440px;
-        margin:0 auto;
-        display:grid;
-        grid-template-columns:1.2fr 0.8fr;
-        gap:120px;
-        align-items:end;
-    ">
-
-            <!-- Left Content -->
-            <div>
-
-                <p class="section-eyebrow reveal"
-                    style="
-                    margin-bottom:24px;
-                    letter-spacing:0.25em;
-               ">
-                    The Philosophy
-                </p>
-
-                <h2 class="section-title reveal reveal-delay-1"
-                    style="
-                    font-size:clamp(52px,7vw,110px);
-                    line-height:0.92;
-                    letter-spacing:-0.04em;
-                    font-weight:300;
-                    margin-bottom:42px;
-                    color:#0A0A0A;
-               ">
-
-                    Clothing<br>
-
-                    that <span
-                        style="
-                    font-style:italic;
-                    font-weight:400;
-                ">speaks</span><br>
-
-                    without noise.
-
+     BRAND STATEMENT - Refined Typography Layout
+    ═══════════════════════════════════════════ -->
+    <section class="relative py-20 lg:py-32 px-6 max-w-7xl mx-auto overflow-hidden">
+        <div class="grid lg:grid-cols-5 gap-16 items-center">
+            <div class="lg:col-span-3 reveal">
+                <p class="text-xs tracking-[0.25em] uppercase text-gray-400 mb-6">The Philosophy</p>
+                <h2 class="font-display text-4xl md:text-6xl lg:text-7xl font-light text-gray-900 leading-[1.1] mb-10">
+                    Clothing that <em class="italic font-medium">speaks</em><br> without noise.
                 </h2>
-
             </div>
-
-            <!-- Right Content -->
-            <div class="reveal reveal-delay-2">
-
-                <div
-                    style="
-                width:60px;
-                height:1px;
-                background:#0A0A0A;
-                margin-bottom:28px;
-            ">
-                </div>
-
-                <p
-                    style="
-                font-family:'DM Sans',sans-serif;
-                font-size:16px;
-                font-weight:300;
-                line-height:2;
-                color:#3D3D3A;
-                max-width:460px;
-                margin-bottom:36px;
-            ">
-
+            <div class="lg:col-span-2 reveal">
+                <div class="w-12 h-px bg-gray-300 mb-6"></div>
+                <p class="text-gray-600 text-lg font-light leading-relaxed mb-8 max-w-md">
                     RYO was created for people who value presence over attention.
                     Every silhouette is intentional — refined proportions,
                     elevated fabrics, and understated details designed to feel timeless.
-
                 </p>
-
-                <div
-                    style="
-                display:flex;
-                gap:48px;
-                flex-wrap:wrap;
-            ">
-
+                <div class="flex gap-12">
                     <div>
-                        <p
-                            style="
-                        font-size:12px;
-                        letter-spacing:0.18em;
-                        text-transform:uppercase;
-                        color:#8A8A86;
-                        margin-bottom:10px;
-                    ">
-                            Focus
-                        </p>
-
-                        <p
-                            style="
-                        font-size:15px;
-                        color:#0A0A0A;
-                    ">
-                            Minimal Luxury
-                        </p>
+                        <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">Focus</p>
+                        <p class="text-gray-900 font-medium">Minimal Luxury</p>
                     </div>
-
                     <div>
-                        <p
-                            style="font-size:12px;letter-spacing:0.18em;text-transform:uppercase;color:#8A8A86; margin-bottom:10px;">
-                            Identity
-                        </p>
-                        <p style="font-size:15px;color:#0A0A0A;">
-                            Premium Streetwear
-                        </p>
+                        <p class="text-xs tracking-widest uppercase text-gray-400 mb-2">Identity</p>
+                        <p class="text-gray-900 font-medium">Premium Streetwear</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
 
     <!-- ═══════════════════════════════════════════
      FEATURED COLLECTION — NEW DROP
@@ -271,9 +175,9 @@
                 @php
                     // الصورة الأساسية
                     $product = $variant->product;
-                    $variantImage = $product?->images?->firstWhere('color_id', $variant->color_id)
-                        ?? $product?->primaryImage
-                        ?? $product?->images?->first();
+                    $variantImage =
+                        $product?->images?->firstWhere('color_id', $variant->color_id) ??
+                        ($product?->primaryImage ?? $product?->images?->first());
                     $imageUrl = $variantImage?->image_path
                         ? Storage::url($variantImage->image_path)
                         : asset('images/placeholder.jpg');
@@ -281,20 +185,24 @@
                     // الصورة الثانية (أول صورة غير أساسية من علاقة images)
                     $hoverImage = $product?->images?->where('id', '!=', $variantImage?->id)->first();
                     $hoverImageUrl = $hoverImage?->image_path ? Storage::url($hoverImage->image_path) : $imageUrl;
-                    $variantLabel = collect([$variant->color?->color_name])->filter()->implode(' / ');
+                    $variantLabel = collect([$variant->color?->color_name])
+                        ->filter()
+                        ->implode(' / ');
                 @endphp
 
                 <div class="product-card reveal reveal-delay-1">
                     <a href="{{ $product ? route('product', $product->slug) : '#' }}" class="product-link">
                         <div class="product-img-wrap" style="aspect-ratio:3/4;">
                             <img src="{{ $imageUrl }}" alt="{{ $product?->product_name }} {{ $variantLabel }}">
-                            <img class="hover-img" src="{{ $hoverImageUrl }}" alt="{{ $product?->product_name }} hover">
+                            <img class="hover-img" src="{{ $hoverImageUrl }}"
+                                alt="{{ $product?->product_name }} hover">
                             <span class="product-badge badge-new">New</span>
                         </div>
                         <div class="product-meta">
                             <p class="product-name">{{ $product?->product_name }}</p>
                             <p class="product-color">{{ $variantLabel ?: 'Default variant' }}</p>
-                            <p class="product-price">EGP {{ number_format($variant->variant_price ?? $product?->product_price ?? 0, 0) }}</p>
+                            <p class="product-price">EGP
+                                {{ number_format($variant->variant_price ?? ($product?->product_price ?? 0), 0) }}</p>
                         </div>
                     </a>
                 </div>
@@ -361,9 +269,9 @@
                 @php
                     // الصورة الأساسية
                     $product = $variant->product;
-                    $variantImage = $product?->images?->firstWhere('color_id', $variant->color_id)
-                        ?? $product?->primaryImage
-                        ?? $product?->images?->first();
+                    $variantImage =
+                        $product?->images?->firstWhere('color_id', $variant->color_id) ??
+                        ($product?->primaryImage ?? $product?->images?->first());
                     $imageUrl = $variantImage?->image_path
                         ? Storage::url($variantImage->image_path)
                         : asset('images/placeholder.jpg');
@@ -371,17 +279,20 @@
                     // الصورة الثانية (أول صورة غير أساسية من علاقة images)
                     $hoverImage = $product?->images?->where('id', '!=', $variantImage?->id)->first();
                     $hoverImageUrl = $hoverImage?->image_path ? Storage::url($hoverImage->image_path) : $imageUrl;
-                    $variantLabel = collect([$variant->color?->color_name])->filter()->implode(' / ');
+                    $variantLabel = collect([$variant->color?->color_name])
+                        ->filter()
+                        ->implode(' / ');
                 @endphp
                 <div class="product-card reveal reveal-delay-1">
                     <a href="{{ $product ? route('product', $product->slug) : '#' }}" class="product-link">
                         <div class="product-img-wrap" style="aspect-ratio:3/4;">
                             <img src="{{ $imageUrl }}" alt="{{ $product?->product_name }} {{ $variantLabel }}">
-                            <img class="hover-img" src="{{ $hoverImageUrl }}" alt="{{ $product?->product_name }} hover">
+                            <img class="hover-img" src="{{ $hoverImageUrl }}"
+                                alt="{{ $product?->product_name }} hover">
                             <span class="product-badge badge-sale">Best Seller</span>
                             <button class="wishlist-btn" aria-label="Wishlist" type="button">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A"
-                                    stroke-width="1.5">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                                    stroke="#0A0A0A" stroke-width="1.5">
                                     <path
                                         d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
                                 </svg>
@@ -390,7 +301,8 @@
                         <div class="product-meta">
                             <p class="product-name">{{ $product?->product_name }}</p>
                             <p class="product-color">{{ $variantLabel ?: 'Default variant' }}</p>
-                            <p class="product-price">EGP {{ number_format($variant->variant_price ?? $product?->product_price ?? 0, 0) }}</p>
+                            <p class="product-price">EGP
+                                {{ number_format($variant->variant_price ?? ($product?->product_price ?? 0), 0) }}</p>
                         </div>
                     </a>
                 </div>
@@ -435,7 +347,8 @@
                 <em>{{ $secondPart ?: 'Essentials' }}</em><br>
                 {{-- يمكنك إزالة السطر الثالث أو استبداله بشيء آخر --}}
             </h2>
-            <a href="{{ $featuredCollectionUrl }}" class="btn-primary" style="pointer-events:auto;">Shop the Drop</a>
+            <a href="{{ $featuredCollectionUrl }}" class="btn-primary" style="pointer-events:auto;">Shop the
+                Drop</a>
         </div>
     </section>
 
