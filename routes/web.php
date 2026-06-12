@@ -63,6 +63,7 @@ Route::livewire('sizes', 'pages::sizes.index')->middleware(['auth', 'permission:
 Route::livewire('payment_methods', 'pages::payment_method.index')->middleware(['auth', 'permission:payment_methods.view'])->name('payment_methods');
 Route::livewire('shipping', 'pages::shipping.index')->middleware(['auth', 'permission:shipping_governorates.view'])->name('shipping');
 Route::livewire('all_collections', 'pages::collection.index')->middleware(['auth', 'permission:collections.view'])->name('all_collections');
+Route::livewire('pos_system', 'pages::pos_system.index')->middleware(['auth', 'permission:pos_system.view'])->name('pos_system');
 
 
 

@@ -33,9 +33,35 @@ return [
         'payment_methods' => 'Payment Methods',
         'shipping_governorates' => 'Shipping Governorates',
         'collections' => 'Collections',
+        'pos_system' => 'POS System',
     ],
 
+    'default_role_permissions' => [
+        'user' => [
+            'dashboard.view',
+            'products.view',
+            'main_categories.view',
+            'sub_categories.view',
+            'customers.view',
+            'suppliers.view',
+            'purchase_invoices.view',
+            'create_purchase_invoice.view',
+            'expenses.view',
+            'expense_items.view',
+            'collections.view',
+        ],
 
+        'pos_sales' => [
+            'pos_system.view',
+            'pos_system.create',
+            'dashboard.view',
+            'products.view',
+            'customers.view',
+            'customers.create',
+            'collections.view',
+            'payment_methods.view',
+        ],
+    ],
 
     'route_permissions' => [
         'dashboard' => 'dashboard.view',
@@ -52,6 +78,7 @@ return [
         'payment_methods' => 'payment_methods.view',
         'shipping' => 'shipping_governorates.view',
         'all_collections' => 'collections.view',
+        'pos_system' => 'pos_system.view',
         'products.edit' => 'products.update',
         'products' => 'products.view',
         'expenses' => 'expenses.view',

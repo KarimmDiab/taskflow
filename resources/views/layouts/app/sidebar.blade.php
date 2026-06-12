@@ -52,6 +52,16 @@
                 @endcan
             </flux:sidebar.group>
 
+            <flux:sidebar.group :heading="__('POS')" class="mb-6">
+                @can('pos_system.view')
+                <flux:sidebar.item icon="shopping-cart" :href="route('pos_system')"
+                    :current="request()->routeIs('pos_system')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('POS System') }}
+                </flux:sidebar.item>
+                @endcan
+            </flux:sidebar.group>
+
             {{-- إدارة الفواتير --}}
             <flux:sidebar.group :heading="__('إدارة الفواتير')" class="mb-6">
                 @can('purchase_invoices.view')
