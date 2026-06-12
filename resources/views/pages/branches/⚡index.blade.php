@@ -54,11 +54,15 @@ new #[Title('إدارة الفروع')] class extends Component {
 
     public function edit($id)
     {
+        abort_unless(auth()->user()?->can('branches.update'), 403);
+
         $this->dispatch('editBranch', id: $id);
     }
 
     public function delete($id)
     {
+        abort_unless(auth()->user()?->can('branches.delete'), 403);
+
         Branches::findOrFail($id)->delete();
         session()->flash('success', 'تم حذف الفرع بنجاح');
         $this->resetPage();
@@ -109,6 +113,7 @@ new #[Title('إدارة الفروع')] class extends Component {
                         </div>
                     </div>
 
+                    @can('branches.create')
                     <flux:modal.trigger name="add-branch">
                         <button
                             class="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300 overflow-hidden">
@@ -124,6 +129,7 @@ new #[Title('إدارة الفروع')] class extends Component {
                             </span>
                         </button>
                     </flux:modal.trigger>
+                    @endcan
                 </div>
 
                 {{-- Stats Cards --}}
@@ -182,8 +188,8 @@ new #[Title('إدارة الفروع')] class extends Component {
         </div>
 
         {{-- Modals --}}
-        <livewire:branch.create />
-        <livewire:branch.edit />
+        @can('branches.create') <livewire:branch.create /> @endcan
+        @can('branches.update') <livewire:branch.edit /> @endcan
 
         {{-- Main Table Card --}}
         <div
@@ -362,6 +368,7 @@ new #[Title('إدارة الفروع')] class extends Component {
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex justify-end items-center gap-2">
+                                        @can('branches.update')
                                         <button wire:click="edit({{ $branch->id }})"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-800 hover:text-blue-700 transition-all duration-150">
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
@@ -371,6 +378,8 @@ new #[Title('إدارة الفروع')] class extends Component {
                                             </svg>
                                             تعديل
                                         </button>
+                                        @endcan
+                                        @can('branches.delete')
                                         <button wire:click="delete({{ $branch->id }})"
                                             wire:confirm="هل أنت متأكد من حذف هذا الفرع؟"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 transition-all duration-150">
@@ -381,6 +390,7 @@ new #[Title('إدارة الفروع')] class extends Component {
                                             </svg>
                                             حذف
                                         </button>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

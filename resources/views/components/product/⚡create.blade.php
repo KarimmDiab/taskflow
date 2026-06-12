@@ -171,6 +171,8 @@ new #[Title('إنشاء منتج')] class extends Component {
 
     public function save()
     {
+        abort_unless(auth()->user()?->can('products.create'), 403);
+
         $validated = $this->validate(
             [
                 'category_id' => ['required', 'integer', 'exists:categories,id'],

@@ -48,11 +48,15 @@ new #[Title('إدارة طرق الدفع')] class extends Component {
 
     public function edit($id)
     {
+        abort_unless(auth()->user()?->can('payment_methods.update'), 403);
+
         $this->dispatch('editPaymentMethod', id: $id);
     }
 
     public function delete($id)
     {
+        abort_unless(auth()->user()?->can('payment_methods.delete'), 403);
+
         PaymentMethod::findOrFail($id)->delete();
         session()->flash('success', 'تم حذف بند طريقة الدفع بنجاح');
         $this->resetPage();
@@ -96,6 +100,7 @@ new #[Title('إدارة طرق الدفع')] class extends Component {
                 </p>
             </div>
 
+            @can('payment_methods.create')
             <flux:modal.trigger name="add_payment_method">
                 <button
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300">
@@ -106,11 +111,12 @@ new #[Title('إدارة طرق الدفع')] class extends Component {
                     إضافة طريقة دفع جديدة
                 </button>
             </flux:modal.trigger>
+            @endcan
         </div>
 
         {{-- Modals --}}
-        <livewire:payment_method.create />
-        <livewire:payment_method.edit />
+        @can('payment_methods.create') <livewire:payment_method.create /> @endcan
+        @can('payment_methods.update') <livewire:payment_method.edit /> @endcan
 
         {{-- Enhanced Table Card --}}
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300"
@@ -259,7 +265,8 @@ new #[Title('إدارة طرق الدفع')] class extends Component {
 
                                 <td class="px-6 py-4">
                                     <div class="flex justify-end items-center gap-2">
-                                        <button wire:click="edit({{ $payment_method->id }})"
+                                    @can('payment_methods.update')
+                                    <button wire:click="edit({{ $payment_method->id }})"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-800 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-150">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
                                                 viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -267,9 +274,11 @@ new #[Title('إدارة طرق الدفع')] class extends Component {
                                                     d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z" />
                                             </svg>
                                             تعديل
-                                        </button>
+                                    </button>
+                                    @endcan
 
-                                        <button wire:click="delete({{ $payment_method->id }})"
+                                    @can('payment_methods.delete')
+                                    <button wire:click="delete({{ $payment_method->id }})"
                                             wire:confirm="هل أنت متأكد من حذف طريقة الدفع هذه؟"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-all duration-150">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5"
@@ -279,7 +288,8 @@ new #[Title('إدارة طرق الدفع')] class extends Component {
                                                     d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
                                             </svg>
                                             حذف
-                                        </button>
+                                    </button>
+                                    @endcan
                                     </div>
                                  </td>
                              </tr>

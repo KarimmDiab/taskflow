@@ -72,6 +72,8 @@ new class extends Component {
     #[On('openEditModal')]
     public function mount($id = null)
     {
+        abort_unless(auth()->user()?->can('products.update'), 403);
+
         // try to populate when page is loaded with an id (route param or query string)
         $routeId = $id ?: request()->query('id') ?: request()->route('id');
 
@@ -267,6 +269,8 @@ new class extends Component {
 
     public function update()
     {
+        abort_unless(auth()->user()?->can('products.update'), 403);
+
         $validated = $this->validate(
             [
                 'category_id' => ['required', 'integer', 'exists:categories,id'],

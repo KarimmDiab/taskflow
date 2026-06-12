@@ -103,6 +103,8 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
     public function mount(): void
     {
+        abort_unless(auth()->user()?->can('create_purchase_invoice.create'), 403);
+
         $this->purchase_invoice_date = now()->format('Y-m-d');
         $this->invoice_number = $this->generateInvoiceNumber();
         $this->branch_id = auth()->user()?->branch_id ?? Branches::query()->orderBy('id')->value('id');
@@ -532,6 +534,8 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
     public function saveNewProduct(): void
     {
+        abort_unless(auth()->user()?->can('products.create'), 403);
+
         $this->validate(
             [
                 'newProductName' => 'required|string|max:191',
@@ -621,6 +625,8 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
     public function saveInvoice(): void
     {
+        abort_unless(auth()->user()?->can('create_purchase_invoice.create'), 403);
+
         $this->saving = true;
 
         $this->validate(

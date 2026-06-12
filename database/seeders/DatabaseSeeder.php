@@ -52,6 +52,6 @@ class DatabaseSeeder extends Seeder
             'email' => 'karim@karim.com',
             'password' => '12345678',
         ]);
-        $admin->assignRole('admin');
+        $admin->assignRole('developer');
     }
 }

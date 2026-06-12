@@ -58,11 +58,15 @@ new #[Title('إدارة التصنيفات الفرعية للمنتجات')] cl
 
     public function edit($id)
     {
+        abort_unless(auth()->user()?->can('sub_categories.update'), 403);
+
         $this->dispatch('editSubCategory', id: $id);
     }
 
     public function delete($id)
     {
+        abort_unless(auth()->user()?->can('sub_categories.delete'), 403);
+
         SubCategory::findOrFail($id)->delete();
         session()->flash('success', 'تم حذف التصنيف الفرعي بنجاح');
         $this->resetPage();
@@ -96,6 +100,7 @@ new #[Title('إدارة التصنيفات الفرعية للمنتجات')] cl
                 </p>
             </div>
 
+            @can('sub_categories.create')
             <flux:modal.trigger name="add-subCategory">
                 <button
                     class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300">
@@ -106,12 +111,13 @@ new #[Title('إدارة التصنيفات الفرعية للمنتجات')] cl
                     إضافة تصنيف فرعي جديد
                 </button>
             </flux:modal.trigger>
+            @endcan
         </div>
 
 
         {{-- Modals --}}
-        <livewire:sub-category.create />
-        <livewire:sub-category.edit />
+        @can('sub_categories.create') <livewire:sub-category.create /> @endcan
+        @can('sub_categories.update') <livewire:sub-category.edit /> @endcan
 
         {{-- Enhanced Table Card --}}
         <div class="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300"
@@ -258,6 +264,7 @@ new #[Title('إدارة التصنيفات الفرعية للمنتجات')] cl
 
                                 <td class="px-6 py-4">
                                     <div class="flex justify-end items-center gap-2">
+                                        @can('sub_categories.update')
                                         <button wire:click="edit({{ $subCategory->id }})"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-200 dark:hover:border-blue-800 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-150">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none"
@@ -267,7 +274,9 @@ new #[Title('إدارة التصنيفات الفرعية للمنتجات')] cl
                                             </svg>
                                             تعديل
                                         </button>
+                                        @endcan
 
+                                        @can('sub_categories.delete')
                                         <button wire:click="delete({{ $subCategory->id }})"
                                             wire:confirm="هل أنت متأكد من حذف هذا التصنيف الفرعي ؟"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 dark:hover:border-red-800 transition-all duration-150">
@@ -278,6 +287,7 @@ new #[Title('إدارة التصنيفات الفرعية للمنتجات')] cl
                                             </svg>
                                             حذف
                                         </button>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

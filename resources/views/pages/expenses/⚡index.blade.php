@@ -89,11 +89,15 @@ new #[Title('إدارة المصروفات')] class extends Component {
 
     public function edit(int $id): void
     {
+        abort_unless(auth()->user()?->can('expenses.update'), 403);
+
         $this->dispatch('editExpensesDetail', id: $id);
     }
 
     public function delete(int $id): void
     {
+        abort_unless(auth()->user()?->can('expenses.delete'), 403);
+
         try {
             $expensesDetails = ExpensesDetail::findOrFail($id);
             $expensesDetails->delete();
@@ -127,6 +131,7 @@ new #[Title('إدارة المصروفات')] class extends Component {
                     </p>
                 </div>
 
+                @can('expenses.create')
                 <flux:modal.trigger name="add-expensesDetails">
                     <button
                         class="group relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] active:scale-95">
@@ -143,6 +148,7 @@ new #[Title('إدارة المصروفات')] class extends Component {
                         </div>
                     </button>
                 </flux:modal.trigger>
+                @endcan
             </div>
         </div>
 
@@ -250,8 +256,8 @@ new #[Title('إدارة المصروفات')] class extends Component {
         </div>
     </div>
 
-    <livewire:expenses.create />
-    <livewire:expenses.edit />
+    @can('expenses.create') <livewire:expenses.create /> @endcan
+    @can('expenses.update') <livewire:expenses.edit /> @endcan
 
     {{-- Main Table Card --}}
     <div class="max-w-7xl mx-auto">
@@ -459,6 +465,7 @@ new #[Title('إدارة المصروفات')] class extends Component {
                                                 </svg>
                                             </a>
                                         @endif
+                                        @can('expenses.update')
                                         <button wire:click="edit({{ $expense->id }})"
                                             class="p-2 text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
@@ -467,7 +474,9 @@ new #[Title('إدارة المصروفات')] class extends Component {
                                                     d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                             </svg>
                                         </button>
+                                        @endcan
 
+                                        @can('expenses.delete')
                                         <button wire:click="delete({{ $expense->id }})"
                                             wire:confirm="هل أنت متأكد من حذف المصروف '{{ $expense->expensesItem->expenses_name ?? 'هذا المصروف' }}'؟"
                                             class="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg transition-all duration-200 hover:scale-110 active:scale-95">
@@ -477,6 +486,7 @@ new #[Title('إدارة المصروفات')] class extends Component {
                                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                             </svg>
                                         </button>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -498,12 +508,14 @@ new #[Title('إدارة المصروفات')] class extends Component {
                                                 مصروفات</p>
                                             <p class="text-sm text-gray-400 mt-2">ابدأ بإضافة مصروف جديد للنظام</p>
                                         </div>
+                                        @can('expenses.create')
                                         <flux:modal.trigger name="add-expensesDetails">
                                             <button
                                                 class="mt-2 px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl hover:shadow-lg transition-all hover:scale-105">
                                                 + إضافة مصروف جديد
                                             </button>
                                         </flux:modal.trigger>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

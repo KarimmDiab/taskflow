@@ -16,117 +16,171 @@
         <flux:sidebar.nav class="px-3 pt-4">
             {{-- لوحة التحكم --}}
             <flux:sidebar.group :heading="__('الرئيسية')" class="mb-6">
+                @can('dashboard.view')
                 <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('لوحة التحكم') }}
                 </flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
 
             {{-- إدارة المنتجات والمخزون --}}
             <flux:sidebar.group :heading="__('إدارة المنتجات والمخزون')" class="mb-6">
+                @can('products.view')
                 <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('المنتجات') }}
                 </flux:sidebar.item>
+                @endcan
 
+                @can('main_categories.view')
                 <flux:sidebar.item icon="tag" :href="route('categories')"
                     :current="request()->routeIs('categories')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('التصنيفات الرئيسية') }}
                 </flux:sidebar.item>
+                @endcan
 
+                @can('sub_categories.view')
                 <flux:sidebar.item icon="tag" :href="route('subCategories')"
                     :current="request()->routeIs('subCategories')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('التصنيفات الفرعية') }}
                 </flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
 
             {{-- إدارة الفواتير --}}
             <flux:sidebar.group :heading="__('إدارة الفواتير')" class="mb-6">
+                @can('purchase_invoices.view')
                 <flux:sidebar.item icon="document-text" :href="route('purchaseInvoices')"
                     :current="request()->routeIs('purchaseInvoices')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('قائمة فواتير المشتريات') }}
                 </flux:sidebar.item>
+                @endcan
 
+                @can('create_purchase_invoice.create')
                 <flux:sidebar.item icon="document-plus" :href="route('createpurchaseInvoices')"
                     :current="request()->routeIs('createpurchaseInvoices')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('تسجيل فاتورة مشتريات جديدة') }}
                 </flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
 
             {{-- إدارة المصروفات --}}
             <flux:sidebar.group :heading="__('إدارة المصروفات')" class="mb-6">
+                @can('expenses.view')
                 <flux:sidebar.item icon="currency-dollar" :href="route('expenses')"
                     :current="request()->routeIs('expenses')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('جميع المصروفات') }}
                 </flux:sidebar.item>
+                @endcan
 
+                @can('expense_items.view')
                 <flux:sidebar.item icon="receipt-percent" :href="route('expenses_items')"
                     :current="request()->routeIs('expenses_items')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('بنود المصروفات') }}
                 </flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
 
             {{-- إدارة العلاقات التجارية --}}
             <flux:sidebar.group :heading="__('العلاقات التجارية')" class="mb-6">
+                @can('customers.view')
                 <flux:sidebar.item icon="user-group" :href="route('customers')"
                     :current="request()->routeIs('customers')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('العملاء') }}
                 </flux:sidebar.item>
+                @endcan
 
+                @can('suppliers.view')
                 <flux:sidebar.item icon="truck" :href="route('suppliers')"
                     :current="request()->routeIs('suppliers')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('الموردين') }}
                 </flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
 
             {{-- إعدادات النظام --}}
             <flux:sidebar.group :heading="__('إعدادات النظام')" class="mb-6">
+                @can('users.view')
                 <flux:sidebar.item icon="users" :href="route('users')" :current="request()->routeIs('users')"
                     wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('المستخدمين') }}
                 </flux:sidebar.item>
+                @endcan
 
+                @can('users.update')
+                <flux:sidebar.item icon="plus-circle" :href="route('roles.index')"
+                    :current="request()->routeIs('roles.index')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('Add Role') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="shield-check" :href="route('roles-permissions.index')"
+                    :current="request()->routeIs('roles-permissions.index')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('Roles Permissions') }}
+                </flux:sidebar.item>
+
+                <flux:sidebar.item icon="user-plus" :href="route('user-roles.index')"
+                    :current="request()->routeIs('user-roles.index')" wire:navigate
+                    class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
+                    {{ __('User Roles') }}
+                </flux:sidebar.item>
+                @endcan
+
+                @can('branches.view')
                 <flux:sidebar.item icon="building-storefront" :href="route('branches')"
                     :current="request()->routeIs('branches')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('الفروع') }}
                 </flux:sidebar.item>
+                @endcan
+                @can('colors.view')
                 <flux:sidebar.item icon="building-storefront" :href="route('colors')"
                     :current="request()->routeIs('colors')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('اضافة الوان') }}
                 </flux:sidebar.item>
+                @endcan
+                @can('sizes.view')
                 <flux:sidebar.item icon="building-storefront" :href="route('sizes')"
                     :current="request()->routeIs('sizes')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('اضافة مقاس') }}
                 </flux:sidebar.item>
+                @endcan
+                @can('payment_methods.view')
                 <flux:sidebar.item icon="building-storefront" :href="route('payment_methods')"
                     :current="request()->routeIs('payment_methods')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('طرق الدفع') }}
                 </flux:sidebar.item>
+                @endcan
+                @can('shipping_governorates.view')
                 <flux:sidebar.item icon="building-storefront" :href="route('shipping')"
                     :current="request()->routeIs('shipping')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('محافظات الشحن') }}
                 </flux:sidebar.item>
+                @endcan
+                @can('collections.view')
                 <flux:sidebar.item icon="building-storefront" :href="route('all_collections')"
                     :current="request()->routeIs('all_collections')" wire:navigate
                     class="rounded-lg px-3 py-2.5 font-medium transition hover:bg-zinc-100 dark:hover:bg-zinc-800/80">
                     {{ __('كولكشن') }}
                 </flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
         </flux:sidebar.nav>
 

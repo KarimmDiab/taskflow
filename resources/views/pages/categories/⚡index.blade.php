@@ -64,6 +64,8 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
 
     public function toggleActive($id)
     {
+        abort_unless(auth()->user()?->can('main_categories.update'), 403);
+
         $category = Category::findOrFail($id);
         $category->update(['is_active' => !$category->is_active]);
         session()->flash('success', 'تم تحديث حالة التصنيف بنجاح');
@@ -71,6 +73,8 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
 
     public function toggleFeatured($id)
     {
+        abort_unless(auth()->user()?->can('main_categories.update'), 403);
+
         $category = Category::findOrFail($id);
         $category->update(['is_featured' => !$category->is_featured]);
         session()->flash('success', 'تم تحديث حالة المميز بنجاح');
@@ -78,11 +82,15 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
 
     public function edit($id)
     {
+        abort_unless(auth()->user()?->can('main_categories.update'), 403);
+
         $this->dispatch('editCategory', id: $id);
     }
 
     public function delete($id)
     {
+        abort_unless(auth()->user()?->can('main_categories.delete'), 403);
+
         Category::findOrFail($id)->delete();
         session()->flash('success', 'تم حذف التصنيف بنجاح');
         $this->resetPage();
@@ -133,6 +141,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                         </div>
                     </div>
 
+                    @can('main_categories.create')
                     <flux:modal.trigger name="add-category">
                         <button
                             class="group relative inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-medium rounded-xl shadow-lg shadow-purple-500/25 hover:shadow-xl hover:shadow-purple-500/30 hover:scale-105 transition-all duration-300 overflow-hidden">
@@ -148,6 +157,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                             </span>
                         </button>
                     </flux:modal.trigger>
+                    @endcan
                 </div>
 
                 {{-- Stats Cards --}}
@@ -207,8 +217,8 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
         </div>
 
         {{-- Modals --}}
-        <livewire:category.create />
-        <livewire:category.edit />
+        @can('main_categories.create') <livewire:category.create /> @endcan
+        @can('main_categories.update') <livewire:category.edit /> @endcan
 
         {{-- Main Table Card --}}
         <div
@@ -393,6 +403,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
 
                                 {{-- Active Toggle --}}
                                 <td class="px-6 py-4">
+                                    @can('main_categories.update')
                                     <button wire:click="toggleActive({{ $category->id }})"
                                         class="focus:outline-none">
                                         @if ($category->is_active)
@@ -409,10 +420,12 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                             </span>
                                         @endif
                                     </button>
+                                    @endcan
                                 </td>
 
                                 {{-- Featured Toggle --}}
                                 <td class="px-6 py-4">
+                                    @can('main_categories.update')
                                     <button wire:click="toggleFeatured({{ $category->id }})"
                                         class="focus:outline-none">
                                         @if ($category->is_featured)
@@ -431,6 +444,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                             </span>
                                         @endif
                                     </button>
+                                    @endcan
                                 </td>
 
                                 {{-- Created At --}}
@@ -446,6 +460,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                 {{-- Actions --}}
                                 <td class="px-6 py-4">
                                     <div class="flex justify-end items-center gap-2">
+                                        @can('main_categories.update')
                                         <button wire:click="edit({{ $category->id }})"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-200 dark:hover:border-purple-800 hover:text-purple-700 transition-all duration-150">
                                             <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"
@@ -455,6 +470,8 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                             </svg>
                                             تعديل
                                         </button>
+                                        @endcan
+                                        @can('main_categories.delete')
                                         <button wire:click="delete({{ $category->id }})"
                                             wire:confirm="هل أنت متأكد من حذف هذا التصنيف؟"
                                             class="inline-flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-medium rounded-lg border border-red-100 dark:border-red-900/30 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-200 transition-all duration-150">
@@ -465,6 +482,7 @@ new #[Title('إدارة تصنيفات المنتجات')] class extends Compone
                                             </svg>
                                             حذف
                                         </button>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>

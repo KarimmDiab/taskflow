@@ -143,11 +143,15 @@ new #[Title('إدارة المنتجات')] class extends Component {
     #[On('editProduct')]
     public function editProduct($id)
     {
+        abort_unless(auth()->user()?->can('products.update'), 403);
+
         $this->dispatch('openEditModal', id: $id);
     }
 
     public function deleteProduct($id)
     {
+        abort_unless(auth()->user()?->can('products.delete'), 403);
+
         $product = Product::findOrFail($id);
         $productName = $product->product_name;
         $product->delete();
@@ -172,6 +176,8 @@ new #[Title('إدارة المنتجات')] class extends Component {
 
     public function bulkDelete()
     {
+        abort_unless(auth()->user()?->can('products.delete'), 403);
+
         if (empty($this->selectedProducts)) {
             return;
         }
@@ -191,6 +197,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
     <div class="max-w-[1600px] mx-auto">
         <!-- HEADER with Add Button -->
         <div class="flex flex-wrap items-center justify-between gap-4 mb-8" dir="ltr">
+            @can('products.create')
             <div>
                 <a href="{{ route('products.create') }}" wire:navigate>
                     <button
@@ -203,6 +210,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                     </button>
                 </a>
             </div>
+            @endcan
             <div class="text-right">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">إدارة المنتجات</h1>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">إدارة وعرض وتعديل جميع المنتجات في نظامك</p>
@@ -398,10 +406,12 @@ new #[Title('إدارة المنتجات')] class extends Component {
                     <span>{{ count($selectedProducts) }} منتج(ات) محددة</span>
                 </div>
                 <div class="flex gap-2">
+                    @can('products.delete')
                     <button wire:click="bulkDelete()" wire:confirm="هل تريد حذف {{ count($selectedProducts) }} منتج؟"
                         class="px-3 py-1.5 bg-white dark:bg-gray-800 border border-red-300 dark:border-red-700 text-red-600 dark:text-red-400 rounded-md text-xs font-medium hover:bg-red-50 dark:hover:bg-red-900/20">
                         حذف
                     </button>
+                    @endcan
                     <button wire:click="clearSelection()"
                         class="px-3 py-1.5 text-gray-500 text-xs hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
                         إلغاء
@@ -594,6 +604,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                 </td>
                                 <td class="px-4 py-3 text-center">
                                     <div class="flex items-center justify-center gap-2">
+                                        @can('products.update')
                                         <button wire:navigate href="{{ route('products.edit', $product->id) }}"
                                             class="p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-all duration-200 group-hover:scale-105">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor"
@@ -603,6 +614,8 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                                 </path>
                                             </svg>
                                         </button>
+                                        @endcan
+                                        @can('products.delete')
                                         <button wire:click="deleteProduct({{ $product->id }})"
                                             wire:confirm="هل أنت متأكد من حذف '{{ $product->product_name }}'؟"
                                             class="p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-all duration-200 group-hover:scale-105">
@@ -613,6 +626,7 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                                 </path>
                                             </svg>
                                         </button>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
@@ -634,12 +648,14 @@ new #[Title('إدارة المنتجات')] class extends Component {
                                                 منتجات</p>
                                             <p class="text-sm text-gray-400 mt-1">ابدأ بإضافة منتج جديد للنظام</p>
                                         </div>
+                                        @can('products.create')
                                         <a href="{{ route('products.create') }}" wire:navigate>
                                             <button
                                                 class="mt-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
                                                 + إضافة منتج
                                             </button>
                                         </a>
+                                        @endcan
                                     </div>
                                 </td>
                             </tr>
