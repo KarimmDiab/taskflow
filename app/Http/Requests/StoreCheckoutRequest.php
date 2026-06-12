@@ -12,7 +12,7 @@ class StoreCheckoutRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -23,7 +23,20 @@ class StoreCheckoutRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'first_name' => ['required', 'string', 'max:100'],
+            'last_name' => ['required', 'string', 'max:100'],
+            'email' => ['nullable', 'email', 'max:100'],
+            'phone' => ['required', 'string', 'max:20'],
+            'shipping_id' => ['required', 'integer', 'exists:shippings,id'],
+            'address1' => ['required', 'string', 'max:255'],
+            'address2' => ['nullable', 'string', 'max:255'],
+            'district' => ['required', 'string', 'max:225'],
+            'notes' => ['nullable', 'string', 'max:225'],
+            'discount' => ['nullable', 'numeric', 'min:0'],
+            'shipping_cost' => ['nullable', 'numeric', 'min:0'],
+            'cart' => ['required', 'array', 'min:1'],
+            'cart.*.variantId' => ['required', 'integer', 'exists:product_variants,id'],
+            'cart.*.quantity' => ['required', 'integer', 'min:1'],
         ];
     }
 }

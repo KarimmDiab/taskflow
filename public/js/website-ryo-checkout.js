@@ -28,6 +28,22 @@ function escapeHtml(str) {
         .replace(/'/g, "&#39;");
 }
 
+function setText(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+function setDisplay(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.style.display = value;
+    }
+}
+
 // ─────────────────────────────────────
 // CART
 // ─────────────────────────────────────
@@ -46,6 +62,7 @@ function loadCheckoutCart() {
 
         return parsed
             .map((item) => ({
+                variantId: Number.parseInt(item.variantId, 10) || 0,
                 productName: item.productName || "RYO Product",
                 colorName: item.colorName || "Default",
                 sizeName: item.sizeName || "OS",
@@ -53,7 +70,7 @@ function loadCheckoutCart() {
                 quantity: Math.max(1, Number.parseInt(item.quantity, 10) || 1),
                 imageUrl: item.imageUrl || "",
             }))
-            .filter((item) => item.quantity > 0);
+            .filter((item) => item.variantId > 0 && item.quantity > 0);
     } catch (error) {
         localStorage.setItem("ryo_cart", "[]");
 
@@ -234,6 +251,10 @@ function togglePromo() {
 
     const chevron = document.getElementById("promoChevron");
 
+    if (!wrap || !chevron) {
+        return;
+    }
+
     const isOpen = wrap.style.display !== "none";
 
     wrap.style.display = isOpen ? "none" : "block";
@@ -242,36 +263,44 @@ function togglePromo() {
 }
 
 function applyPromo() {
-    const code = document
-        .getElementById("promoCode")
-        .value.toUpperCase()
-        .trim();
+    const promoCode = document.getElementById("promoCode");
+
+    if (!promoCode) {
+        return;
+    }
+
+    const code = promoCode.value.toUpperCase().trim();
 
     const msg = document.getElementById("promoMsg");
 
     if (code === "RYO10") {
         checkoutState.discount = Math.round(checkoutState.cartSubtotal * 0.1);
 
-        msg.textContent = "✓ RYO10 applied — 10% off";
+        if (msg) {
+            msg.textContent = "RYO10 applied - 10% off";
 
-        msg.style.color = "#0A0A0A";
+            msg.style.color = "#0A0A0A";
+        }
 
-        document.getElementById("discountRow").style.display = "flex";
+        setDisplay("discountRow", "flex");
 
-        document.getElementById("discountDisplay").textContent =
-            `− ${formatEGP(checkoutState.discount)}`;
+        setText("discountDisplay", `- ${formatEGP(checkoutState.discount)}`);
     } else if (code === "") {
-        msg.textContent = "Please enter a promo code";
+        if (msg) {
+            msg.textContent = "Please enter a promo code";
 
-        msg.style.color = "#9C9A96";
+            msg.style.color = "#9C9A96";
+        }
     } else {
-        msg.textContent = "Invalid code";
+        if (msg) {
+            msg.textContent = "Invalid code";
 
-        msg.style.color = "#c0392b";
+            msg.style.color = "#c0392b";
+        }
 
         checkoutState.discount = 0;
 
-        document.getElementById("discountRow").style.display = "none";
+        setDisplay("discountRow", "none");
     }
 
     updateTotal();
@@ -289,10 +318,9 @@ function updateTotal() {
             checkoutState.discount,
     );
 
-    document.getElementById("grandTotal").textContent = formatEGP(total);
+    setText("grandTotal", formatEGP(total));
 
-    document.getElementById("totalInBtn").textContent =
-        total.toLocaleString("en-EG");
+    setText("totalInBtn", total.toLocaleString("en-EG"));
 }
 
 // ─────────────────────────────────────
@@ -384,9 +412,7 @@ function renderOrderSummary() {
         }
     }
 
-    document.getElementById("subtotalDisplay").textContent = formatEGP(
-        checkoutState.cartSubtotal,
-    );
+    setText("subtotalDisplay", formatEGP(checkoutState.cartSubtotal));
 
     renderShippingPrice();
 
@@ -411,22 +437,129 @@ function formatExpiry(input) {
 // PLACE ORDER
 // ─────────────────────────────────────
 
-function placeOrder() {
-    if (loadCheckoutCart().length === 0) {
+function showCheckoutError(message) {
+    const error = document.getElementById("checkoutError");
+
+    if (!error) {
+        alert(message);
+        return;
+    }
+
+    error.textContent = message;
+    error.style.display = "block";
+}
+
+function hideCheckoutError() {
+    const error = document.getElementById("checkoutError");
+
+    if (error) {
+        error.textContent = "";
+        error.style.display = "none";
+    }
+}
+
+function getCheckoutPayload() {
+    const citySelect = document.getElementById("city");
+
+    return {
+        first_name: document.getElementById("firstName")?.value.trim() || "",
+        last_name: document.getElementById("lastName")?.value.trim() || "",
+        email: document.getElementById("email")?.value.trim() || "",
+        phone: document.getElementById("phone")?.value.trim() || "",
+        shipping_id: citySelect?.value || "",
+        address1: document.getElementById("address1")?.value.trim() || "",
+        address2: document.getElementById("address2")?.value.trim() || "",
+        district: document.getElementById("district")?.value.trim() || "",
+        notes: document.getElementById("notes")?.value.trim() || "",
+        shipping_cost: checkoutState.shippingCost,
+        discount: checkoutState.discount,
+        cart: loadCheckoutCart().map((item) => ({
+            variantId: item.variantId,
+            quantity: item.quantity,
+        })),
+    };
+}
+
+function validateCheckoutPayload(payload) {
+    if (!payload.first_name || !payload.last_name) {
+        return "Please enter your full name.";
+    }
+
+    if (!payload.phone) {
+        return "Please enter your phone number.";
+    }
+
+    if (!payload.address1 || !payload.shipping_id || !payload.district) {
+        return "Please complete your shipping address.";
+    }
+
+    return "";
+}
+
+async function placeOrder() {
+    const cart = loadCheckoutCart();
+
+    if (cart.length === 0) {
+        showCheckoutError("Your bag is empty.");
         return;
     }
 
     const btn = document.getElementById("placeOrderBtn");
+    const originalHtml = btn.innerHTML;
 
     btn.innerHTML = "Processing...";
-
     btn.style.background = "#3D3D3A";
-
     btn.disabled = true;
+    hideCheckoutError();
 
-    setTimeout(() => {
-        document.getElementById("successOverlay").classList.add("show");
-    }, 1800);
+    try {
+        const payload = getCheckoutPayload();
+        const validationError = validateCheckoutPayload(payload);
+
+        if (validationError) {
+            throw new Error(validationError);
+        }
+
+        const response = await fetch(window.checkoutStoreUrl || "/ryo-checkout", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "X-CSRF-TOKEN":
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute("content") || "",
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            const errors = data.errors ? Object.values(data.errors).flat() : [];
+            throw new Error(
+                errors[0] || data.message || "Unable to place your order.",
+            );
+        }
+
+        localStorage.setItem("ryo_cart", "[]");
+        renderOrderSummary();
+
+        if (data.invoice_number) {
+            setText("confirmedOrderNumber", data.invoice_number);
+            setText("confirmedInvoiceNumber", data.invoice_number);
+        }
+
+        const successOverlay = document.getElementById("successOverlay");
+        if (successOverlay) {
+            successOverlay.classList.add("show");
+        }
+    } catch (error) {
+        showCheckoutError(error.message || "Unable to place your order.");
+        btn.innerHTML = originalHtml;
+        btn.style.background = "";
+        btn.disabled = false;
+    }
 }
 
 // ─────────────────────────────────────

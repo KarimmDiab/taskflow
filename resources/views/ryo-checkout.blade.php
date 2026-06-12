@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>RYO - Checkout</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
@@ -34,9 +35,13 @@
         <h2
             style="font-family:'Cormorant Garamond',serif;font-size:clamp(36px,5vw,60px);font-weight:300;margin-bottom:16px;line-height:1.1;">
             Thank you,<br><em>your order is placed.</em></h2>
-        <p style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#9C9A96;margin-bottom:8px;">
+        <!---<p style="font-family:'DM Sans',sans-serif;font-size:14px;font-weight:300;color:#9C9A96;margin-bottom:8px;">
             Order
-            #RYO-2025-00841</p>
+            #<span id="confirmedOrderNumber">-</span></p> --->
+        <div
+            style="font-family:'Space Grotesk',sans-serif;font-size:18px;letter-spacing:.14em;text-transform:uppercase;color:#0A0A0A;border:1px solid #D5D3CF;padding:14px 22px;margin-bottom:24px;">
+            Order #<span id="confirmedInvoiceNumber">-</span>
+        </div>
         <p
             style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:300;color:#9C9A96;margin-bottom:48px;max-width:400px;line-height:1.7;">
             A confirmation has been sent to your email. Your order will be delivered within 2–4 business days.</p>
@@ -44,9 +49,7 @@
             <a href="{{ route('all-products') }}"
                 style="display:inline-flex;align-items:center;gap:10px;background:#0A0A0A;color:#F8F6F2;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:14px 28px;text-decoration:none;">Continue
                 Shopping</a>
-            <a href="#"
-                style="display:inline-flex;align-items:center;gap:10px;background:transparent;color:#0A0A0A;font-family:'Space Grotesk',sans-serif;font-size:11px;letter-spacing:.12em;text-transform:uppercase;padding:13px 28px;text-decoration:none;border:1px solid #0A0A0A;">Track
-                Order</a>
+ <!-- #region -->
         </div>
     </div>
 
@@ -245,6 +248,10 @@
 
 
                 <!-- Submit -->
+                <div id="checkoutError"
+                    style="display:none;font-family:'DM Sans',sans-serif;font-size:12px;color:#c0392b;margin-bottom:14px;line-height:1.6;">
+                </div>
+
                 <button class="submit-btn" id="placeOrderBtn" onclick="placeOrder()">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.5">
@@ -370,6 +377,7 @@
 
     <script>
         window.govs = @json($govs);
+        window.checkoutStoreUrl = @json(route('checkout.store'));
     </script>
 
 

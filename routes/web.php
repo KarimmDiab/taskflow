@@ -30,6 +30,7 @@ Route::get('/ryo-product/{product}', [ProductController::class, 'show'])
     ->name('product');
 
 Route::get('/ryo-checkout', [CheckoutController::class, 'index'])->name('checkout');
+Route::post('/ryo-checkout', [CheckoutController::class, 'store'])->name('checkout.store');
 
 Route::get('/ryo-collections', [ProductController::class, 'showAllCollection'])->name('collections');
 

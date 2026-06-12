@@ -21,8 +21,8 @@ return new class extends Migration
             $table->decimal('remaining_amount', 10, 2)->unsigned()->default(0);
             $table->foreignId('customer_id')->constrained('customers')->nullable()->onUpdate('cascade')->onDelete('restrict');
             $table->foreignId('payment_method_id')->constrained('payment_methods')->onUpdate('cascade')->onDelete('restrict');
-            $table->foreignId('user_id')->constrained('users')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreignId('branch_id')->constrained('branches')->onUpdate('cascade')->onDelete('restrict');
+            $table->foreignId('user_id')->constrained('users')->onDelete('restrict')->onUpdate('cascade')->nullable();
+            $table->foreignId('branch_id')->constrained('branches')->onUpdate('cascade')->onDelete('restrict')->nullable();
             $table->timestamps();
             $table->softDeletes();
             $table->engine('InnoDB');
