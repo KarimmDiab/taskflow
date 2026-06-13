@@ -51,6 +51,11 @@ class SalesInvoice extends Model
         return $this->hasMany(SalesInvoiceDetail::class);
     }
 
+    public function onlineOrder()
+    {
+        return $this->hasOne(OnlineOrder::class);
+    }
+
     public function customerTransaction()
     {
         return $this->hasMany(CustomerTransaction::class);

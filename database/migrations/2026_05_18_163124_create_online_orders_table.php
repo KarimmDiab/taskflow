@@ -24,6 +24,7 @@ return new class extends Migration
             $table->string('customer_phone', 20);
             $table->string('customer_email', 100)->nullable();
             $table->timestamps();
+            $table->softDeletes();
             $table->engine('InnoDB');
         });
     }

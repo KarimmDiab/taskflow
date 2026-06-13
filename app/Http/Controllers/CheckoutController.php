@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreCheckoutRequest;
 use App\Http\Requests\UpdateCheckoutRequest;
+use App\Mail\OrderInvoiceMail;
 use App\Models\Branches;
 use App\Models\Checkout;
 use App\Models\Customer;
@@ -16,6 +17,8 @@ use App\Models\SalesInvoiceDetail;
 use App\Models\Shipping;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
 
 class CheckoutController extends Controller
@@ -46,6 +49,7 @@ class CheckoutController extends Controller
         $data = $request->validated();
 
         $invoice = DB::transaction(function () use ($data) {
+            $customerEmail = $this->validEmail($data['email'] ?? null);
             $cart = collect($data['cart'])
                 ->groupBy(fn ($item) => (int) $item['variantId'])
                 ->map(fn ($items, $variantId) => [
@@ -112,7 +116,7 @@ class CheckoutController extends Controller
             );
 
             $invoice = SalesInvoice::create([
-                'invoice_number' => $this->generateInvoiceNumber('INV'),
+                'invoice_number' => $this->generateInvoiceNumber('RYO'),
                 'total_amount' => $subtotal,
                 'deduction' => $deduction,
                 'net_total' => $netTotal,
@@ -120,8 +124,8 @@ class CheckoutController extends Controller
                 'remaining_amount' => $netTotal,
                 'customer_id' => $customer->id,
                 'payment_method_id' => $paymentMethodId,
-                //'user_id' => $userId,
-                //'branch_id' => $branchId,
+                'user_id' => $userId,
+                'branch_id' => $branchId,
             ]);
 
             foreach ($cart as $item) {
@@ -160,11 +164,21 @@ class CheckoutController extends Controller
                 'status' => 'pending',
                 'customer_name' => $customerName,
                 'customer_phone' => $data['phone'],
-                'customer_email' => $data['email'] ?? null,
+                'customer_email' => $customerEmail,
             ]);
 
             return $invoice;
         });
+
+        $invoice->load([
+            'customer',
+            'onlineOrder.shipping',
+            'salesInvoiceDetails.productVariant.product',
+            'salesInvoiceDetails.productVariant.color',
+            'salesInvoiceDetails.productVariant.size',
+        ]);
+
+        $this->sendInvoiceEmail($invoice);
 
         return response()->json([
             'message' => 'Order placed successfully.',
@@ -230,6 +244,44 @@ class CheckoutController extends Controller
         }
 
         return null;
+    }
+
+    private function validEmail(?string $email): ?string
+    {
+        $email = trim((string) $email);
+
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return null;
+        }
+
+        return $email;
+    }
+
+    private function sendInvoiceEmail(SalesInvoice $invoice): void
+    {
+        $email = $this->validEmail($invoice->onlineOrder?->customer_email);
+
+        if (! $email) {
+            return;
+        }
+
+        try {
+            $mail = Mail::to($email);
+            $mailable = new OrderInvoiceMail($invoice);
+
+            if (config('queue.default') && config('queue.default') !== 'sync') {
+                $mail->queue($mailable);
+            } else {
+                $mail->send($mailable);
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Failed to send order invoice email.', [
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'email' => $email,
+                'error' => $exception->getMessage(),
+            ]);
+        }
     }
 
     private function generateInvoiceNumber(string $prefix): string

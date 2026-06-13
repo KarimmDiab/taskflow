@@ -25,7 +25,7 @@ class StoreCheckoutRequest extends FormRequest
         return [
             'first_name' => ['required', 'string', 'max:100'],
             'last_name' => ['required', 'string', 'max:100'],
-            'email' => ['nullable', 'email', 'max:100'],
+            'email' => ['nullable', 'string', 'max:100'],
             'phone' => ['required', 'string', 'max:20'],
             'shipping_id' => ['required', 'integer', 'exists:shippings,id'],
             'address1' => ['required', 'string', 'max:255'],
