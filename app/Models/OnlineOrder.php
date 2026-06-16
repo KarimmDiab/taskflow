@@ -24,7 +24,17 @@ class OnlineOrder extends Model
         'customer_email',
     ];
 
-        protected $casts = [
+    public const STATUSES = [
+        'pending',
+        'confirmed',
+        'preparing',
+        'shipped',
+        'delivered',
+        'cancelled',
+        'returned',
+    ];
+
+    protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
@@ -38,6 +48,21 @@ class OnlineOrder extends Model
     public function shipping()
     {
         return $this->belongsTo(Shipping::class);
+    }
+
+    public function getOrderNumberAttribute(): string
+    {
+        return $this->salesInvoice?->invoice_number ?? 'ORD-'.$this->id;
+    }
+
+    public function getSubtotalAttribute(): float
+    {
+        return (float) ($this->salesInvoice?->total_amount ?? 0);
+    }
+
+    public function getGrandTotalAttribute(): float
+    {
+        return (float) ($this->salesInvoice?->net_total ?? ($this->subtotal + $this->shipping_cost));
     }
 
 }

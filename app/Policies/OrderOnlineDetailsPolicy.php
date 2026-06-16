@@ -13,7 +13,7 @@ class OrderOnlineDetailsPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('orders.view');
     }
 
     /**
@@ -21,7 +21,7 @@ class OrderOnlineDetailsPolicy
      */
     public function view(User $user, OnlineOrder $orderOnlineDetails): bool
     {
-        return false;
+        return $user->can('orders.view');
     }
 
     /**
@@ -29,7 +29,7 @@ class OrderOnlineDetailsPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('orders.create');
     }
 
     /**
@@ -37,7 +37,7 @@ class OrderOnlineDetailsPolicy
      */
     public function update(User $user, OnlineOrder $orderOnlineDetails): bool
     {
-        return false;
+        return $user->can('orders.update');
     }
 
     /**
@@ -45,7 +45,7 @@ class OrderOnlineDetailsPolicy
      */
     public function delete(User $user, OnlineOrder $orderOnlineDetails): bool
     {
-        return false;
+        return $user->can('orders.delete');
     }
 
     /**
@@ -53,7 +53,7 @@ class OrderOnlineDetailsPolicy
      */
     public function restore(User $user, OnlineOrder $orderOnlineDetails): bool
     {
-        return false;
+        return $user->can('orders.delete');
     }
 
     /**
@@ -61,6 +61,6 @@ class OrderOnlineDetailsPolicy
      */
     public function forceDelete(User $user, OnlineOrder $orderOnlineDetails): bool
     {
-        return false;
+        return $user->can('orders.delete');
     }
 }

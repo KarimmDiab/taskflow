@@ -3,10 +3,21 @@
 namespace App\Providers;
 
 use App\Models\Category;
+use App\Models\Inventory;
+use App\Models\OnlineOrder;
+use App\Models\SalesInvoice;
+use App\Listeners\CreateUserLoginNotification;
+use App\Observers\InventoryObserver;
+use App\Observers\OnlineOrderObserver;
+use App\Observers\SalesInvoiceObserver;
+use App\Policies\OrderOnlineDetailsPolicy;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Date;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Validation\Rules\Password;
@@ -28,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->configureDefaults();
         Carbon::setLocale('ar');
+        Gate::policy(OnlineOrder::class, OrderOnlineDetailsPolicy::class);
+        OnlineOrder::observe(OnlineOrderObserver::class);
+        Inventory::observe(InventoryObserver::class);
+        SalesInvoice::observe(SalesInvoiceObserver::class);
+        Event::listen(Login::class, CreateUserLoginNotification::class);
 
         View::composer('partials.footer', function ($view) {
 

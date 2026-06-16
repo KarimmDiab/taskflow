@@ -4,6 +4,7 @@ use Livewire\Component;
 use Livewire\Attributes\Title;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 new #[Title('Roles Permissions')] class extends Component {
     public string $selectedRole = 'manager';
@@ -13,6 +14,7 @@ new #[Title('Roles Permissions')] class extends Component {
     public function mount(): void
     {
         abort_unless(auth()->user()?->can('users.update'), 403);
+        $this->syncConfiguredPermissions();
         $this->loadRolePermissions();
     }
 
@@ -74,6 +76,7 @@ new #[Title('Roles Permissions')] class extends Component {
     public function save(): void
     {
         $this->saving = true;
+        $this->syncConfiguredPermissions();
 
         $allowedPermissions = Permission::query()->pluck('name')->all();
 
@@ -94,6 +97,18 @@ new #[Title('Roles Permissions')] class extends Component {
     {
         $role = Role::findByName($this->selectedRole);
         $this->selectedPermissions = $role->permissions()->pluck('name')->all();
+    }
+
+    private function syncConfiguredPermissions(): void
+    {
+        foreach ($this->getAllPermissionsList() as $permission) {
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
+        }
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 };
 ?>

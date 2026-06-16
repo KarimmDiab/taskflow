@@ -65,6 +65,10 @@ Route::livewire('payment_methods', 'pages::payment_method.index')->middleware(['
 Route::livewire('shipping', 'pages::shipping.index')->middleware(['auth', 'permission:shipping_governorates.view'])->name('shipping');
 Route::livewire('all_collections', 'pages::collection.index')->middleware(['auth', 'permission:collections.view'])->name('all_collections');
 Route::livewire('pos_system', 'pages::pos_system.index')->middleware(['auth', 'permission:pos_system.view'])->name('pos_system');
+Route::livewire('orders', 'pages::orders.index')->middleware(['auth', 'permission:orders.view'])->name('orders');
+Route::get('admin/notifications', \App\Livewire\Admin\Notifications\Index::class)
+    ->middleware(['auth', 'permission:notifications.view'])
+    ->name('admin.notifications');
 
 
 
