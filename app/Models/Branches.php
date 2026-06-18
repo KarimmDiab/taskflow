@@ -45,7 +45,12 @@ class Branches extends Model
 
     public function stockTransfers()
     {
-        return $this->hasMany(StockTransfer::class);
+        return $this->hasMany(StockTransfer::class, 'from_branch_id');
+    }
+
+    public function incomingStockTransfers()
+    {
+        return $this->hasMany(StockTransfer::class, 'to_branch_id');
     }
 
     public function stockMovements()

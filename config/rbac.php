@@ -17,6 +17,9 @@ return [
         'print' => 'Print',
         'approve' => 'Approve',
         'export' => 'Export',
+        'send' => 'Send',
+        'receive' => 'Receive',
+        'cancel' => 'Cancel',
     ],
 
     'modules' => [
@@ -44,6 +47,7 @@ return [
         'sales.return' => 'Sales Returns',
         'stock_movements' => 'Stock Movements',
         'inventory_adjustments' => 'Inventory Adjustments',
+        'stock_transfers' => 'Stock Transfers',
     ],
 
     'default_role_permissions' => [
@@ -112,6 +116,8 @@ return [
         'sales.returns.print' => 'sales.print',
         'stock-movements.index' => 'stock_movements.view',
         'inventory-adjustments.index' => 'inventory_adjustments.view',
+        'stock-transfers.index' => 'stock_transfers.view',
+        'stock-transfers.print' => 'stock_transfers.print',
         'admin.notifications' => 'notifications.view',
         'roles-permissions.index' => 'users.update',
         'user-roles.index' => 'users.update',

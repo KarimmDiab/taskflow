@@ -14,7 +14,11 @@ class StockTransferItem extends Model
     protected $fillable = [
         'stock_transfer_id',
         'product_id',
+        'product_variant_id',
         'quantity',
+        'quantity_sent',
+        'quantity_received',
+        'notes',
     ];
 
     protected $casts = [
@@ -31,5 +35,10 @@ class StockTransferItem extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+
+    public function productVariant()
+    {
+        return $this->belongsTo(ProductVariant::class);
     }
 }
