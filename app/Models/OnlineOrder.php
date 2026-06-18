@@ -15,6 +15,14 @@ class OnlineOrder extends Model
         'sales_invoice_id',
         'shipping_id',
         'shipping_cost',
+        'subtotal',
+        'discount_amount',
+        'discount_type',
+        'coupon_id',
+        'coupon_code',
+        'grand_total',
+        'net_total',
+        'coupon_counted_at',
         'address',
         'area',
         'order_note',
@@ -38,6 +46,11 @@ class OnlineOrder extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'coupon_counted_at' => 'datetime',
+        'subtotal' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'grand_total' => 'decimal:2',
+        'net_total' => 'decimal:2',
     ];
 
     public function salesInvoice()
@@ -50,6 +63,11 @@ class OnlineOrder extends Model
         return $this->belongsTo(Shipping::class);
     }
 
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
     public function getOrderNumberAttribute(): string
     {
         return $this->salesInvoice?->invoice_number ?? 'ORD-'.$this->id;
@@ -57,12 +75,16 @@ class OnlineOrder extends Model
 
     public function getSubtotalAttribute(): float
     {
-        return (float) ($this->salesInvoice?->total_amount ?? 0);
+        $subtotal = (float) ($this->attributes['subtotal'] ?? 0);
+
+        return $subtotal > 0 ? $subtotal : (float) ($this->salesInvoice?->total_amount ?? 0);
     }
 
     public function getGrandTotalAttribute(): float
     {
-        return (float) ($this->salesInvoice?->net_total ?? ($this->subtotal + $this->shipping_cost));
+        $grandTotal = (float) ($this->attributes['grand_total'] ?? 0);
+
+        return $grandTotal > 0 ? $grandTotal : (float) ($this->salesInvoice?->net_total ?? ($this->subtotal + $this->shipping_cost));
     }
 
 }

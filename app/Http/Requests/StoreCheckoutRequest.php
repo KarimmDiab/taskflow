@@ -33,6 +33,7 @@ class StoreCheckoutRequest extends FormRequest
             'district' => ['required', 'string', 'max:225'],
             'notes' => ['nullable', 'string', 'max:225'],
             'discount' => ['nullable', 'numeric', 'min:0'],
+            'coupon_code' => ['nullable', 'string', 'max:255'],
             'shipping_cost' => ['nullable', 'numeric', 'min:0'],
             'cart' => ['required', 'array', 'min:1'],
             'cart.*.variantId' => ['required', 'integer', 'exists:product_variants,id'],

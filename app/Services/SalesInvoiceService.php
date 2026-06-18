@@ -14,12 +14,18 @@ class SalesInvoiceService
         private readonly InventoryService $inventory,
         private readonly StockMovementService $stockMovements,
         private readonly SalesActivityLogger $logger,
+        private readonly DiscountService $discounts,
     ) {}
 
     public function create(array $data, array $items): SalesInvoice
     {
         return DB::transaction(function () use ($data, $items): SalesInvoice {
-            $totals = $this->calculateTotals($items, (float) ($data['discount_amount'] ?? $data['deduction'] ?? 0), (float) ($data['tax_amount'] ?? 0));
+            $totals = $this->calculateTotals(
+                $items,
+                (float) ($data['discount_value'] ?? $data['discount_amount'] ?? $data['deduction'] ?? 0),
+                (float) ($data['tax_amount'] ?? 0),
+                $data['discount_type'] ?? 'fixed',
+            );
             $paid = (float) ($data['paid_amount'] ?? 0);
 
             if ($paid > $totals['grand_total']) {
@@ -28,9 +34,15 @@ class SalesInvoiceService
 
             $invoice = SalesInvoice::create([
                 'invoice_number' => $data['invoice_number'] ?? $this->generateInvoiceNumber(),
+                'subtotal' => $totals['gross_subtotal'],
                 'total_amount' => $totals['subtotal'],
                 'deduction' => $totals['discount'],
+                'discount_amount' => $totals['discount'],
+                'discount_type' => $data['discount_type'] ?? ($totals['invoice_discount'] > 0 ? 'fixed' : null),
+                'coupon_id' => $data['coupon_id'] ?? null,
+                'coupon_code' => $data['coupon_code'] ?? null,
                 'tax_amount' => $totals['tax'],
+                'grand_total' => $totals['grand_total'],
                 'net_total' => $totals['grand_total'],
                 'paid_amount' => $paid,
                 'remaining_amount' => max($totals['grand_total'] - $paid, 0),
@@ -68,7 +80,7 @@ class SalesInvoiceService
         }
 
         return DB::transaction(function () use ($invoice, $data, $items): SalesInvoice {
-            $invoice->load('salesInvoiceDetails');
+            $invoice->load(['salesInvoiceDetails', 'coupon', 'onlineOrder.coupon']);
             $oldBranchId = (int) $invoice->branch_id;
             $newBranchId = (int) $data['branch_id'];
 
@@ -84,7 +96,12 @@ class SalesInvoiceService
                 );
             }
 
-            $totals = $this->calculateTotals($items, (float) ($data['discount_amount'] ?? $data['deduction'] ?? 0), (float) ($data['tax_amount'] ?? 0));
+            $totals = $this->calculateTotals(
+                $items,
+                (float) ($data['discount_value'] ?? $data['discount_amount'] ?? $data['deduction'] ?? 0),
+                (float) ($data['tax_amount'] ?? 0),
+                $data['discount_type'] ?? 'fixed',
+            );
             $paid = (float) ($data['paid_amount'] ?? 0);
 
             if ($paid > $totals['grand_total']) {
@@ -96,9 +113,13 @@ class SalesInvoiceService
             }
 
             $invoice->update([
+                'subtotal' => $totals['gross_subtotal'],
                 'total_amount' => $totals['subtotal'],
                 'deduction' => $totals['discount'],
+                'discount_amount' => $totals['discount'],
+                'discount_type' => $data['discount_type'] ?? ($totals['invoice_discount'] > 0 ? 'fixed' : null),
                 'tax_amount' => $totals['tax'],
+                'grand_total' => $totals['grand_total'],
                 'net_total' => $totals['grand_total'],
                 'paid_amount' => $paid,
                 'remaining_amount' => max($totals['grand_total'] - $paid, 0),
@@ -156,22 +177,45 @@ class SalesInvoiceService
                 'cancellation_reason' => $reason,
             ]);
 
+            if ($invoice->coupon) {
+                if (! $invoice->onlineOrder || $invoice->onlineOrder->coupon_counted_at) {
+                    $this->discounts->decrementCouponUsage($invoice->coupon);
+                }
+
+                $invoice->onlineOrder?->update(['coupon_counted_at' => null]);
+            }
+
             $this->logger->invoice($invoice, 'cancelled', $reason);
 
             return $invoice->fresh();
         });
     }
 
-    public function calculateTotals(array $items, float $invoiceDiscount = 0, float $tax = 0): array
+    public function calculateTotals(array $items, float $invoiceDiscount = 0, float $tax = 0, ?string $invoiceDiscountType = 'fixed'): array
     {
-        $subtotal = collect($items)->sum(fn (array $item): float => ((float) $item['quantity'] * (float) $item['unit_price']) - (float) ($item['discount_amount'] ?? 0));
-        $discount = min(max($invoiceDiscount, 0), $subtotal);
+        $grossSubtotal = 0;
+        $itemDiscounts = 0;
+
+        foreach ($items as $item) {
+            $lineSubtotal = (float) $item['quantity'] * (float) $item['unit_price'];
+            $itemDiscount = $this->resolveItemDiscount($item, $lineSubtotal);
+
+            $grossSubtotal += $lineSubtotal;
+            $itemDiscounts += $itemDiscount;
+        }
+
+        $subtotal = max($grossSubtotal - $itemDiscounts, 0);
+        $invoiceDiscount = $this->discounts->calculateAmount($invoiceDiscountType, $invoiceDiscount, $subtotal);
+        $discount = min(max($itemDiscounts + $invoiceDiscount, 0), $grossSubtotal);
         $tax = max($tax, 0);
-        $grandTotal = max($subtotal - $discount + $tax, 0);
+        $grandTotal = max($subtotal - $invoiceDiscount + $tax, 0);
 
         return [
+            'gross_subtotal' => round($grossSubtotal, 2),
             'subtotal' => round($subtotal, 2),
             'discount' => round($discount, 2),
+            'item_discount' => round($itemDiscounts, 2),
+            'invoice_discount' => round($invoiceDiscount, 2),
             'tax' => round($tax, 2),
             'grand_total' => round($grandTotal, 2),
         ];
@@ -182,17 +226,35 @@ class SalesInvoiceService
         $variant = ProductVariant::query()->with('product')->findOrFail((int) $item['product_variant_id']);
         $quantity = (int) $item['quantity'];
         $unitPrice = (float) $item['unit_price'];
-        $discount = (float) ($item['discount_amount'] ?? 0);
+        $lineSubtotal = $quantity * $unitPrice;
+        $discount = $this->resolveItemDiscount($item, $lineSubtotal);
+        $lineTotal = max($lineSubtotal - $discount, 0);
 
         return SalesInvoiceDetail::create([
             'sales_invoice_id' => $invoice->id,
             'product_variant_id' => $variant->id,
             'product_quantity' => $quantity,
             'unit_price' => $unitPrice,
+            'item_discount_type' => $item['item_discount_type'] ?? null,
+            'item_discount_value' => $item['item_discount_value'] ?? null,
+            'item_discount_amount' => $discount,
             'discount_amount' => $discount,
             'cost_price' => (float) ($variant->variant_cost ?: $variant->product?->product_cost ?: 0),
-            'line_total' => max(($quantity * $unitPrice) - $discount, 0),
+            'line_total' => $lineTotal,
+            'line_total_after_discount' => $lineTotal,
         ]);
+    }
+
+    private function resolveItemDiscount(array $item, float $lineSubtotal): float
+    {
+        $type = $item['item_discount_type'] ?? null;
+        $value = (float) ($item['item_discount_value'] ?? $item['discount_amount'] ?? 0);
+
+        if ($type === null && isset($item['discount_amount'])) {
+            $type = 'fixed';
+        }
+
+        return $this->discounts->calculateAmount($type, $value, $lineSubtotal);
     }
 
     private function assertStock(int $variantId, int $branchId, int $quantity): void

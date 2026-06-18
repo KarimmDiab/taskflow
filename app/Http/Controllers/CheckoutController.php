@@ -7,6 +7,7 @@ use App\Http\Requests\UpdateCheckoutRequest;
 use App\Mail\OrderInvoiceMail;
 use App\Models\Branches;
 use App\Models\Checkout;
+use App\Models\Coupon;
 use App\Models\Customer;
 use App\Models\Inventory;
 use App\Models\OnlineOrder;
@@ -16,7 +17,9 @@ use App\Models\SalesInvoice;
 use App\Models\SalesInvoiceDetail;
 use App\Models\Shipping;
 use App\Models\User;
+use App\Services\DiscountService;
 use App\Services\StockMovementService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -108,7 +111,15 @@ class CheckoutController extends Controller
 
             $shipping = Shipping::query()->where('is_active', true)->findOrFail($data['shipping_id']);
             $shippingCost = $subtotal >= 1500 ? 0 : max(0, (float) ($shipping->shipping_cost ?? 0));
-            $deduction = min(max(0, (float) ($data['discount'] ?? 0)), $subtotal + $shippingCost);
+            $coupon = null;
+            $deduction = 0;
+
+            if (! empty($data['coupon_code'])) {
+                $couponResult = app(DiscountService::class)->validateCoupon($data['coupon_code'], $subtotal);
+                $coupon = $couponResult['coupon'];
+                $deduction = (float) $couponResult['discount_amount'];
+            }
+
             $netTotal = max(0, $subtotal + $shippingCost - $deduction);
             $customerName = trim($data['first_name'].' '.$data['last_name']);
             $customer = Customer::query()->firstOrCreate(
@@ -118,8 +129,14 @@ class CheckoutController extends Controller
 
             $invoice = SalesInvoice::create([
                 'invoice_number' => $this->generateInvoiceNumber('RYO'),
+                'subtotal' => $subtotal,
                 'total_amount' => $subtotal,
                 'deduction' => $deduction,
+                'discount_amount' => $deduction,
+                'discount_type' => $coupon?->type,
+                'coupon_id' => $coupon?->id,
+                'coupon_code' => $coupon?->code,
+                'grand_total' => $netTotal,
                 'net_total' => $netTotal,
                 'paid_amount' => 0,
                 'remaining_amount' => $netTotal,
@@ -138,6 +155,9 @@ class CheckoutController extends Controller
                     'product_variant_id' => $item['variant_id'],
                     'product_quantity' => $item['quantity'],
                     'unit_price' => $unitPrice,
+                    'cost_price' => (float) ($variant->variant_cost ?: $variant->product?->product_cost ?: 0),
+                    'line_total' => $unitPrice * $item['quantity'],
+                    'line_total_after_discount' => $unitPrice * $item['quantity'],
                 ]);
 
                 app(StockMovementService::class)->recordSale(
@@ -155,6 +175,13 @@ class CheckoutController extends Controller
                 'sales_invoice_id' => $invoice->id,
                 'shipping_id' => $shipping->id,
                 'shipping_cost' => (int) round($shippingCost),
+                'subtotal' => $subtotal,
+                'discount_amount' => $deduction,
+                'discount_type' => $coupon?->type,
+                'coupon_id' => $coupon?->id,
+                'coupon_code' => $coupon?->code,
+                'grand_total' => $netTotal,
+                'net_total' => $netTotal,
                 'address' => trim($data['address1'].' '.($data['address2'] ?? '')),
                 'area' => $data['district'],
                 'order_note' => $data['notes'] ?? null,
@@ -181,6 +208,57 @@ class CheckoutController extends Controller
             'message' => 'Order placed successfully.',
             'invoice_id' => $invoice->id,
             'invoice_number' => $invoice->invoice_number,
+        ]);
+    }
+
+    public function validateCoupon(Request $request, DiscountService $discounts)
+    {
+        $validated = $request->validate([
+            'coupon_code' => ['required', 'string', 'max:255'],
+            'cart' => ['required', 'array', 'min:1'],
+            'cart.*.variantId' => ['required', 'integer', 'exists:product_variants,id'],
+            'cart.*.quantity' => ['required', 'integer', 'min:1'],
+        ]);
+
+        $cart = collect($validated['cart'])
+            ->groupBy(fn ($item) => (int) $item['variantId'])
+            ->map(fn ($items, $variantId) => [
+                'variant_id' => (int) $variantId,
+                'quantity' => $items->sum(fn ($item) => (int) $item['quantity']),
+            ])
+            ->values();
+
+        $variants = ProductVariant::query()
+            ->with('product')
+            ->whereIn('id', $cart->pluck('variant_id')->all())
+            ->where('is_active', true)
+            ->get()
+            ->keyBy('id');
+
+        $subtotal = 0;
+        foreach ($cart as $item) {
+            $variant = $variants->get($item['variant_id']);
+            if (! $variant) {
+                throw ValidationException::withMessages(['cart' => 'One or more products are no longer available.']);
+            }
+
+            $subtotal += (float) ($variant->variant_price ?: $variant->product?->product_price ?: 0) * $item['quantity'];
+        }
+
+        $result = $discounts->validateCoupon($validated['coupon_code'], $subtotal);
+        /** @var Coupon $coupon */
+        $coupon = $result['coupon'];
+
+        return response()->json([
+            'message' => 'Coupon applied.',
+            'coupon' => [
+                'id' => $coupon->id,
+                'code' => $coupon->code,
+                'name' => $coupon->name,
+                'type' => $coupon->type,
+                'value' => (float) $coupon->value,
+            ],
+            'discount_amount' => (float) $result['discount_amount'],
         ]);
     }
 

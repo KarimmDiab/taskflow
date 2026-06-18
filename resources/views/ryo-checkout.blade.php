@@ -378,6 +378,7 @@
     <script>
         window.govs = @json($govs);
         window.checkoutStoreUrl = @json(route('checkout.store'));
+        window.checkoutCouponUrl = @json(route('checkout.coupon'));
     </script>
 
 

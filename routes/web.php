@@ -24,6 +24,7 @@ Route::get('/ryo-product/{product}', [ProductController::class, 'show'])
 
 Route::get('/ryo-checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/ryo-checkout', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::post('/ryo-checkout/coupon', [CheckoutController::class, 'validateCoupon'])->name('checkout.coupon');
 
 Route::get('/ryo-collections', [ProductController::class, 'showAllCollection'])->name('collections');
 
@@ -69,6 +70,7 @@ Route::middleware(['auth'])->group(function () {
     Route::view('sales-returns/{return}/print', 'pages.sales.return-receipt')->middleware('permission:sales.print')->name('sales.returns.print');
 });
 Route::livewire('orders', 'pages::orders.index')->middleware(['auth', 'permission:orders.view'])->name('orders');
+Route::livewire('coupons', 'pages::coupons.index')->middleware(['auth', 'permission:coupons.view'])->name('coupons.index');
 Route::get('admin/notifications', Index::class)
     ->middleware(['auth', 'permission:notifications.view'])
     ->name('admin.notifications');

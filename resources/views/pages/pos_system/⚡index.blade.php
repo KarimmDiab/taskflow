@@ -6,6 +6,7 @@ use App\Models\Inventory;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariant;
 use App\Services\SalesInvoiceService;
+use App\Services\DiscountService;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
@@ -16,6 +17,8 @@ new #[Title('POS System')] class extends Component {
     public ?int $customer_id = null;
     public ?int $payment_method_id = null;
     public float $deduction = 0;
+    public string $discount_type = 'fixed';
+    public float $discount_value = 0;
     public float $paid_amount = 0;
     public array $cart = [];
     public bool $isCheckingOut = false;
@@ -73,9 +76,28 @@ new #[Title('POS System')] class extends Component {
         return collect($this->cart)->sum(fn($item) => $item['quantity'] * $item['unit_price']);
     }
 
+    public function getItemDiscountTotalProperty(): float
+    {
+        return collect($this->cart)->sum(fn($item) => (float) ($item['item_discount_amount'] ?? 0));
+    }
+
+    public function getSubtotalAfterItemDiscountsProperty(): float
+    {
+        return max($this->subtotal - $this->itemDiscountTotal, 0);
+    }
+
+    public function getInvoiceDiscountAmountProperty(): float
+    {
+        try {
+            return app(DiscountService::class)->calculateAmount($this->discount_type, $this->discount_value, $this->subtotalAfterItemDiscounts);
+        } catch (\Illuminate\Validation\ValidationException) {
+            return 0;
+        }
+    }
+
     public function getNetTotalProperty(): float
     {
-        return max($this->subtotal - $this->deduction, 0);
+        return max($this->subtotalAfterItemDiscounts - $this->invoiceDiscountAmount, 0);
     }
 
     public function getRemainingAmountProperty(): float
@@ -108,7 +130,12 @@ new #[Title('POS System')] class extends Component {
             'available' => $available,
             'quantity' => $currentQuantity + 1,
             'unit_price' => (float) ($variant->variant_price ?: $variant->product->product_price),
+            'item_discount_type' => $this->cart[$variantId]['item_discount_type'] ?? 'fixed',
+            'item_discount_value' => (float) ($this->cart[$variantId]['item_discount_value'] ?? 0),
+            'item_discount_amount' => (float) ($this->cart[$variantId]['item_discount_amount'] ?? 0),
         ];
+
+        $this->recalculateItemDiscount($variantId);
 
         $this->paid_amount = $this->netTotal;
         $this->showNotification('Added to cart', 'success');
@@ -150,6 +177,7 @@ new #[Title('POS System')] class extends Component {
         }
 
         $this->cart[$variantId]['quantity']++;
+        $this->recalculateItemDiscount($variantId);
         $this->paid_amount = $this->netTotal;
     }
 
@@ -163,6 +191,8 @@ new #[Title('POS System')] class extends Component {
 
         if ($this->cart[$variantId]['quantity'] <= 0) {
             unset($this->cart[$variantId]);
+        } else {
+            $this->recalculateItemDiscount($variantId);
         }
 
         $this->paid_amount = $this->netTotal;
@@ -182,13 +212,34 @@ new #[Title('POS System')] class extends Component {
         }
         $this->cart = [];
         $this->deduction = 0;
+        $this->discount_type = 'fixed';
+        $this->discount_value = 0;
         $this->paid_amount = 0;
         $this->showNotification('Cart cleared', 'info');
     }
 
-    public function updatedDeduction(): void
+    public function updatedDiscountValue(): void
     {
-        $this->deduction = max((float) $this->deduction, 0);
+        $this->discount_value = max((float) $this->discount_value, 0);
+        $this->deduction = $this->invoiceDiscountAmount;
+        $this->paid_amount = min((float) $this->paid_amount, $this->netTotal);
+    }
+
+    public function updatedDiscountType(): void
+    {
+        $this->updatedDiscountValue();
+    }
+
+    public function updatedCart($value, string $key): void
+    {
+        if (! str_contains($key, '.item_discount_')) {
+            return;
+        }
+
+        abort_unless(auth()->user()?->can('discounts.manual.apply'), 403);
+
+        $variantId = (int) str($key)->before('.')->toString();
+        $this->recalculateItemDiscount($variantId);
         $this->paid_amount = min((float) $this->paid_amount, $this->netTotal);
     }
 
@@ -201,13 +252,26 @@ new #[Title('POS System')] class extends Component {
             'branch_id' => ['required', 'exists:branches,id'],
             'customer_id' => ['required', 'exists:customers,id'],
             'payment_method_id' => ['required', 'exists:payment_methods,id'],
-            'deduction' => ['numeric', 'min:0'],
+            'discount_type' => ['nullable', 'in:percentage,fixed'],
+            'discount_value' => ['numeric', 'min:0'],
             'paid_amount' => ['numeric', 'min:0'],
             'cart' => ['required', 'array', 'min:1'],
         ]);
 
-        if ($this->deduction > $this->subtotal) {
-            $this->addError('deduction', 'Discount cannot exceed subtotal.');
+        if (($this->discount_value > 0 || $this->itemDiscountTotal > 0) && ! auth()->user()?->can('discounts.manual.apply')) {
+            $this->addError('discount_value', 'You do not have permission to apply manual discounts.');
+            $this->isCheckingOut = false;
+            return;
+        }
+
+        if ($this->discount_type === 'percentage' && $this->discount_value > 100) {
+            $this->addError('discount_value', 'Percentage discount cannot exceed 100%.');
+            $this->isCheckingOut = false;
+            return;
+        }
+
+        if ($this->discount_type === 'fixed' && $this->discount_value > $this->subtotalAfterItemDiscounts) {
+            $this->addError('discount_value', 'Discount cannot exceed subtotal.');
             $this->isCheckingOut = false;
             return;
         }
@@ -219,7 +283,9 @@ new #[Title('POS System')] class extends Component {
         }
 
         app(SalesInvoiceService::class)->create([
-            'deduction' => $this->deduction,
+            'discount_type' => $this->discount_value > 0 ? $this->discount_type : null,
+            'discount_value' => $this->discount_value,
+            'deduction' => $this->invoiceDiscountAmount,
             'paid_amount' => $this->paid_amount,
             'customer_id' => $this->customer_id,
             'payment_method_id' => $this->payment_method_id,
@@ -229,11 +295,14 @@ new #[Title('POS System')] class extends Component {
             'product_variant_id' => $item['variant_id'],
             'quantity' => $item['quantity'],
             'unit_price' => $item['unit_price'],
-            'discount_amount' => 0,
+            'item_discount_type' => ($item['item_discount_value'] ?? 0) > 0 ? ($item['item_discount_type'] ?? 'fixed') : null,
+            'item_discount_value' => (float) ($item['item_discount_value'] ?? 0),
         ])->values()->all());
 
         $this->cart = [];
         $this->deduction = 0;
+        $this->discount_type = 'fixed';
+        $this->discount_value = 0;
         $this->paid_amount = 0;
         $this->isCheckingOut = false;
         $this->showNotification('Sale completed successfully!', 'success');
@@ -244,6 +313,25 @@ new #[Title('POS System')] class extends Component {
         $this->notification = $message;
         $this->notificationType = $type;
         $this->dispatch('notification-shown');
+    }
+
+    private function recalculateItemDiscount(int $variantId): void
+    {
+        if (! isset($this->cart[$variantId])) {
+            return;
+        }
+
+        $item = $this->cart[$variantId];
+        $lineSubtotal = (float) $item['quantity'] * (float) $item['unit_price'];
+        $type = $item['item_discount_type'] ?? 'fixed';
+        $value = max((float) ($item['item_discount_value'] ?? 0), 0);
+
+        if ($type === 'percentage' && $value > 100) {
+            $value = 100;
+            $this->cart[$variantId]['item_discount_value'] = 100;
+        }
+
+        $this->cart[$variantId]['item_discount_amount'] = app(DiscountService::class)->calculateAmount($type, $value, $lineSubtotal);
     }
 };
 ?>
@@ -524,9 +612,27 @@ new #[Title('POS System')] class extends Component {
                                                 class="px-3 py-1 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition">+</button>
                                         </div>
                                         <span
-                                            class="font-bold text-gray-900 dark:text-white">{{ number_format($item['quantity'] * $item['unit_price']) }}
+                                            class="font-bold text-gray-900 dark:text-white">{{ number_format(($item['quantity'] * $item['unit_price']) - ($item['item_discount_amount'] ?? 0)) }}
                                             ج.م</span>
                                     </div>
+                                    @can('discounts.manual.apply')
+                                        <div class="mt-3 grid grid-cols-[120px_1fr] gap-2">
+                                            <select wire:model.live="cart.{{ $variantId }}.item_discount_type"
+                                                class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs dark:border-gray-700 dark:bg-gray-800">
+                                                <option value="fixed">EGP off</option>
+                                                <option value="percentage">% off</option>
+                                            </select>
+                                            <input type="number" min="0" step="0.01"
+                                                wire:model.live.debounce.300ms="cart.{{ $variantId }}.item_discount_value"
+                                                placeholder="Item discount"
+                                                class="rounded-lg border border-gray-200 bg-white px-2 py-1.5 text-xs dark:border-gray-700 dark:bg-gray-800">
+                                        </div>
+                                        @if (($item['item_discount_amount'] ?? 0) > 0)
+                                            <p class="mt-2 inline-flex rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-semibold text-rose-600 dark:bg-rose-950/40 dark:text-rose-300">
+                                                -{{ number_format((float) $item['item_discount_amount'], 2) }} EGP item discount
+                                            </p>
+                                        @endif
+                                    @endcan
                                 </div>
                             @empty
                                 <div class="text-center py-12 text-gray-500 dark:text-gray-400">
@@ -570,16 +676,25 @@ new #[Title('POS System')] class extends Component {
 
                             <!-- Discount & Paid -->
                             <div class="space-y-3">
+                                @can('discounts.manual.apply')
                                 <div>
                                     <label
                                         class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Discount
                                         (ج.م)</label>
-                                    <input type="number" step="0.01" min="0" wire:model.live="deduction"
+                                    <div class="grid grid-cols-[130px_1fr] gap-2">
+                                        <select wire:model.live="discount_type"
+                                            class="text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500/30">
+                                            <option value="fixed">EGP off</option>
+                                            <option value="percentage">% off</option>
+                                        </select>
+                                    <input type="number" step="0.01" min="0" wire:model.live.debounce.300ms="discount_value"
                                         class="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl px-3 py-2 bg-white dark:bg-gray-800 focus:ring-2 focus:ring-blue-500/30">
-                                    @error('deduction')
+                                    </div>
+                                    @error('discount_value')
                                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                                     @enderror
                                 </div>
+                                @endcan
                                 <div>
                                     <label
                                         class="block text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1">Paid
@@ -604,7 +719,7 @@ new #[Title('POS System')] class extends Component {
                                 </div>
                                 <div class="flex justify-between text-sm">
                                     <span class="text-gray-600 dark:text-gray-400">Discount</span>
-                                    <span class="font-semibold text-red-500">{{ number_format($this->deduction) }}
+                                    <span class="font-semibold text-red-500">{{ number_format($this->itemDiscountTotal + $this->invoiceDiscountAmount) }}
                                         ج.م</span>
                                 </div>
                                 <div

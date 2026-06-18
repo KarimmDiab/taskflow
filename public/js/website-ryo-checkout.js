@@ -9,6 +9,7 @@ const checkoutState = {
     selectedCityShippingCost: 0,
     shippingCost: 0,
     discount: 0,
+    couponCode: "",
 };
 
 // ─────────────────────────────────────
@@ -262,7 +263,7 @@ function togglePromo() {
     chevron.style.transform = isOpen ? "" : "rotate(180deg)";
 }
 
-function applyPromo() {
+async function applyPromo() {
     const promoCode = document.getElementById("promoCode");
 
     if (!promoCode) {
@@ -273,32 +274,66 @@ function applyPromo() {
 
     const msg = document.getElementById("promoMsg");
 
-    if (code === "RYO10") {
-        checkoutState.discount = Math.round(checkoutState.cartSubtotal * 0.1);
-
-        if (msg) {
-            msg.textContent = "RYO10 applied - 10% off";
-
-            msg.style.color = "#0A0A0A";
-        }
-
-        setDisplay("discountRow", "flex");
-
-        setText("discountDisplay", `- ${formatEGP(checkoutState.discount)}`);
-    } else if (code === "") {
+    if (code === "") {
         if (msg) {
             msg.textContent = "Please enter a promo code";
 
             msg.style.color = "#9C9A96";
         }
-    } else {
+        return;
+    }
+
+    if (msg) {
+        msg.textContent = "Checking code...";
+        msg.style.color = "#9C9A96";
+    }
+
+    try {
+        const response = await fetch(window.checkoutCouponUrl || "/ryo-checkout/coupon", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "application/json",
+                "X-CSRF-TOKEN":
+                    document
+                        .querySelector('meta[name="csrf-token"]')
+                        ?.getAttribute("content") || "",
+            },
+            body: JSON.stringify({
+                coupon_code: code,
+                cart: loadCheckoutCart().map((item) => ({
+                    variantId: item.variantId,
+                    quantity: item.quantity,
+                })),
+            }),
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            const errors = data.errors ? Object.values(data.errors).flat() : [];
+            throw new Error(errors[0] || data.message || "Invalid code");
+        }
+
+        checkoutState.discount = Number(data.discount_amount) || 0;
+        checkoutState.couponCode = data.coupon?.code || code;
+
         if (msg) {
-            msg.textContent = "Invalid code";
+            msg.textContent = `${checkoutState.couponCode} applied`;
+            msg.style.color = "#0A0A0A";
+        }
+
+        setDisplay("discountRow", "flex");
+        setText("discountDisplay", `- ${formatEGP(checkoutState.discount)}`);
+    } catch (error) {
+        if (msg) {
+            msg.textContent = error.message || "Invalid code";
 
             msg.style.color = "#c0392b";
         }
 
         checkoutState.discount = 0;
+        checkoutState.couponCode = "";
 
         setDisplay("discountRow", "none");
     }
@@ -473,6 +508,7 @@ function getCheckoutPayload() {
         notes: document.getElementById("notes")?.value.trim() || "",
         shipping_cost: checkoutState.shippingCost,
         discount: checkoutState.discount,
+        coupon_code: checkoutState.couponCode,
         cart: loadCheckoutCart().map((item) => ({
             variantId: item.variantId,
             quantity: item.quantity,

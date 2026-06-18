@@ -21,6 +21,7 @@ new #[Title('Sales Invoice Details')] class extends Component {
             'branch',
             'user',
             'paymentMethod',
+            'coupon',
             'salesInvoiceDetails.productVariant.product',
             'salesInvoiceDetails.productVariant.color',
             'salesInvoiceDetails.productVariant.size',
@@ -169,6 +170,9 @@ new #[Title('Sales Invoice Details')] class extends Component {
                 <h2 class="font-bold">Totals</h2>
                 <dl class="mt-4 space-y-2 text-sm">
                     <div class="flex justify-between"><dt>Subtotal</dt><dd>{{ number_format((float) $invoice->total_amount, 2) }}</dd></div>
+                    @if ($invoice->coupon_code)
+                        <div class="flex justify-between"><dt>Coupon</dt><dd class="font-semibold text-rose-600">{{ $invoice->coupon_code }}</dd></div>
+                    @endif
                     <div class="flex justify-between"><dt>Discount</dt><dd>{{ number_format((float) $invoice->deduction, 2) }}</dd></div>
                     <div class="flex justify-between"><dt>Tax</dt><dd>{{ number_format((float) $invoice->tax_amount, 2) }}</dd></div>
                     <div class="flex justify-between border-t pt-2 font-bold dark:border-zinc-800"><dt>Grand Total</dt><dd>{{ number_format((float) $invoice->net_total, 2) }}</dd></div>

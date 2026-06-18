@@ -308,196 +308,229 @@
 
 
 
-        <flux:sidebar.nav class="px-3 pt-4 custom-scroll">
-            <!-- Dashboard -->
-            <flux:sidebar.group :heading="__('الرئيسية')" class="sidebar-group-enhanced mb-6">
-                @can('dashboard.view')
-                    <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
-                        wire:navigate class="sidebar-item-enhanced">
-                        {{ __('لوحة التحكم') }}
-                    </flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
+<flux:sidebar.nav class="px-3 pt-4 custom-scroll">
+    {{-- 1. لوحة التحكم --}}
+    <flux:sidebar.group :heading="__('الرئيسية')" class="sidebar-group-enhanced mb-6">
+        @can('dashboard.view')
+            <flux:sidebar.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')"
+                wire:navigate class="sidebar-item-enhanced">
+                {{ __('لوحة التحكم') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
 
-            <!-- Products & Inventory -->
-            <flux:sidebar.group :heading="__('إدارة المنتجات والمخزون')" class="sidebar-group-enhanced mb-6">
-                @can('stock_movements.view')
-                    <flux:sidebar.item icon="arrows-right-left" :href="route('stock-movements.index')"
-                        :current="request()->routeIs('stock-movements.index')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Stock Movements') }}</flux:sidebar.item>
-                @endcan
-                @can('inventory_adjustments.view')
-                    <flux:sidebar.item icon="clipboard-document-check" :href="route('inventory-adjustments.index')"
-                        :current="request()->routeIs('inventory-adjustments.index')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Inventory Adjustments') }}</flux:sidebar.item>
-                @endcan
-                @can('stock_transfers.view')
-                    <flux:sidebar.item icon="truck" :href="route('stock-transfers.index')"
-                        :current="request()->routeIs('stock-transfers.index')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Stock Transfers') }}</flux:sidebar.item>
-                @endcan
-                @can('barcodes.view')
-                    <flux:sidebar.item icon="qr-code" :href="route('barcodes.index')"
-                        :current="request()->routeIs('barcodes.index')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Barcode Labels') }}</flux:sidebar.item>
-                @endcan
-                @can('products.view')
-                    <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
-                        wire:navigate class="sidebar-item-enhanced">{{ __('المنتجات') }}</flux:sidebar.item>
-                @endcan
-                @can('main_categories.view')
-                    <flux:sidebar.item icon="tag" :href="route('categories')"
-                        :current="request()->routeIs('categories')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('التصنيفات الرئيسية') }}</flux:sidebar.item>
-                @endcan
-                @can('sub_categories.view')
-                    <flux:sidebar.item icon="tag" :href="route('subCategories')"
-                        :current="request()->routeIs('subCategories')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('التصنيفات الفرعية') }}</flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
+    {{-- 2. نقاط البيع --}}
+    <flux:sidebar.group :heading="__('POS')" class="sidebar-group-enhanced mb-6">
+        @can('pos_system.view')
+            <flux:sidebar.item icon="shopping-cart" :href="route('pos_system')"
+                :current="request()->routeIs('pos_system')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('POS System') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
 
-            <!-- POS -->
-            <flux:sidebar.group :heading="__('POS')" class="sidebar-group-enhanced mb-6">
-                @can('pos_system.view')
-                    <flux:sidebar.item icon="shopping-cart" :href="route('pos_system')"
-                        :current="request()->routeIs('pos_system')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('POS System') }}</flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
+    {{-- 3. المتجر الإلكتروني --}}
+    <flux:sidebar.group :heading="__('المتجر الإلكتروني')" class="sidebar-group-enhanced mb-6">
+        @can('orders.view')
+            <flux:sidebar.item icon="shopping-bag" :href="route('orders')" :current="request()->routeIs('orders')"
+                wire:navigate class="sidebar-item-enhanced">{{ __('الطلبات أونلاين') }}</flux:sidebar.item>
+        @endcan
+        @can('coupons.view')
+            <flux:sidebar.item icon="receipt-percent" :href="route('coupons.index')" :current="request()->routeIs('coupons.index')"
+                wire:navigate class="sidebar-item-enhanced">{{ __('الكوبونات') }}</flux:sidebar.item>
+        @endcan
+        @can('notifications.view')
+            <flux:sidebar.item icon="bell" :href="route('admin.notifications')"
+                :current="request()->routeIs('admin.notifications')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('الإشعارات') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
 
-            <!-- Online Store -->
-            <flux:sidebar.group :heading="__('Online Store')" class="sidebar-group-enhanced mb-6">
-                @can('orders.view')
-                    <flux:sidebar.item icon="shopping-bag" :href="route('orders')" :current="request()->routeIs('orders')"
-                        wire:navigate class="sidebar-item-enhanced">{{ __('Online Orders') }}</flux:sidebar.item>
-                @endcan
-                @can('notifications.view')
-                    <flux:sidebar.item icon="bell" :href="route('admin.notifications')"
-                        :current="request()->routeIs('admin.notifications')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Notifications') }}</flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
+    {{-- 4. إدارة الفواتير --}}
+    <flux:sidebar.group :heading="__('إدارة الفواتير')" class="sidebar-group-enhanced mb-6">
+        @can('sales.view')
+            <flux:sidebar.item icon="chart-bar-square" :href="route('sales.index')"
+                :current="request()->routeIs('sales.index') || request()->routeIs('sales.show') || request()->routeIs('sales.edit')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('فواتير المبيعات') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('sales.return.view')
+            <flux:sidebar.item icon="arrow-uturn-left" :href="route('sales.returns')"
+                :current="request()->routeIs('sales.returns')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('مرتجعات المبيعات') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('sales.view')
+            <flux:sidebar.item icon="presentation-chart-line" :href="route('sales.reports')"
+                :current="request()->routeIs('sales.reports')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('تقارير المبيعات') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('purchase_invoices.view')
+            <flux:sidebar.item icon="document-text" :href="route('purchaseInvoices')"
+                :current="request()->routeIs('purchaseInvoices')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('قائمة فواتير المشتريات') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('create_purchase_invoice.create')
+            <flux:sidebar.item icon="document-plus" :href="route('createpurchaseInvoices')"
+                :current="request()->routeIs('createpurchaseInvoices')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('تسجيل فاتورة مشتريات جديدة') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('purchase_returns.view')
+            <flux:sidebar.item icon="arrow-uturn-left" :href="route('purchase-returns.index')"
+                :current="request()->routeIs('purchase-returns.*')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('مرتجعات المشتريات') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('supplier_payments.view')
+            <flux:sidebar.item icon="banknotes" :href="route('supplier-payments.index')"
+                :current="request()->routeIs('supplier-payments.*')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('مدفوعات الموردين') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item icon="book-open" :href="route('supplier-ledger.index')"
+                :current="request()->routeIs('supplier-ledger.*')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('كشف حساب المورد') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
 
-            <!-- Invoices -->
-            <flux:sidebar.group :heading="__('إدارة الفواتير')" class="sidebar-group-enhanced mb-6">
-                @can('sales.view')
-                    <flux:sidebar.item icon="chart-bar-square" :href="route('sales.index')"
-                        :current="request()->routeIs('sales.index') || request()->routeIs('sales.show') || request()->routeIs('sales.edit')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Sales Invoices') }}</flux:sidebar.item>
-                @endcan
-                @can('sales.return.view')
-                    <flux:sidebar.item icon="arrow-uturn-left" :href="route('sales.returns')"
-                        :current="request()->routeIs('sales.returns')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Sales Returns') }}</flux:sidebar.item>
-                @endcan
-                @can('sales.view')
-                    <flux:sidebar.item icon="presentation-chart-line" :href="route('sales.reports')"
-                        :current="request()->routeIs('sales.reports')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Sales Reports') }}</flux:sidebar.item>
-                @endcan
-                @can('purchase_invoices.view')
-                    <flux:sidebar.item icon="document-text" :href="route('purchaseInvoices')"
-                        :current="request()->routeIs('purchaseInvoices')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('قائمة فواتير المشتريات') }}</flux:sidebar.item>
-                @endcan
-                @can('create_purchase_invoice.create')
-                    <flux:sidebar.item icon="document-plus" :href="route('createpurchaseInvoices')"
-                        :current="request()->routeIs('createpurchaseInvoices')" wire:navigate
-                        class="sidebar-item-enhanced">{{ __('تسجيل فاتورة مشتريات جديدة') }}</flux:sidebar.item>
-                @endcan
-                @can('supplier_payments.view')
-                    <flux:sidebar.item icon="banknotes" :href="route('supplier-payments.index')"
-                        :current="request()->routeIs('supplier-payments.*')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Supplier Payments') }}</flux:sidebar.item>
-                    <flux:sidebar.item icon="book-open" :href="route('supplier-ledger.index')"
-                        :current="request()->routeIs('supplier-ledger.*')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Supplier Ledger') }}</flux:sidebar.item>
-                @endcan
-                @can('purchase_returns.view')
-                    <flux:sidebar.item icon="arrow-uturn-left" :href="route('purchase-returns.index')"
-                        :current="request()->routeIs('purchase-returns.*')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Purchase Returns') }}</flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
-            <!-- Expenses -->
-            <flux:sidebar.group :heading="__('إدارة المصروفات')" class="sidebar-group-enhanced mb-6">
-                @can('expenses.view')
-                    <flux:sidebar.item icon="currency-dollar" :href="route('expenses')"
-                        :current="request()->routeIs('expenses')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('جميع المصروفات') }}</flux:sidebar.item>
-                @endcan
-                @can('expense_items.view')
-                    <flux:sidebar.item icon="receipt-percent" :href="route('expenses_items')"
-                        :current="request()->routeIs('expenses_items')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('بنود المصروفات') }}</flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
+    {{-- 5. إدارة المنتجات والمخزون --}}
+    <flux:sidebar.group :heading="__('إدارة المنتجات والمخزون')" class="sidebar-group-enhanced mb-6">
+        @can('products.view')
+            <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
+                wire:navigate class="sidebar-item-enhanced">{{ __('المنتجات') }}</flux:sidebar.item>
+        @endcan
+        @can('main_categories.view')
+            <flux:sidebar.item icon="tag" :href="route('categories')"
+                :current="request()->routeIs('categories')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('التصنيفات الرئيسية') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('sub_categories.view')
+            <flux:sidebar.item icon="tag" :href="route('subCategories')"
+                :current="request()->routeIs('subCategories')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('التصنيفات الفرعية') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('barcodes.view')
+            <flux:sidebar.item icon="qr-code" :href="route('barcodes.index')"
+                :current="request()->routeIs('barcodes.index')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('ملصقات الباركود') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('stock_movements.view')
+            <flux:sidebar.item icon="arrows-right-left" :href="route('stock-movements.index')"
+                :current="request()->routeIs('stock-movements.index')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('حركات المخزون') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('inventory_adjustments.view')
+            <flux:sidebar.item icon="clipboard-document-check" :href="route('inventory-adjustments.index')"
+                :current="request()->routeIs('inventory-adjustments.index')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('تسويات المخزون') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('stock_transfers.view')
+            <flux:sidebar.item icon="truck" :href="route('stock-transfers.index')"
+                :current="request()->routeIs('stock-transfers.index')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('تحويلات المخزون') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
 
-            <!-- Business Relations -->
-            <flux:sidebar.group :heading="__('العلاقات التجارية')" class="sidebar-group-enhanced mb-6">
-                @can('customers.view')
-                    <flux:sidebar.item icon="user-group" :href="route('customers')"
-                        :current="request()->routeIs('customers')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('العملاء') }}</flux:sidebar.item>
-                @endcan
-                @can('suppliers.view')
-                    <flux:sidebar.item icon="truck" :href="route('suppliers')"
-                        :current="request()->routeIs('suppliers')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('الموردين') }}</flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
+    {{-- 6. إدارة المصروفات --}}
+    <flux:sidebar.group :heading="__('إدارة المصروفات')" class="sidebar-group-enhanced mb-6">
+        @can('expenses.view')
+            <flux:sidebar.item icon="currency-dollar" :href="route('expenses')"
+                :current="request()->routeIs('expenses')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('جميع المصروفات') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('expense_items.view')
+            <flux:sidebar.item icon="receipt-percent" :href="route('expenses_items')"
+                :current="request()->routeIs('expenses_items')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('بنود المصروفات') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
 
-            <!-- System Settings -->
-            <flux:sidebar.group :heading="__('إعدادات النظام')" class="sidebar-group-enhanced mb-6">
-                @can('users.view')
-                    <flux:sidebar.item icon="users" :href="route('users')" :current="request()->routeIs('users')"
-                        wire:navigate class="sidebar-item-enhanced">{{ __('المستخدمين') }}</flux:sidebar.item>
-                @endcan
-                @can('users.update')
-                    <flux:sidebar.item icon="plus-circle" :href="route('roles.index')"
-                        :current="request()->routeIs('roles.index')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('Add Role') }}</flux:sidebar.item>
-                    <flux:sidebar.item icon="shield-check" :href="route('roles-permissions.index')"
-                        :current="request()->routeIs('roles-permissions.index')" wire:navigate
-                        class="sidebar-item-enhanced">{{ __('Roles Permissions') }}</flux:sidebar.item>
-                    <flux:sidebar.item icon="user-plus" :href="route('user-roles.index')"
-                        :current="request()->routeIs('user-roles.index')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('User Roles') }}</flux:sidebar.item>
-                @endcan
-                @can('branches.view')
-                    <flux:sidebar.item icon="building-storefront" :href="route('branches')"
-                        :current="request()->routeIs('branches')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('الفروع') }}</flux:sidebar.item>
-                @endcan
-                @can('colors.view')
-                    <flux:sidebar.item icon="building-storefront" :href="route('colors')"
-                        :current="request()->routeIs('colors')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('اضافة الوان') }}</flux:sidebar.item>
-                @endcan
-                @can('sizes.view')
-                    <flux:sidebar.item icon="building-storefront" :href="route('sizes')"
-                        :current="request()->routeIs('sizes')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('اضافة مقاس') }}</flux:sidebar.item>
-                @endcan
-                @can('payment_methods.view')
-                    <flux:sidebar.item icon="building-storefront" :href="route('payment_methods')"
-                        :current="request()->routeIs('payment_methods')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('طرق الدفع') }}</flux:sidebar.item>
-                @endcan
-                @can('shipping_governorates.view')
-                    <flux:sidebar.item icon="building-storefront" :href="route('shipping')"
-                        :current="request()->routeIs('shipping')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('محافظات الشحن') }}</flux:sidebar.item>
-                @endcan
-                @can('collections.view')
-                    <flux:sidebar.item icon="building-storefront" :href="route('all_collections')"
-                        :current="request()->routeIs('all_collections')" wire:navigate class="sidebar-item-enhanced">
-                        {{ __('كولكشن') }}</flux:sidebar.item>
-                @endcan
-            </flux:sidebar.group>
-        </flux:sidebar.nav>
+    {{-- 7. العلاقات التجارية --}}
+    <flux:sidebar.group :heading="__('العلاقات التجارية')" class="sidebar-group-enhanced mb-6">
+        @can('customers.view')
+            <flux:sidebar.item icon="user-group" :href="route('customers')"
+                :current="request()->routeIs('customers')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('العملاء') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('suppliers.view')
+            <flux:sidebar.item icon="truck" :href="route('suppliers')"
+                :current="request()->routeIs('suppliers')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('الموردين') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
 
+    {{-- 8. إعدادات النظام --}}
+    <flux:sidebar.group :heading="__('إعدادات النظام')" class="sidebar-group-enhanced mb-6">
+        @can('users.view')
+            <flux:sidebar.item icon="users" :href="route('users')" :current="request()->routeIs('users')"
+                wire:navigate class="sidebar-item-enhanced">{{ __('المستخدمين') }}</flux:sidebar.item>
+        @endcan
+        @can('users.update')
+            <flux:sidebar.item icon="plus-circle" :href="route('roles.index')"
+                :current="request()->routeIs('roles.index')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('إضافة دور') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item icon="shield-check" :href="route('roles-permissions.index')"
+                :current="request()->routeIs('roles-permissions.index')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('صلاحيات الأدوار') }}
+            </flux:sidebar.item>
+            <flux:sidebar.item icon="user-plus" :href="route('user-roles.index')"
+                :current="request()->routeIs('user-roles.index')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('أدوار المستخدمين') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('branches.view')
+            <flux:sidebar.item icon="building-storefront" :href="route('branches')"
+                :current="request()->routeIs('branches')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('الفروع') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('colors.view')
+            <flux:sidebar.item icon="swatch" :href="route('colors')"
+                :current="request()->routeIs('colors')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('إضافة ألوان') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('sizes.view')
+            <flux:sidebar.item icon="swatch" :href="route('sizes')"
+                :current="request()->routeIs('sizes')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('إضافة مقاسات') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('payment_methods.view')
+            <flux:sidebar.item icon="credit-card" :href="route('payment_methods')"
+                :current="request()->routeIs('payment_methods')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('طرق الدفع') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('shipping_governorates.view')
+            <flux:sidebar.item icon="truck" :href="route('shipping')"
+                :current="request()->routeIs('shipping')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('محافظات الشحن') }}
+            </flux:sidebar.item>
+        @endcan
+        @can('collections.view')
+            <flux:sidebar.item icon="rectangle-stack" :href="route('all_collections')"
+                :current="request()->routeIs('all_collections')" wire:navigate class="sidebar-item-enhanced">
+                {{ __('الكولكشن') }}
+            </flux:sidebar.item>
+        @endcan
+    </flux:sidebar.group>
+</flux:sidebar.nav>
         <flux:spacer />
     </flux:sidebar>
 

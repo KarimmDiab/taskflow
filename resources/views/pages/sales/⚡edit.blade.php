@@ -28,7 +28,6 @@ new #[Title('Edit Sales Invoice')] class extends Component {
         $this->customerId = $invoice->customer_id;
         $this->branchId = $invoice->branch_id;
         $this->paymentMethodId = $invoice->payment_method_id;
-        $this->invoiceDiscount = (float) $invoice->deduction;
         $this->taxAmount = (float) $invoice->tax_amount;
         $this->paidAmount = (float) $invoice->paid_amount;
         $this->items = $invoice->salesInvoiceDetails->map(fn ($detail): array => [
@@ -37,6 +36,7 @@ new #[Title('Edit Sales Invoice')] class extends Component {
             'unit_price' => (float) $detail->unit_price,
             'discount_amount' => (float) $detail->discount_amount,
         ])->values()->all();
+        $this->invoiceDiscount = max((float) $invoice->deduction - collect($this->items)->sum('discount_amount'), 0);
     }
 
     public function getCustomersProperty()
@@ -100,6 +100,7 @@ new #[Title('Edit Sales Invoice')] class extends Component {
             'customer_id' => $this->customerId,
             'branch_id' => $this->branchId,
             'payment_method_id' => $this->paymentMethodId,
+            'discount_type' => $this->invoiceDiscount > 0 ? 'fixed' : null,
             'deduction' => $this->invoiceDiscount,
             'tax_amount' => $this->taxAmount,
             'paid_amount' => $this->paidAmount,

@@ -75,6 +75,9 @@
     </table>
     <section class="totals">
         <div><span>Subtotal</span><strong>{{ number_format((float) $salesInvoice->total_amount, 2) }}</strong></div>
+        @if ($salesInvoice->coupon_code)
+            <div><span>Coupon</span><strong>{{ $salesInvoice->coupon_code }}</strong></div>
+        @endif
         <div><span>Discount</span><strong>{{ number_format((float) $salesInvoice->deduction, 2) }}</strong></div>
         <div><span>Tax</span><strong>{{ number_format((float) $salesInvoice->tax_amount, 2) }}</strong></div>
         <div class="grand"><span>Grand Total</span><span>{{ number_format((float) $salesInvoice->net_total, 2) }}</span></div>

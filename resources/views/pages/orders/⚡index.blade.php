@@ -2,6 +2,7 @@
 
 use App\Models\OnlineOrder;
 use App\Models\Shipping;
+use App\Services\DiscountService;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -26,7 +27,7 @@ new #[Title('Online Orders')] class extends Component {
         $dateTo = $this->validDate($this->dateTo);
 
         $orders = OnlineOrder::query()
-            ->with(['shipping', 'salesInvoice.paymentMethod'])
+            ->with(['shipping', 'coupon', 'salesInvoice.paymentMethod'])
             ->when($this->search, function ($query) {
                 $search = trim($this->search);
 
@@ -59,6 +60,7 @@ new #[Title('Online Orders')] class extends Component {
         return OnlineOrder::query()
             ->with([
                 'shipping',
+                'coupon',
                 'salesInvoice.paymentMethod',
                 'salesInvoice.salesInvoiceDetails.productVariant.product.images',
                 'salesInvoice.salesInvoiceDetails.productVariant.product.primaryImage',
@@ -143,8 +145,25 @@ new #[Title('Online Orders')] class extends Component {
             "statusUpdates.{$orderId}.in" => 'Please choose a valid order status.',
         ]);
 
-        $order = OnlineOrder::query()->findOrFail($orderId);
-        $order->update(['status' => $status]);
+        $order = OnlineOrder::query()->with('coupon')->findOrFail($orderId);
+        $oldStatus = $order->status;
+
+        if (in_array($status, ['confirmed', 'preparing', 'shipped', 'delivered'], true) && ! $order->coupon_counted_at && $order->coupon) {
+            app(DiscountService::class)->incrementCouponUsage($order->coupon);
+            $order->coupon_counted_at = now();
+        }
+
+        if (in_array($status, ['cancelled', 'returned'], true) && $order->coupon_counted_at && $order->coupon) {
+            app(DiscountService::class)->decrementCouponUsage($order->coupon);
+            $order->coupon_counted_at = null;
+        }
+
+        $order->status = $status;
+        $order->save();
+
+        if ($order->salesInvoice && $status === 'cancelled' && $oldStatus !== 'cancelled') {
+            $order->salesInvoice->update(['status' => 'cancelled']);
+        }
 
         session()->flash('success', "Order {$order->order_number} status updated to {$status}.");
     }
@@ -264,6 +283,7 @@ new #[Title('Online Orders')] class extends Component {
                                 <th class="px-4 py-3.5 text-left">Area</th>
                                 <th class="px-4 py-3.5 text-right">Subtotal</th>
                                 <th wire:click="sortByColumn('shipping_cost')" class="cursor-pointer px-4 py-3.5 text-right hover:text-rose-600 transition">Shipping</th>
+                                <th class="px-4 py-3.5 text-right">Discount</th>
                                 <th class="px-4 py-3.5 text-right">Total</th>
                                 <th class="px-4 py-3.5 text-left">Payment</th>
                                 <th wire:click="sortByColumn('status')" class="cursor-pointer px-4 py-3.5 text-left hover:text-rose-600 transition">Status</th>
@@ -292,6 +312,12 @@ new #[Title('Online Orders')] class extends Component {
                                     <td class="px-4 py-4">{{ $order->area }}</td>
                                     <td class="px-4 py-4 text-right font-medium">{{ number_format($order->subtotal, 2) }}</td>
                                     <td class="px-4 py-4 text-right font-medium">{{ number_format($order->shipping_cost, 2) }}</td>
+                                    <td class="px-4 py-4 text-right font-medium text-rose-600">
+                                        {{ (float) $order->discount_amount > 0 ? '-'.number_format((float) $order->discount_amount, 2) : '-' }}
+                                        @if ($order->coupon_code)
+                                            <div class="text-[11px] font-semibold text-slate-400">{{ $order->coupon_code }}</div>
+                                        @endif
+                                    </td>
                                     <td class="px-4 py-4 text-right font-bold">{{ number_format($order->grand_total, 2) }}</td>
                                     <td class="px-4 py-4">{{ $order->salesInvoice?->paymentMethod?->payment_method_name ?? '-' }}</td>
                                     <td class="px-4 py-4">
@@ -325,7 +351,7 @@ new #[Title('Online Orders')] class extends Component {
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="12" class="px-6 py-20 text-center">
+                                    <td colspan="13" class="px-6 py-20 text-center">
                                         <div class="mx-auto flex max-w-sm flex-col items-center">
                                             <div class="flex h-16 w-16 items-center justify-center rounded-2xl bg-stone-100 text-2xl dark:bg-slate-800">📦</div>
                                             <h3 class="mt-4 text-lg font-bold">No online orders found</h3>
@@ -444,6 +470,12 @@ new #[Title('Online Orders')] class extends Component {
                         <div class="flex justify-end">
                             <div class="w-full max-w-sm rounded-xl border border-stone-200 bg-stone-50/50 p-5 dark:border-slate-800 dark:bg-slate-950/50">
                                 <div class="flex justify-between py-2 text-sm"><span class="text-slate-500">Subtotal</span><span class="font-semibold">{{ number_format($selected->subtotal, 2) }} EGP</span></div>
+                                @if ((float) $selected->discount_amount > 0)
+                                    <div class="flex justify-between py-2 text-sm">
+                                        <span class="text-slate-500">Coupon Discount {{ $selected->coupon_code ? '('.$selected->coupon_code.')' : '' }}</span>
+                                        <span class="font-semibold text-rose-600">-{{ number_format((float) $selected->discount_amount, 2) }} EGP</span>
+                                    </div>
+                                @endif
                                 <div class="flex justify-between py-2 text-sm"><span class="text-slate-500">Shipping Cost</span><span class="font-semibold">{{ number_format($selected->shipping_cost, 2) }} EGP</span></div>
                                 <div class="mt-3 flex justify-between border-t border-stone-200 pt-4 text-lg font-bold dark:border-slate-800">
                                     <span>Grand Total</span>

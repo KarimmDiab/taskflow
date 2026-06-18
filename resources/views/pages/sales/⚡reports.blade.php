@@ -16,17 +16,21 @@ new #[Title('Sales Reports')] class extends Component {
     {
         $sales = $this->invoiceQuery()->where('status', '!=', 'cancelled');
         $returns = $this->returnQuery()->whereIn('status', ['approved', 'completed']);
-        $totalSales = (float) (clone $sales)->sum('net_total');
+        $grossSales = (float) (clone $sales)->sum(DB::raw('COALESCE(NULLIF(subtotal, 0), total_amount)'));
+        $totalDiscounts = (float) (clone $sales)->sum(DB::raw('COALESCE(NULLIF(discount_amount, 0), deduction, 0)'));
         $totalReturns = (float) (clone $returns)->sum('return_amount');
-        $grossProfit = (float) SalesInvoiceDetail::query()
+        $cost = (float) SalesInvoiceDetail::query()
             ->whereHas('salesInvoice', fn ($query) => $this->applyInvoiceFilters($query)->where('status', '!=', 'cancelled'))
-            ->sum(DB::raw('line_total - (cost_price * product_quantity)'));
-        $netSales = $totalSales - $totalReturns;
+            ->sum(DB::raw('cost_price * product_quantity'));
+        $netSales = $grossSales - $totalDiscounts - $totalReturns;
+        $grossProfit = $netSales - $cost;
 
         return [
-            'total_sales' => $totalSales,
+            'gross_sales' => $grossSales,
+            'total_discounts' => $totalDiscounts,
             'total_returns' => $totalReturns,
             'net_sales' => $netSales,
+            'cost' => $cost,
             'gross_profit' => $grossProfit,
             'profit_margin' => $netSales > 0 ? ($grossProfit / $netSales) * 100 : 0,
         ];
@@ -149,11 +153,13 @@ new #[Title('Sales Reports')] class extends Component {
             </div>
         </div>
 
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7">
             @foreach ([
-                ['Total Sales', number_format($this->cards['total_sales'], 2)],
+                ['Gross Sales', number_format($this->cards['gross_sales'], 2)],
+                ['Total Discounts', number_format($this->cards['total_discounts'], 2)],
                 ['Total Returns', number_format($this->cards['total_returns'], 2)],
                 ['Net Sales', number_format($this->cards['net_sales'], 2)],
+                ['Cost', number_format($this->cards['cost'], 2)],
                 ['Gross Profit', number_format($this->cards['gross_profit'], 2)],
                 ['Profit Margin %', number_format($this->cards['profit_margin'], 2).'%'],
             ] as [$label, $value])

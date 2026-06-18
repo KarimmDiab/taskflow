@@ -14,9 +14,15 @@ class SalesInvoice extends Model
 
     protected $fillable = [
         'invoice_number',
+        'subtotal',
         'total_amount',
         'deduction',
+        'discount_amount',
+        'discount_type',
+        'coupon_id',
+        'coupon_code',
         'tax_amount',
+        'grand_total',
         'net_total',
         'paid_amount',
         'remaining_amount',
@@ -35,6 +41,15 @@ class SalesInvoice extends Model
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'subtotal' => 'decimal:2',
+        'total_amount' => 'decimal:2',
+        'deduction' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'tax_amount' => 'decimal:2',
+        'grand_total' => 'decimal:2',
+        'net_total' => 'decimal:2',
+        'paid_amount' => 'decimal:2',
+        'remaining_amount' => 'decimal:2',
     ];
 
     public function user()
@@ -60,6 +75,11 @@ class SalesInvoice extends Model
     public function onlineOrder()
     {
         return $this->hasOne(OnlineOrder::class);
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
     }
 
     public function customerTransaction()

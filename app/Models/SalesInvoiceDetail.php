@@ -17,15 +17,26 @@ class SalesInvoiceDetail extends Model
         'sales_invoice_id',
         'product_quantity',
         'unit_price',
+        'item_discount_type',
+        'item_discount_value',
+        'item_discount_amount',
         'discount_amount',
         'cost_price',
         'line_total',
+        'line_total_after_discount',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'unit_price' => 'decimal:2',
+        'item_discount_value' => 'decimal:2',
+        'item_discount_amount' => 'decimal:2',
+        'discount_amount' => 'decimal:2',
+        'cost_price' => 'decimal:2',
+        'line_total' => 'decimal:2',
+        'line_total_after_discount' => 'decimal:2',
     ];
 
     public function salesInvoice()

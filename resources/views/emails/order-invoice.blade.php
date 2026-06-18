@@ -345,7 +345,7 @@
                                             </tr>
                                             @if ($discount > 0)
                                                 <tr>
-                                                    <td style="padding:8px 0;color:#b66d4b;font-size:14px;">Discount
+                                                    <td style="padding:8px 0;color:#b66d4b;font-size:14px;">Discount{{ $invoice->coupon_code ? ' ('.$invoice->coupon_code.')' : '' }}
                                                     </td>
                                                     <td align="right"
                                                         style="padding:8px 0;color:#b66d4b;font-size:14px;">- EGP
