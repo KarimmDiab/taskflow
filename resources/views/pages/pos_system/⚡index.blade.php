@@ -11,6 +11,7 @@ use Livewire\Attributes\Title;
 
 new #[Title('POS System')] class extends Component {
     public string $search = '';
+    public string $barcodeInput = '';
     public ?int $branch_id = null;
     public ?int $customer_id = null;
     public ?int $payment_method_id = null;
@@ -50,11 +51,15 @@ new #[Title('POS System')] class extends Component {
         return ProductVariant::query()
             ->with(['product.primaryImage', 'product.category', 'color', 'size', 'inventories' => fn($query) => $query->where('branch_id', $this->branch_id)])
             ->where('is_active', true)
-            ->whereHas('product', function ($query) {
-                $query->where('is_active', true)->when($this->search, function ($inner) {
-                    $inner->where(function ($searchQuery) {
-                        $searchQuery->where('product_name', 'like', "%{$this->search}%")->orWhere('product_code', 'like', "%{$this->search}%");
-                    });
+            ->whereHas('product', fn($query) => $query->where('is_active', true))
+            ->when($this->search, function ($query) {
+                $query->where(function ($inner) {
+                    $inner->where('sku', 'like', "%{$this->search}%")
+                        ->orWhere('barcode', 'like', "%{$this->search}%")
+                        ->orWhereHas('product', function ($productQuery) {
+                            $productQuery->where('product_name', 'like', "%{$this->search}%")
+                                ->orWhere('product_code', 'like', "%{$this->search}%");
+                        });
                 });
             })
             ->whereHas('inventories', fn($query) => $query->where('branch_id', $this->branch_id)->where('quantity', '>', 0))
@@ -107,6 +112,30 @@ new #[Title('POS System')] class extends Component {
 
         $this->paid_amount = $this->netTotal;
         $this->showNotification('Added to cart', 'success');
+    }
+
+    public function scanBarcode(): void
+    {
+        abort_unless(auth()->user()?->can('pos_system.create'), 403);
+
+        $code = trim($this->barcodeInput);
+        $this->barcodeInput = '';
+
+        if ($code === '') {
+            return;
+        }
+
+        $variant = ProductVariant::query()
+            ->where('barcode', $code)
+            ->orWhere('sku', $code)
+            ->first();
+
+        if (! $variant) {
+            $this->showNotification("Barcode or SKU not found: {$code}", 'error');
+            return;
+        }
+
+        $this->addToCart($variant->id);
     }
 
     public function increment(int $variantId): void
@@ -328,7 +357,7 @@ new #[Title('POS System')] class extends Component {
                         </div>
                         <div class="relative flex-1 min-w-[200px]">
                             <input type="text" wire:model.live.debounce.300ms="search"
-                                placeholder="Search by name or code..."
+                                placeholder="Search by name, SKU, or barcode..."
                                 class="w-full text-sm border border-gray-200 dark:border-gray-700 rounded-xl pr-4 pl-10 py-2.5 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 shadow-sm">
                             <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
                                 <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor"
@@ -337,6 +366,20 @@ new #[Title('POS System')] class extends Component {
                                         d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                                 </svg>
                             </div>
+                        </div>
+                        <div class="relative flex-1 min-w-[220px]">
+                            <form wire:submit.prevent="scanBarcode">
+                                <input type="text" wire:model="barcodeInput" autofocus
+                                    placeholder="Scan barcode or SKU + Enter"
+                                    class="w-full text-sm border border-blue-200 dark:border-blue-800 rounded-xl pr-4 pl-10 py-2.5 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 shadow-sm">
+                                <div class="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2M7 8h.01M11 8h.01M15 8h2M7 12h2M13 12h.01M17 12h.01M7 16h.01M11 16h6" />
+                                    </svg>
+                                </div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -372,6 +415,9 @@ new #[Title('POS System')] class extends Component {
                                             {{ $product->product_name }}</h3>
                                         <p class="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
                                             {{ $variant->color?->color_name }} - {{ $variant->size?->size_name }}
+                                        </p>
+                                        <p class="text-[11px] text-gray-400 mt-1 font-mono">
+                                            {{ $variant->barcode ?: $variant->sku }}
                                         </p>
                                         <div class="flex items-center justify-between mt-3">
                                             <span

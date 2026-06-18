@@ -293,6 +293,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                     foreach ($terms as $term) {
                         $q->where(function ($sq) use ($term) {
                             $sq->where('sku', 'like', '%' . $term . '%')
+                                ->orWhere('barcode', 'like', '%' . $term . '%')
                                 ->orWhereHas('product', function ($pq) use ($term) {
                                     $pq->where('product_name', 'like', '%' . $term . '%')->orWhere('product_code', 'like', '%' . $term . '%');
                                 })

@@ -20,6 +20,8 @@ return [
         'send' => 'Send',
         'receive' => 'Receive',
         'cancel' => 'Cancel',
+        'generate' => 'Generate',
+        'regenerate' => 'Regenerate',
     ],
 
     'modules' => [
@@ -48,6 +50,7 @@ return [
         'stock_movements' => 'Stock Movements',
         'inventory_adjustments' => 'Inventory Adjustments',
         'stock_transfers' => 'Stock Transfers',
+        'barcodes' => 'Barcodes',
     ],
 
     'default_role_permissions' => [
@@ -118,6 +121,8 @@ return [
         'inventory-adjustments.index' => 'inventory_adjustments.view',
         'stock-transfers.index' => 'stock_transfers.view',
         'stock-transfers.print' => 'stock_transfers.print',
+        'barcodes.index' => 'barcodes.view',
+        'barcodes.print' => 'barcodes.print',
         'admin.notifications' => 'notifications.view',
         'roles-permissions.index' => 'users.update',
         'user-roles.index' => 'users.update',

@@ -336,6 +336,11 @@
                         :current="request()->routeIs('stock-transfers.index')" wire:navigate class="sidebar-item-enhanced">
                         {{ __('Stock Transfers') }}</flux:sidebar.item>
                 @endcan
+                @can('barcodes.view')
+                    <flux:sidebar.item icon="qr-code" :href="route('barcodes.index')"
+                        :current="request()->routeIs('barcodes.index')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Barcode Labels') }}</flux:sidebar.item>
+                @endcan
                 @can('products.view')
                     <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
                         wire:navigate class="sidebar-item-enhanced">{{ __('المنتجات') }}</flux:sidebar.item>

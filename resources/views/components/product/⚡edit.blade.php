@@ -131,6 +131,7 @@ new class extends Component {
                     'color_id' => $variant->color_id,
                     'size_id' => $variant->size_id,
                     'sku' => $variant->sku,
+                    'barcode' => $variant->barcode,
                     'variant_cost' => $variant->variant_cost,
                     'variant_price' => $variant->variant_price,
                     'quantity' => $variant->inventories->first()?->quantity ?? 0,
@@ -870,6 +871,7 @@ new class extends Component {
                             <tr>
                                 <th class="px-4 py-3 font-semibold">الخيار</th>
                                 <th class="px-4 py-3 font-semibold">SKU</th>
+                                <th class="px-4 py-3 font-semibold">Barcode</th>
                                 <th class="px-4 py-3 font-semibold">التكلفة</th>
                                 <th class="px-4 py-3 font-semibold">السعر</th>
                                 <th class="px-4 py-3 font-semibold">الكمية</th>
@@ -885,6 +887,21 @@ new class extends Component {
                                     <td class="px-4 py-3">
                                         <input type="text" wire:model="variants.{{ $index }}.sku"
                                             class="w-40 rounded-md border border-slate-300 px-2 py-1.5 text-xs font-mono outline-none focus:border-[#008060]">
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        @if (!empty($variant['barcode']))
+                                            <div class="w-40 rounded-md border border-slate-200 bg-white p-1">
+                                                {!! app(\App\Services\BarcodeService::class)->svg($variant['barcode'], 32, 1) !!}
+                                            </div>
+                                            <div class="mt-1 flex items-center gap-2">
+                                                <span class="font-mono text-[11px] text-slate-500">{{ $variant['barcode'] }}</span>
+                                                <a href="{{ route('barcodes.print', ['labels' => rtrim(strtr(base64_encode(json_encode([['id' => $variant['id'] ?? 0, 'quantity' => 1]])), '+/', '-_'), '=')]) }}"
+                                                    target="_blank"
+                                                    class="rounded bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-700 hover:bg-slate-200">Print</a>
+                                            </div>
+                                        @else
+                                            <span class="rounded-full bg-amber-100 px-2 py-1 text-[11px] font-semibold text-amber-700">Missing</span>
+                                        @endif
                                     </td>
                                     <td class="px-4 py-3">
                                         <input type="number" min="0" step="0.01"
