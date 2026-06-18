@@ -361,6 +361,21 @@
 
             <!-- Invoices -->
             <flux:sidebar.group :heading="__('إدارة الفواتير')" class="sidebar-group-enhanced mb-6">
+                @can('sales.view')
+                    <flux:sidebar.item icon="chart-bar-square" :href="route('sales.index')"
+                        :current="request()->routeIs('sales.index') || request()->routeIs('sales.show') || request()->routeIs('sales.edit')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Sales Invoices') }}</flux:sidebar.item>
+                @endcan
+                @can('sales.return.view')
+                    <flux:sidebar.item icon="arrow-uturn-left" :href="route('sales.returns')"
+                        :current="request()->routeIs('sales.returns')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Sales Returns') }}</flux:sidebar.item>
+                @endcan
+                @can('sales.view')
+                    <flux:sidebar.item icon="presentation-chart-line" :href="route('sales.reports')"
+                        :current="request()->routeIs('sales.reports')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Sales Reports') }}</flux:sidebar.item>
+                @endcan
                 @can('purchase_invoices.view')
                     <flux:sidebar.item icon="document-text" :href="route('purchaseInvoices')"
                         :current="request()->routeIs('purchaseInvoices')" wire:navigate class="sidebar-item-enhanced">

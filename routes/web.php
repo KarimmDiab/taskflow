@@ -1,15 +1,11 @@
 <?php
 
 use App\Http\Controllers\CheckoutController;
-use App\Http\Controllers\ProductController;
-use App\Models\Product;
-
 use App\Http\Controllers\CollectionController;
 use App\Http\Controllers\HomePageController;
-
-
+use App\Http\Controllers\ProductController;
+use App\Livewire\Admin\Notifications\Index;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/', [HomePageController::class, 'index'])->name('home');
 
@@ -19,9 +15,6 @@ Route::view('/about-us', 'ryo-about-us')->name('about-us');
 Route::view('/FAQs', 'ryo-FAQs')->name('FAQs');
 Route::view('/polices', 'polices')->name('polices');
 Route::view('/refund-policy', 'ryo-refund-policy')->name('refund-policy');
-
-
-
 
 Route::view('/terms-of-services', 'ryo-terms-of-services')->name('terms-of-services');
 Route::view('/privacy-policy', 'ryo-privacy-policy')->name('privacy-policy');
@@ -36,14 +29,8 @@ Route::get('/ryo-collections', [ProductController::class, 'showAllCollection'])-
 
 Route::get('/ryo-cart', [ProductController::class, 'index'])->name('cart');
 
-
 Route::get('/collections/{slug}', [CollectionController::class, 'show'])
     ->name('collection.show');
-
-
-
-
-
 
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::view('dashboard', 'dashboard')
@@ -65,15 +52,20 @@ Route::livewire('payment_methods', 'pages::payment_method.index')->middleware(['
 Route::livewire('shipping', 'pages::shipping.index')->middleware(['auth', 'permission:shipping_governorates.view'])->name('shipping');
 Route::livewire('all_collections', 'pages::collection.index')->middleware(['auth', 'permission:collections.view'])->name('all_collections');
 Route::livewire('pos_system', 'pages::pos_system.index')->middleware(['auth', 'permission:pos_system.view'])->name('pos_system');
+Route::middleware(['auth'])->group(function () {
+    Route::livewire('sales', 'pages::sales.index')->middleware('permission:sales.view')->name('sales.index');
+    Route::livewire('sales/{invoice}', 'pages::sales.show')->middleware('permission:sales.view')->name('sales.show');
+    Route::livewire('sales/{invoice}/edit', 'pages::sales.edit')->middleware('permission:sales.edit')->name('sales.edit');
+    Route::livewire('sales-returns', 'pages::sales.returns')->middleware('permission:sales.return.view')->name('sales.returns');
+    Route::livewire('sales-reports', 'pages::sales.reports')->middleware('permission:sales.view')->name('sales.reports');
+    Route::view('sales/{invoice}/print/a4', 'pages.sales.print-a4')->middleware('permission:sales.print')->name('sales.print.a4');
+    Route::view('sales/{invoice}/print/receipt', 'pages.sales.print-receipt')->middleware('permission:sales.print')->name('sales.print.receipt');
+    Route::view('sales-returns/{return}/print', 'pages.sales.return-receipt')->middleware('permission:sales.print')->name('sales.returns.print');
+});
 Route::livewire('orders', 'pages::orders.index')->middleware(['auth', 'permission:orders.view'])->name('orders');
-Route::get('admin/notifications', \App\Livewire\Admin\Notifications\Index::class)
+Route::get('admin/notifications', Index::class)
     ->middleware(['auth', 'permission:notifications.view'])
     ->name('admin.notifications');
-
-
-
-
-
 
 Route::livewire('product/edit/{id}', 'product.edit')->middleware(['auth', 'permission:products.update'])->name('products.edit');
 

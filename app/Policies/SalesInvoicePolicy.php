@@ -4,45 +4,29 @@ namespace App\Policies;
 
 use App\Models\SalesInvoice;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class SalesInvoicePolicy
 {
-    /**
-     * Determine whether the user can view any models.
-     */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('sales.view');
     }
 
-    /**
-     * Determine whether the user can view the model.
-     */
     public function view(User $user, SalesInvoice $salesInvoice): bool
     {
-        return false;
+        return $user->can('sales.view');
     }
 
-    /**
-     * Determine whether the user can create models.
-     */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('sales.create');
     }
 
-    /**
-     * Determine whether the user can update the model.
-     */
     public function update(User $user, SalesInvoice $salesInvoice): bool
     {
-        return false;
+        return $salesInvoice->status !== 'cancelled' && ($user->can('sales.edit') || $user->can('sales.update'));
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     */
     public function delete(User $user, SalesInvoice $salesInvoice): bool
     {
         return false;
@@ -62,5 +46,15 @@ class SalesInvoicePolicy
     public function forceDelete(User $user, SalesInvoice $salesInvoice): bool
     {
         return false;
+    }
+
+    public function print(User $user, SalesInvoice $salesInvoice): bool
+    {
+        return $user->can('sales.print');
+    }
+
+    public function createReturn(User $user, SalesInvoice $salesInvoice): bool
+    {
+        return $salesInvoice->status !== 'cancelled' && $user->can('sales.return.create');
     }
 }

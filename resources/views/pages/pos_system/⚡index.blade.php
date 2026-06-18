@@ -5,9 +5,7 @@ use App\Models\Customer;
 use App\Models\Inventory;
 use App\Models\PaymentMethod;
 use App\Models\ProductVariant;
-use App\Models\SalesInvoice;
-use App\Models\SalesInvoiceDetail;
-use Illuminate\Support\Facades\DB;
+use App\Services\SalesInvoiceService;
 use Livewire\Component;
 use Livewire\Attributes\Title;
 
@@ -191,52 +189,25 @@ new #[Title('POS System')] class extends Component {
             return;
         }
 
-        DB::transaction(function () {
-            $invoice = SalesInvoice::create([
-                'invoice_number' => $this->generateInvoiceNumber(),
-                'total_amount' => $this->subtotal,
-                'deduction' => $this->deduction,
-                'net_total' => $this->netTotal,
-                'paid_amount' => $this->paid_amount,
-                'remaining_amount' => $this->remainingAmount,
-                'customer_id' => $this->customer_id,
-                'payment_method_id' => $this->payment_method_id,
-                'user_id' => auth()->id(),
-                'branch_id' => $this->branch_id,
-            ]);
-
-            foreach ($this->cart as $item) {
-                $inventory = Inventory::query()->where('product_variant_id', $item['variant_id'])->where('branch_id', $this->branch_id)->lockForUpdate()->firstOrFail();
-
-                if ($inventory->quantity < $item['quantity']) {
-                    throw new \RuntimeException('Not enough stock for ' . $item['name']);
-                }
-
-                SalesInvoiceDetail::create([
-                    'sales_invoice_id' => $invoice->id,
-                    'product_variant_id' => $item['variant_id'],
-                    'product_quantity' => $item['quantity'],
-                    'unit_price' => $item['unit_price'],
-                ]);
-
-                $inventory->decrement('quantity', $item['quantity']);
-            }
-        });
+        app(SalesInvoiceService::class)->create([
+            'deduction' => $this->deduction,
+            'paid_amount' => $this->paid_amount,
+            'customer_id' => $this->customer_id,
+            'payment_method_id' => $this->payment_method_id,
+            'user_id' => auth()->id(),
+            'branch_id' => $this->branch_id,
+        ], collect($this->cart)->map(fn (array $item): array => [
+            'product_variant_id' => $item['variant_id'],
+            'quantity' => $item['quantity'],
+            'unit_price' => $item['unit_price'],
+            'discount_amount' => 0,
+        ])->values()->all());
 
         $this->cart = [];
         $this->deduction = 0;
         $this->paid_amount = 0;
         $this->isCheckingOut = false;
         $this->showNotification('Sale completed successfully!', 'success');
-    }
-
-    private function generateInvoiceNumber(): string
-    {
-        do {
-            $number = 'POS-' . now()->format('Ymd-His') . '-' . random_int(100, 999);
-        } while (SalesInvoice::where('invoice_number', $number)->exists());
-
-        return $number;
     }
 
     private function showNotification(string $message, string $type = 'success'): void

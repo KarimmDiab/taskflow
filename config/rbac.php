@@ -12,7 +12,10 @@ return [
         'view' => 'View',
         'create' => 'Create',
         'update' => 'Update',
+        'edit' => 'Edit',
         'delete' => 'Delete',
+        'print' => 'Print',
+        'approve' => 'Approve',
     ],
 
     'modules' => [
@@ -36,6 +39,8 @@ return [
         'shipping_governorates' => 'Shipping Governorates',
         'collections' => 'Collections',
         'pos_system' => 'POS System',
+        'sales' => 'Sales Management',
+        'sales.return' => 'Sales Returns',
     ],
 
     'default_role_permissions' => [
@@ -64,6 +69,11 @@ return [
             'customers.create',
             'collections.view',
             'payment_methods.view',
+            'sales.view',
+            'sales.create',
+            'sales.print',
+            'sales.return.create',
+            'sales.return.view',
         ],
     ],
 
@@ -89,6 +99,13 @@ return [
         'purchaseInvoices' => 'purchase_invoices.view',
         'createpurchaseInvoices' => 'create_purchase_invoice.create',
         'orders' => 'orders.view',
+        'sales.index' => 'sales.view',
+        'sales.show' => 'sales.view',
+        'sales.edit' => 'sales.edit',
+        'sales.returns' => 'sales.return.view',
+        'sales.reports' => 'sales.view',
+        'sales.print' => 'sales.print',
+        'sales.returns.print' => 'sales.print',
         'admin.notifications' => 'notifications.view',
         'roles-permissions.index' => 'users.update',
         'user-roles.index' => 'users.update',

@@ -16,9 +16,14 @@ class SalesInvoice extends Model
         'invoice_number',
         'total_amount',
         'deduction',
+        'tax_amount',
         'net_total',
         'paid_amount',
         'remaining_amount',
+        'status',
+        'cancelled_at',
+        'cancelled_by',
+        'cancellation_reason',
         'customer_id',
         'payment_method_id',
         'user_id',
@@ -29,6 +34,7 @@ class SalesInvoice extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
         'deleted_at' => 'datetime',
+        'cancelled_at' => 'datetime',
     ];
 
     public function user()
@@ -61,10 +67,36 @@ class SalesInvoice extends Model
         return $this->hasMany(CustomerTransaction::class);
     }
 
+    public function returns()
+    {
+        return $this->hasMany(SalesReturn::class);
+    }
 
+    public function activityLogs()
+    {
+        return $this->hasMany(SalesActivityLog::class);
+    }
+
+    public function cancelledBy()
+    {
+        return $this->belongsTo(User::class, 'cancelled_by');
+    }
 
     public function paymentMethod()
     {
         return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function getPaymentStatusAttribute(): string
+    {
+        if ((float) $this->remaining_amount <= 0) {
+            return 'paid';
+        }
+
+        if ((float) $this->paid_amount > 0) {
+            return 'partial';
+        }
+
+        return 'unpaid';
     }
 }
