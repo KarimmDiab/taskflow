@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('purchase_invoice_details', function (Blueprint $table) {
+            $table->id();
             $table->foreignId('product_variant_id')->constrained('product_variants')->onDelete('restrict')->onUpdate('cascade');
             $table->foreignId('purchase_invoice_id')->constrained('purchase_invoices')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('branch_id')->nullable()->constrained('branches')->onDelete('restrict')->onUpdate('cascade');
             $table->integer('product_quantity')->unsigned()->default(0);
-            $table->decimal('unit_cost')->unsigned()->default(0);
+            $table->decimal('unit_cost', 12, 2)->unsigned()->default(0);
             $table->timestamps();
             $table->softDeletes();
             $table->engine('InnoDB');

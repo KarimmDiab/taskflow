@@ -87,6 +87,10 @@ Route::livewire('supplier-payments/{supplierPayment}', 'pages::supplier_payments
 Route::view('supplier-payments/{supplierPayment}/print', 'pages.supplier_payments.print')->middleware(['auth', 'permission:supplier_payments.print'])->name('supplier-payments.print');
 Route::livewire('supplier-ledger', 'pages::supplier_payments.ledger')->middleware(['auth', 'permission:supplier_payments.view'])->name('supplier-ledger.index');
 Route::view('supplier-ledger/print', 'pages.supplier_payments.ledger-print')->middleware(['auth', 'permission:supplier_payments.print'])->name('supplier-ledger.print');
+Route::livewire('purchase-returns', 'pages::purchase_returns.index')->middleware(['auth', 'permission:purchase_returns.view'])->name('purchase-returns.index');
+Route::livewire('purchase-returns/create', 'pages::purchase_returns.create')->middleware(['auth', 'permission:purchase_returns.create'])->name('purchase-returns.create');
+Route::view('purchase-returns/{purchaseReturn}/print', 'pages.purchase_returns.print')->middleware(['auth', 'permission:purchase_returns.print'])->name('purchase-returns.print');
+Route::livewire('purchase-returns/{purchaseReturn}', 'pages::purchase_returns.show')->middleware(['auth', 'permission:purchase_returns.view'])->name('purchase-returns.show');
 
 Route::prefix('admin')->middleware(['auth', 'permission:users.update'])->group(function () {
     Route::livewire('roles', 'pages::roles.index')->name('roles.index');

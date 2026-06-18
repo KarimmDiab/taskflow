@@ -6,19 +6,23 @@
 
     $invoiceQuery = \App\Models\PurchaseInvoice::query()->with('supplier')->when($supplierId, fn ($q) => $q->where('supplier_id', $supplierId));
     $paymentQuery = \App\Models\SupplierPayment::query()->with(['supplier', 'purchaseInvoice'])->when($supplierId, fn ($q) => $q->where('supplier_id', $supplierId));
+    $returnQuery = \App\Models\PurchaseReturn::query()->with(['supplier', 'purchaseInvoice'])->when($supplierId, fn ($q) => $q->where('supplier_id', $supplierId));
 
     if ($dateFrom) {
         $invoiceQuery->whereDate('purchase_invoice_date', '>=', $dateFrom);
         $paymentQuery->whereDate('payment_date', '>=', $dateFrom);
+        $returnQuery->whereDate('return_date', '>=', $dateFrom);
     }
     if ($dateTo) {
         $invoiceQuery->whereDate('purchase_invoice_date', '<=', $dateTo);
         $paymentQuery->whereDate('payment_date', '<=', $dateTo);
+        $returnQuery->whereDate('return_date', '<=', $dateTo);
     }
 
     $rows = collect()
         ->merge($invoiceQuery->get()->map(fn ($invoice) => ['date' => $invoice->purchase_invoice_date, 'type' => 'Invoice', 'reference' => $invoice->invoice_number, 'supplier' => $invoice->supplier?->supplier_name, 'debit' => (float) $invoice->total_amount, 'credit' => 0.0]))
         ->merge($paymentQuery->get()->map(fn ($payment) => ['date' => $payment->payment_date, 'type' => 'Payment', 'reference' => $payment->payment_number . ($payment->purchaseInvoice ? ' / ' . $payment->purchaseInvoice->invoice_number : ''), 'supplier' => $payment->supplier?->supplier_name, 'debit' => 0.0, 'credit' => (float) $payment->amount]))
+        ->merge($returnQuery->get()->map(fn ($return) => ['date' => $return->return_date, 'type' => 'Return', 'reference' => $return->return_number . ' / ' . ($return->purchaseInvoice?->invoice_number ?? '-'), 'supplier' => $return->supplier?->supplier_name, 'debit' => 0.0, 'credit' => (float) $return->total_amount]))
         ->sortBy([['date', 'asc'], ['type', 'asc']])
         ->values();
 

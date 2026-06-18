@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\PurchaseInvoice;
+use App\Models\PurchaseReturn;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
 use Livewire\Attributes\Computed;
@@ -39,17 +40,21 @@ new #[Title('Supplier Ledger')] class extends Component {
     {
         $purchaseQuery = PurchaseInvoice::query()->when($this->supplierId !== '', fn ($query) => $query->where('supplier_id', $this->supplierId));
         $paymentQuery = SupplierPayment::query()->when($this->supplierId !== '', fn ($query) => $query->where('supplier_id', $this->supplierId));
+        $returnQuery = PurchaseReturn::query()->when($this->supplierId !== '', fn ($query) => $query->where('supplier_id', $this->supplierId));
 
         $this->applyDates($purchaseQuery, 'purchase_invoice_date');
         $this->applyDates($paymentQuery, 'payment_date');
+        $this->applyDates($returnQuery, 'return_date');
 
         $purchases = (float) $purchaseQuery->sum('total_amount');
         $payments = (float) $paymentQuery->sum('amount');
+        $returns = (float) $returnQuery->sum('total_amount');
 
         return [
             'purchases' => $purchases,
             'payments' => $payments,
-            'balance' => $purchases - $payments,
+            'returns' => $returns,
+            'balance' => $purchases - $payments - $returns,
         ];
     }
 
@@ -65,6 +70,11 @@ new #[Title('Supplier Ledger')] class extends Component {
             ->with(['supplier', 'purchaseInvoice'])
             ->when($this->supplierId !== '', fn ($query) => $query->where('supplier_id', $this->supplierId));
         $this->applyDates($paymentQuery, 'payment_date');
+
+        $returnQuery = PurchaseReturn::query()
+            ->with(['supplier', 'purchaseInvoice'])
+            ->when($this->supplierId !== '', fn ($query) => $query->where('supplier_id', $this->supplierId));
+        $this->applyDates($returnQuery, 'return_date');
 
         $rows = collect()
             ->merge($invoiceQuery->get()->map(fn ($invoice) => [
@@ -82,6 +92,14 @@ new #[Title('Supplier Ledger')] class extends Component {
                 'supplier' => $payment->supplier?->supplier_name,
                 'debit' => 0.0,
                 'credit' => (float) $payment->amount,
+            ]))
+            ->merge($returnQuery->get()->map(fn ($return) => [
+                'date' => $return->return_date,
+                'type' => 'Return',
+                'reference' => $return->return_number . ' / ' . ($return->purchaseInvoice?->invoice_number ?? '-'),
+                'supplier' => $return->supplier?->supplier_name,
+                'debit' => 0.0,
+                'credit' => (float) $return->total_amount,
             ]))
             ->sortBy([['date', 'asc'], ['type', 'asc']])
             ->values();
@@ -174,7 +192,7 @@ new #[Title('Supplier Ledger')] class extends Component {
                 <p class="mt-1 text-sm text-slate-500">{{ $this->supplier?->supplier_phone }}</p>
             </div>
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><p class="text-sm text-slate-500">Total Purchases</p><p class="mt-2 text-2xl font-bold">{{ number_format($this->totals['purchases'], 2) }}</p></div>
-            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><p class="text-sm text-slate-500">Total Payments</p><p class="mt-2 text-2xl font-bold text-emerald-600">{{ number_format($this->totals['payments'], 2) }}</p></div>
+            <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><p class="text-sm text-slate-500">Payments + Returns</p><p class="mt-2 text-2xl font-bold text-emerald-600">{{ number_format($this->totals['payments'] + $this->totals['returns'], 2) }}</p><p class="mt-1 text-xs text-slate-500">Returns: {{ number_format($this->totals['returns'], 2) }}</p></div>
             <div class="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"><p class="text-sm text-slate-500">Outstanding Balance</p><p class="mt-2 text-2xl font-bold text-amber-600">{{ number_format($this->totals['balance'], 2) }}</p></div>
         </div>
 

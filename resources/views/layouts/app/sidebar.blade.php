@@ -414,6 +414,11 @@
                         :current="request()->routeIs('supplier-ledger.*')" wire:navigate class="sidebar-item-enhanced">
                         {{ __('Supplier Ledger') }}</flux:sidebar.item>
                 @endcan
+                @can('purchase_returns.view')
+                    <flux:sidebar.item icon="arrow-uturn-left" :href="route('purchase-returns.index')"
+                        :current="request()->routeIs('purchase-returns.*')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Purchase Returns') }}</flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
             <!-- Expenses -->
             <flux:sidebar.group :heading="__('إدارة المصروفات')" class="sidebar-group-enhanced mb-6">
