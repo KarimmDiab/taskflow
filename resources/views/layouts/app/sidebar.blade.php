@@ -406,8 +406,15 @@
                         :current="request()->routeIs('createpurchaseInvoices')" wire:navigate
                         class="sidebar-item-enhanced">{{ __('تسجيل فاتورة مشتريات جديدة') }}</flux:sidebar.item>
                 @endcan
+                @can('supplier_payments.view')
+                    <flux:sidebar.item icon="banknotes" :href="route('supplier-payments.index')"
+                        :current="request()->routeIs('supplier-payments.*')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Supplier Payments') }}</flux:sidebar.item>
+                    <flux:sidebar.item icon="book-open" :href="route('supplier-ledger.index')"
+                        :current="request()->routeIs('supplier-ledger.*')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Supplier Ledger') }}</flux:sidebar.item>
+                @endcan
             </flux:sidebar.group>
-
             <!-- Expenses -->
             <flux:sidebar.group :heading="__('إدارة المصروفات')" class="sidebar-group-enhanced mb-6">
                 @can('expenses.view')

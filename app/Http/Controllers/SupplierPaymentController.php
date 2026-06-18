@@ -3,8 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\SupplierPayment;
-use App\Http\Requests\StoreSupplierPaymentRequest;
-use App\Http\Requests\UpdateSupplierPaymentRequest;
 
 class SupplierPaymentController extends Controller
 {
@@ -36,30 +34,6 @@ class SupplierPaymentController extends Controller
      * Display the specified resource.
      */
     public function show(SupplierPayment $supplierPayment)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(SupplierPayment $supplierPayment)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateSupplierPaymentRequest $request, SupplierPayment $supplierPayment)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(SupplierPayment $supplierPayment)
     {
         //
     }

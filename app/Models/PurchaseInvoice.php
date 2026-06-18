@@ -52,8 +52,26 @@ class PurchaseInvoice extends Model
         return $this->hasMany(SupplierPayment::class);
     }
 
+    public function supplierPayments()
+    {
+        return $this->hasMany(SupplierPayment::class);
+    }
+
     public function paymentMethod()
     {
         return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function getPaymentStatusAttribute(): string
+    {
+        if ((float) $this->remaining_amount <= 0) {
+            return 'fully_paid';
+        }
+
+        if ((float) $this->paid_amount > 0) {
+            return 'partially_paid';
+        }
+
+        return 'unpaid';
     }
 }

@@ -2,39 +2,51 @@
 
 namespace App\Models;
 
+use Database\Factories\SupplierPaymentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class SupplierPayment extends Model
 {
-    /** @use HasFactory<\Database\Factories\SupplierPaymentFactory> */
-    use HasFactory, SoftDeletes;
+    /** @use HasFactory<SupplierPaymentFactory> */
+    use HasFactory;
 
     protected $fillable = [
-        'payment_date',
-        'paid_amount',
-        'note',
-        'purchase_invoice_id',
+        'payment_number',
         'supplier_id',
-        'user_id'
+        'purchase_invoice_id',
+        'payment_method_id',
+        'amount',
+        'payment_date',
+        'reference_number',
+        'notes',
+        'created_by',
     ];
 
     protected $casts = [
-        'payment_date' => 'datetime', 
+        'amount' => 'decimal:2',
+        'payment_date' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
     ];
 
-
-    public function purchaseInvoice() 
+    public function purchaseInvoice()
     {
         return $this->belongsTo(PurchaseInvoice::class);
     }
 
-    public function supplier() 
+    public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function createdBy()
+    {
+        return $this->belongsTo(User::class, 'created_by');
     }
 }

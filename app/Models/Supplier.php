@@ -2,19 +2,20 @@
 
 namespace App\Models;
 
+use Database\Factories\SupplierFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends Model
 {
-    /** @use HasFactory<\Database\Factories\SupplierFactory> */
+    /** @use HasFactory<SupplierFactory> */
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'supplier_name',
         'supplier_phone',
-        'supplier_address'
+        'supplier_address',
     ];
 
     protected $casts = [
@@ -28,7 +29,17 @@ class Supplier extends Model
         return $this->hasMany(PurchaseInvoice::class);
     }
 
+    public function purchaseInvoices()
+    {
+        return $this->hasMany(PurchaseInvoice::class);
+    }
+
     public function supplierPayment()
+    {
+        return $this->hasMany(SupplierPayment::class);
+    }
+
+    public function supplierPayments()
     {
         return $this->hasMany(SupplierPayment::class);
     }

@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use App\Models\SupplierPayment;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class SupplierPaymentPolicy
 {
@@ -13,7 +12,7 @@ class SupplierPaymentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('supplier_payments.view');
     }
 
     /**
@@ -21,7 +20,7 @@ class SupplierPaymentPolicy
      */
     public function view(User $user, SupplierPayment $supplierPayment): bool
     {
-        return false;
+        return $user->can('supplier_payments.view');
     }
 
     /**
@@ -29,7 +28,7 @@ class SupplierPaymentPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('supplier_payments.create');
     }
 
     /**

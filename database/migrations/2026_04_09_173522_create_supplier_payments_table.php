@@ -13,14 +13,16 @@ return new class extends Migration
     {
         Schema::create('supplier_payments', function (Blueprint $table) {
             $table->id();
-            $table->date('payment_date');
-            $table->decimal('paid_amount')->unsigned()->default(0);
-            $table->string('note')->nullable();
-            $table->foreignId('purchase_invoice_id')->constrained('purchase_invoices')->onDelete('restrict')->onUpdate('cascade');
+            $table->string('payment_number')->unique();
             $table->foreignId('supplier_id')->constrained('suppliers')->onDelete('restrict')->onUpdate('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('purchase_invoice_id')->nullable()->constrained('purchase_invoices')->onDelete('restrict')->onUpdate('cascade');
+            $table->foreignId('payment_method_id')->constrained('payment_methods')->onDelete('restrict')->onUpdate('cascade');
+            $table->decimal('amount', 12, 2)->unsigned();
+            $table->date('payment_date');
+            $table->string('reference_number')->nullable();
+            $table->text('notes')->nullable();
+            $table->foreignId('created_by')->constrained('users')->onDelete('restrict')->onUpdate('cascade');
             $table->timestamps();
-            $table->softDeletes();
             $table->engine('InnoDB');
         });
     }

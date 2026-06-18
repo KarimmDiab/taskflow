@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\PaymentMethod;
 use App\Models\PurchaseInvoice;
 use App\Models\Supplier;
 use App\Models\SupplierPayment;
@@ -21,14 +22,15 @@ class SupplierPaymentFactory extends Factory
     public function definition(): array
     {
         return [
+            'payment_number' => 'SP-'.now()->format('Y').'-'.fake()->unique()->numerify('######'),
+            'supplier_id' => Supplier::inRandomOrder()->value('id') ?? Supplier::factory(),
+            'purchase_invoice_id' => PurchaseInvoice::inRandomOrder()->value('id'),
+            'payment_method_id' => PaymentMethod::inRandomOrder()->value('id') ?? PaymentMethod::factory(),
+            'amount' => fake()->randomFloat(2, 100, 5000),
             'payment_date' => fake()->date(),
-            'paid_amount' => fake()->numberBetween(1000,5000),
-            'note' => fake()->sentence(10),
-            'purchase_invoice_id' => PurchaseInvoice::inRandomOrder()->first()->id,
-            'supplier_id' => Supplier::inRandomOrder()->first()->id,
-            'user_id' => User::inRandomOrder()->first()->id,
-
-
+            'reference_number' => fake()->optional()->bothify('REF-####'),
+            'notes' => fake()->optional()->sentence(10),
+            'created_by' => User::inRandomOrder()->value('id') ?? User::factory(),
         ];
     }
 }

@@ -80,6 +80,13 @@ Route::livewire('expenses', 'pages::expenses.index')->middleware(['auth', 'permi
 Route::livewire('purchaseInvoices', 'pages::purchases.index')->middleware(['auth', 'permission:purchase_invoices.view'])->name('purchaseInvoices');
 
 Route::livewire('createpurchaseInvoices', 'pages::purchases.create')->middleware(['auth', 'permission:create_purchase_invoice.create'])->name('createpurchaseInvoices');
+Route::livewire('purchaseInvoices/{purchaseInvoice}', 'pages::purchases.show')->middleware(['auth', 'permission:purchase_invoices.view'])->name('purchaseInvoices.show');
+Route::livewire('supplier-payments', 'pages::supplier_payments.index')->middleware(['auth', 'permission:supplier_payments.view'])->name('supplier-payments.index');
+Route::livewire('supplier-payments/create', 'pages::supplier_payments.create')->middleware(['auth', 'permission:supplier_payments.create'])->name('supplier-payments.create');
+Route::livewire('supplier-payments/{supplierPayment}', 'pages::supplier_payments.show')->middleware(['auth', 'permission:supplier_payments.view'])->name('supplier-payments.show');
+Route::view('supplier-payments/{supplierPayment}/print', 'pages.supplier_payments.print')->middleware(['auth', 'permission:supplier_payments.print'])->name('supplier-payments.print');
+Route::livewire('supplier-ledger', 'pages::supplier_payments.ledger')->middleware(['auth', 'permission:supplier_payments.view'])->name('supplier-ledger.index');
+Route::view('supplier-ledger/print', 'pages.supplier_payments.ledger-print')->middleware(['auth', 'permission:supplier_payments.print'])->name('supplier-ledger.print');
 
 Route::prefix('admin')->middleware(['auth', 'permission:users.update'])->group(function () {
     Route::livewire('roles', 'pages::roles.index')->name('roles.index');

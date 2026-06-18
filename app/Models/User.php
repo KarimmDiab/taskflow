@@ -41,7 +41,7 @@ class User extends Authenticatable
 
     public function supplierPayments()
     {
-        return $this->hasMany(SupplierPayment::class);
+        return $this->hasMany(SupplierPayment::class, 'created_by');
     }
 
     public function salesinvoices()
