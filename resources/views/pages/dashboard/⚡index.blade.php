@@ -382,25 +382,32 @@ new #[Title('ERP Dashboard')] class extends Component {
 };
 ?>
 
-<div class="min-h-screen bg-slate-50 px-4 py-6 text-slate-900 dark:bg-zinc-950 dark:text-zinc-100 sm:px-6 lg:px-8" dir="ltr">
-    <div class="mx-auto max-w-[1800px] space-y-6">
-        <section class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <div class="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
+<!-- واجهة المستخدم المُحسَّنة بالكامل -->
+<div class="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100 px-4 py-8 text-slate-900 dark:from-zinc-950 dark:via-zinc-900 dark:to-zinc-950 dark:text-zinc-100 sm:px-6 lg:px-8" dir="ltr">
+    <div class="mx-auto max-w-[1800px] space-y-8">
+
+        <!-- Header Section -->
+        <section class="relative overflow-hidden rounded-3xl border border-white/20 bg-white/70 p-6 shadow-xl shadow-slate-200/40 backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80 dark:shadow-black/20">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-500/5 via-purple-500/5 to-teal-500/5"></div>
+            <div class="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
                 <div>
-                    <p class="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-400">Fashion ERP Command Center</p>
-                    <h1 class="mt-1 text-3xl font-bold tracking-tight">Main Dashboard</h1>
-                    <p class="mt-2 max-w-3xl text-sm text-slate-500 dark:text-slate-400">Live sales, inventory, purchasing, returns, and finance overview from your current ERP/POS data.</p>
+                    <div class="mb-1 inline-flex items-center gap-2 rounded-full bg-indigo-100 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300">
+                        <span class="h-2 w-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                        Fashion ERP Command Center
+                    </div>
+                    <h1 class="mt-3 text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white">Main Dashboard</h1>
+                    <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-500 dark:text-slate-400">Live sales, inventory, purchasing, returns, and finance overview from your entire ERP ecosystem.</p>
                 </div>
-                <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-                    <input type="date" wire:model.live="dateFrom" class="rounded-xl border-slate-200 text-sm shadow-sm dark:border-zinc-700 dark:bg-zinc-950">
-                    <input type="date" wire:model.live="dateTo" class="rounded-xl border-slate-200 text-sm shadow-sm dark:border-zinc-700 dark:bg-zinc-950">
-                    <select wire:model.live="branchId" class="rounded-xl border-slate-200 text-sm shadow-sm dark:border-zinc-700 dark:bg-zinc-950">
+                <div class="grid w-full gap-3 sm:grid-cols-2 xl:w-auto xl:grid-cols-4">
+                    <input type="date" wire:model.live="dateFrom" class="rounded-xl border-slate-200/80 bg-white/70 text-sm shadow-sm backdrop-blur-sm dark:border-zinc-700/80 dark:bg-zinc-950/70">
+                    <input type="date" wire:model.live="dateTo" class="rounded-xl border-slate-200/80 bg-white/70 text-sm shadow-sm backdrop-blur-sm dark:border-zinc-700/80 dark:bg-zinc-950/70">
+                    <select wire:model.live="branchId" class="rounded-xl border-slate-200/80 bg-white/70 text-sm shadow-sm backdrop-blur-sm dark:border-zinc-700/80 dark:bg-zinc-950/70">
                         <option value="">All branches</option>
                         @foreach ($this->branches as $branch)
                             <option value="{{ $branch->id }}">{{ $branch->branch_name }}</option>
                         @endforeach
                     </select>
-                    <select wire:model.live="channel" class="rounded-xl border-slate-200 text-sm shadow-sm dark:border-zinc-700 dark:bg-zinc-950">
+                    <select wire:model.live="channel" class="rounded-xl border-slate-200/80 bg-white/70 text-sm shadow-sm backdrop-blur-sm dark:border-zinc-700/80 dark:bg-zinc-950/70">
                         <option value="all">All channels</option>
                         <option value="pos">POS only</option>
                         <option value="online">Online only</option>
@@ -409,77 +416,87 @@ new #[Title('ERP Dashboard')] class extends Component {
             </div>
         </section>
 
-        <div wire:loading.flex class="fixed inset-x-0 top-20 z-50 justify-center pointer-events-none">
-            <div class="rounded-full border border-blue-100 bg-white/90 px-4 py-2 text-xs font-semibold text-blue-700 shadow-lg backdrop-blur dark:border-blue-900 dark:bg-zinc-900/90 dark:text-blue-300">Refreshing dashboard...</div>
+        <!-- Loading State -->
+        <div wire:loading.flex class="fixed inset-x-0 top-24 z-50 justify-center pointer-events-none">
+            <div class="flex items-center gap-3 rounded-full border border-indigo-100 bg-white/90 px-5 py-2.5 text-sm font-semibold text-indigo-700 shadow-xl backdrop-blur-xl dark:border-indigo-800 dark:bg-zinc-900/90 dark:text-indigo-300">
+                <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path></svg>
+                Refreshing dashboard data...
+            </div>
         </div>
 
+        <!-- KPI Cards Grid -->
         <section class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5">
             @foreach ([
-                ['Total Sales', $this->kpis['total_sales'], 'EGP', 'bg-blue-50 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300'],
-                ['Net Sales', $this->kpis['net_sales'], 'EGP', 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300'],
-                ['Total Orders', $this->kpis['total_orders'], '', 'bg-slate-100 text-slate-700 dark:bg-zinc-800 dark:text-zinc-200'],
-                ['Online Orders', $this->kpis['online_orders'], '', 'bg-rose-50 text-rose-700 dark:bg-rose-950/30 dark:text-rose-300'],
-                ['POS Sales', $this->kpis['pos_sales'], '', 'bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300'],
-                ['Total Purchases', $this->kpis['total_purchases'], 'EGP', 'bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300'],
-                ['Total Returns', $this->kpis['total_returns'], 'EGP', 'bg-red-50 text-red-700 dark:bg-red-950/30 dark:text-red-300'],
-                ['Gross Profit', $this->kpis['gross_profit'], 'EGP', 'bg-teal-50 text-teal-700 dark:bg-teal-950/30 dark:text-teal-300'],
-                ['Total Expenses', $this->kpis['total_expenses'], 'EGP', 'bg-orange-50 text-orange-700 dark:bg-orange-950/30 dark:text-orange-300'],
-                ['Low Stock Products', $this->kpis['low_stock_products'], '', 'bg-yellow-50 text-yellow-700 dark:bg-yellow-950/30 dark:text-yellow-300'],
-                ['Out of Stock Products', $this->kpis['out_of_stock_products'], '', 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200'],
-                ['Total Customers', $this->kpis['total_customers'], '', 'bg-cyan-50 text-cyan-700 dark:bg-cyan-950/30 dark:text-cyan-300'],
-                ['Total Suppliers', $this->kpis['total_suppliers'], '', 'bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300'],
-            ] as [$label, $value, $suffix, $classes])
-                <div class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900">
-                    <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">{{ $label }}</p>
-                    <p class="mt-3 rounded-xl px-3 py-2 text-2xl font-black {{ $classes }}">
+                ['Total Sales', $this->kpis['total_sales'], 'EGP', 'bg-gradient-to-br from-blue-50 to-indigo-50 text-blue-700 dark:from-blue-950/30 dark:to-indigo-950/20 dark:text-blue-300', 'M13 7h8m0 0v8m0-8l-8 8-4-4-6 6'],
+                ['Net Sales', $this->kpis['net_sales'], 'EGP', 'bg-gradient-to-br from-emerald-50 to-teal-50 text-emerald-700 dark:from-emerald-950/30 dark:to-teal-950/20 dark:text-emerald-300', 'M5 10l7-7m0 0l7 7m-7-7v18'],
+                ['Total Orders', $this->kpis['total_orders'], '', 'bg-gradient-to-br from-slate-100 to-gray-50 text-slate-700 dark:from-zinc-800 dark:to-zinc-900 dark:text-zinc-200', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+                ['Online Orders', $this->kpis['online_orders'], '', 'bg-gradient-to-br from-rose-50 to-pink-50 text-rose-700 dark:from-rose-950/30 dark:to-pink-950/20 dark:text-rose-300', 'M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9'],
+                ['POS Sales', $this->kpis['pos_sales'], '', 'bg-gradient-to-br from-indigo-50 to-blue-50 text-indigo-700 dark:from-indigo-950/30 dark:to-blue-950/20 dark:text-indigo-300', 'M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z'],
+                ['Total Purchases', $this->kpis['total_purchases'], 'EGP', 'bg-gradient-to-br from-amber-50 to-yellow-50 text-amber-700 dark:from-amber-950/30 dark:to-yellow-950/20 dark:text-amber-300', 'M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4z'],
+                ['Total Returns', $this->kpis['total_returns'], 'EGP', 'bg-gradient-to-br from-red-50 to-rose-50 text-red-700 dark:from-red-950/30 dark:to-rose-950/20 dark:text-red-300', 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z'],
+                ['Gross Profit', $this->kpis['gross_profit'], 'EGP', 'bg-gradient-to-br from-teal-50 to-cyan-50 text-teal-700 dark:from-teal-950/30 dark:to-cyan-950/20 dark:text-teal-300', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                ['Total Expenses', $this->kpis['total_expenses'], 'EGP', 'bg-gradient-to-br from-orange-50 to-amber-50 text-orange-700 dark:from-orange-950/30 dark:to-amber-950/20 dark:text-orange-300', 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z'],
+                ['Low Stock', $this->kpis['low_stock_products'], '', 'bg-gradient-to-br from-yellow-50 to-amber-50 text-yellow-700 dark:from-yellow-950/30 dark:to-amber-950/20 dark:text-yellow-300', 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'],
+                ['Out of Stock', $this->kpis['out_of_stock_products'], '', 'bg-gradient-to-br from-zinc-100 to-slate-100 text-zinc-700 dark:from-zinc-800 dark:to-slate-900 dark:text-zinc-200', 'M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                ['Customers', $this->kpis['total_customers'], '', 'bg-gradient-to-br from-cyan-50 to-blue-50 text-cyan-700 dark:from-cyan-950/30 dark:to-blue-950/20 dark:text-cyan-300', 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z'],
+                ['Suppliers', $this->kpis['total_suppliers'], '', 'bg-gradient-to-br from-violet-50 to-purple-50 text-violet-700 dark:from-violet-950/30 dark:to-purple-950/20 dark:text-violet-300', 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+            ] as [$label, $value, $suffix, $classes, $iconPath])
+                <div class="group relative overflow-hidden rounded-2xl border border-white/20 bg-white/70 p-5 shadow-lg shadow-slate-200/50 backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/70 dark:border-zinc-800/50 dark:bg-zinc-900/80 dark:shadow-black/20 dark:hover:shadow-black/40">
+                    <div class="absolute -right-4 -top-4 h-24 w-24 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <svg fill="currentColor" viewBox="0 0 24 24"><path d="{{ $iconPath }}"/></svg>
+                    </div>
+                    <p class="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">{{ $label }}</p>
+                    <p class="mt-2 inline-block rounded-xl px-3 py-2 text-2xl font-black {{ $classes }}">
                         {{ is_numeric($value) ? number_format((float) $value, $suffix === '' ? 0 : 2) : $value }} {{ $suffix }}
                     </p>
                 </div>
             @endforeach
         </section>
 
-        <section class="grid gap-4 xl:grid-cols-3">
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 xl:col-span-2">
-                <h2 class="text-lg font-bold">Sales Overview</h2>
+        <!-- Charts Section -->
+        <section class="grid gap-5 xl:grid-cols-3">
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80 xl:col-span-2">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-indigo-500"></span> Sales Overview</h2>
                 <div class="mt-4 h-80" wire:ignore><canvas id="salesTrendChart"></canvas></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">POS vs Online</h2>
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-rose-500"></span> POS vs Online</h2>
                 <div class="mt-4 h-80" wire:ignore><canvas id="channelChart"></canvas></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Sales by Branch</h2>
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-blue-500"></span> Sales by Branch</h2>
                 <div class="mt-4 h-72" wire:ignore><canvas id="branchChart"></canvas></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Payment Methods</h2>
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-violet-500"></span> Payment Methods</h2>
                 <div class="mt-4 h-72" wire:ignore><canvas id="paymentChart"></canvas></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Top Customers</h2>
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-teal-500"></span> Top Customers</h2>
                 <div class="mt-4 h-72" wire:ignore><canvas id="customerChart"></canvas></div>
             </div>
         </section>
 
-        <section class="grid gap-4 xl:grid-cols-3">
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Top Selling Products</h2>
+        <!-- Data Cards Row -->
+        <section class="grid gap-5 xl:grid-cols-3">
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-emerald-500"></span> Top Selling Products</h2>
                 <div class="mt-4 h-72" wire:ignore><canvas id="productChart"></canvas></div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Inventory Overview</h2>
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-amber-500"></span> Inventory Overview</h2>
                 <dl class="mt-4 space-y-3 text-sm">
-                    <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>Total inventory value</dt><dd class="font-bold">{{ number_format($this->inventoryOverview['value'], 2) }} EGP</dd></div>
-                    <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>Low stock variants</dt><dd class="font-bold">{{ number_format($this->kpis['low_stock_products']) }}</dd></div>
-                    <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>Out of stock variants</dt><dd class="font-bold">{{ number_format($this->inventoryOverview['out_of_stock']) }}</dd></div>
+                    <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>Total inventory value</dt><dd class="font-bold">{{ number_format($this->inventoryOverview['value'], 2) }} EGP</dd></div>
+                    <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>Low stock variants</dt><dd class="font-bold">{{ number_format($this->kpis['low_stock_products']) }}</dd></div>
+                    <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>Out of stock variants</dt><dd class="font-bold">{{ number_format($this->inventoryOverview['out_of_stock']) }}</dd></div>
                 </dl>
                 <div class="mt-5">
-                    <h3 class="text-sm font-bold">Low Stock Variants</h3>
+                    <h3 class="text-sm font-bold text-slate-500 dark:text-slate-400">Low Stock Variants</h3>
                     <div class="mt-3 space-y-2">
                         @forelse ($this->inventoryOverview['low_stock'] as $row)
-                            <div class="flex items-center justify-between rounded-xl border border-slate-100 p-3 text-sm dark:border-zinc-800">
-                                <span>{{ $row->productVariant?->product?->product_name ?? 'Unknown' }} <span class="text-slate-400">{{ $row->branch?->branch_name }}</span></span>
-                                <span class="rounded-full bg-yellow-50 px-2 py-1 text-xs font-bold text-yellow-700">{{ $row->quantity }}</span>
+                            <div class="flex items-center justify-between rounded-xl border border-slate-100/70 bg-white/40 p-3 text-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/40">
+                                <span>{{ $row->productVariant?->product?->product_name ?? 'Unknown' }} <span class="text-slate-400">at {{ $row->branch?->branch_name }}</span></span>
+                                <span class="rounded-full bg-yellow-100 px-2.5 py-1 text-xs font-bold text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300">{{ $row->quantity }}</span>
                             </div>
                         @empty
                             <p class="rounded-xl border border-dashed border-slate-200 p-4 text-center text-sm text-slate-500 dark:border-zinc-800">No low stock variants.</p>
@@ -487,33 +504,34 @@ new #[Title('ERP Dashboard')] class extends Component {
                     </div>
                 </div>
             </div>
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Purchases Overview</h2>
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-cyan-500"></span> Purchases Overview</h2>
                 <dl class="mt-4 space-y-3 text-sm">
                     @foreach ([
                         ['Purchase invoices', number_format($this->purchasesOverview['count'])],
                         ['Purchase amount', number_format($this->purchasesOverview['amount'], 2).' EGP'],
                         ['Supplier payments', number_format($this->purchasesOverview['payments'], 2).' EGP'],
-                        ['Outstanding supplier balance', number_format($this->purchasesOverview['outstanding'], 2).' EGP'],
+                        ['Outstanding balance', number_format($this->purchasesOverview['outstanding'], 2).' EGP'],
                         ['Purchase returns', number_format($this->purchasesOverview['returns'], 2).' EGP'],
                     ] as [$label, $value])
-                        <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>{{ $label }}</dt><dd class="font-bold">{{ $value }}</dd></div>
+                        <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>{{ $label }}</dt><dd class="font-bold">{{ $value }}</dd></div>
                     @endforeach
                 </dl>
             </div>
         </section>
 
-        <section class="grid gap-4 xl:grid-cols-3">
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Returns Overview</h2>
+        <!-- Returns & Finance & Ops Summary -->
+        <section class="grid gap-5 xl:grid-cols-3">
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-red-500"></span> Returns Overview</h2>
                 <dl class="mt-4 space-y-3 text-sm">
-                    <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>Sales returns</dt><dd class="font-bold">{{ number_format($this->returnsOverview['sales_returns'], 2) }} EGP</dd></div>
-                    <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>Purchase returns</dt><dd class="font-bold">{{ number_format($this->returnsOverview['purchase_returns'], 2) }} EGP</dd></div>
-                    <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>Return rate</dt><dd class="font-bold">{{ number_format($this->returnsOverview['return_rate'], 2) }}%</dd></div>
+                    <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>Sales returns</dt><dd class="font-bold">{{ number_format($this->returnsOverview['sales_returns'], 2) }} EGP</dd></div>
+                    <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>Purchase returns</dt><dd class="font-bold">{{ number_format($this->returnsOverview['purchase_returns'], 2) }} EGP</dd></div>
+                    <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>Return rate</dt><dd class="font-bold">{{ number_format($this->returnsOverview['return_rate'], 2) }}%</dd></div>
                 </dl>
                 <div class="mt-5 space-y-2">
                     @forelse ($this->returnsOverview['top_products'] as $row)
-                        <div class="flex justify-between rounded-xl border border-slate-100 p-3 text-sm dark:border-zinc-800">
+                        <div class="flex justify-between rounded-xl border border-slate-100/70 bg-white/40 p-3 text-sm backdrop-blur-sm dark:border-zinc-800 dark:bg-zinc-950/40">
                             <span>{{ $row->productVariant?->product?->product_name ?? 'Unknown' }}</span>
                             <span class="font-bold">{{ (int) $row->qty }} pcs</span>
                         </div>
@@ -523,8 +541,8 @@ new #[Title('ERP Dashboard')] class extends Component {
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Finance Overview</h2>
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-purple-500"></span> Finance Overview</h2>
                 <dl class="mt-4 space-y-3 text-sm">
                     @foreach ([
                         ['Gross sales', $this->finance['gross_sales']],
@@ -536,30 +554,30 @@ new #[Title('ERP Dashboard')] class extends Component {
                         ['Expenses', $this->finance['expenses']],
                         ['Estimated net profit', $this->finance['estimated_net_profit']],
                     ] as [$label, $value])
-                        <div class="flex justify-between rounded-xl bg-slate-50 p-3 dark:bg-zinc-950"><dt>{{ $label }}</dt><dd class="font-bold">{{ number_format($value, 2) }} EGP</dd></div>
+                        <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 dark:bg-zinc-950/50"><dt>{{ $label }}</dt><dd class="font-bold">{{ number_format($value, 2) }} EGP</dd></div>
                     @endforeach
-                    <div class="flex justify-between rounded-xl bg-blue-50 p-3 text-blue-700 dark:bg-blue-950/30 dark:text-blue-300"><dt>Profit margin</dt><dd class="font-black">{{ number_format($this->finance['profit_margin'], 2) }}%</dd></div>
+                    <div class="flex justify-between rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 p-3 font-bold text-blue-700 dark:from-blue-950/30 dark:to-indigo-950/20 dark:text-blue-300"><dt>Profit margin</dt><dd class="font-black">{{ number_format($this->finance['profit_margin'], 2) }}%</dd></div>
                 </dl>
             </div>
 
-            <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                <h2 class="text-lg font-bold">Operations Summary</h2>
-                <div class="mt-4 space-y-5">
+            <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-orange-500"></span> Operations Summary</h2>
+                <div class="mt-4 space-y-6">
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-500">Inventory adjustments</h3>
+                        <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Inventory adjustments</h3>
                         <div class="mt-2 space-y-2">
                             @forelse ($this->inventoryOverview['adjustments'] as $row)
-                                <div class="flex justify-between rounded-xl bg-slate-50 p-3 text-sm dark:bg-zinc-950"><span>{{ str($row->adjustment_type)->headline() }}</span><strong>{{ $row->total }} / {{ (int) $row->qty }} pcs</strong></div>
+                                <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 text-sm dark:bg-zinc-950/50"><span>{{ str($row->adjustment_type)->headline() }}</span><strong>{{ $row->total }} / {{ (int) $row->qty }} pcs</strong></div>
                             @empty
                                 <p class="text-sm text-slate-500">No adjustments.</p>
                             @endforelse
                         </div>
                     </div>
                     <div>
-                        <h3 class="text-sm font-semibold text-slate-500">Stock transfers</h3>
+                        <h3 class="text-sm font-semibold text-slate-500 dark:text-slate-400">Stock transfers</h3>
                         <div class="mt-2 space-y-2">
                             @forelse ($this->inventoryOverview['transfers'] as $row)
-                                <div class="flex justify-between rounded-xl bg-slate-50 p-3 text-sm dark:bg-zinc-950"><span>{{ ucfirst($row->status) }}</span><strong>{{ $row->total }}</strong></div>
+                                <div class="flex justify-between rounded-xl bg-slate-50/70 p-3 text-sm dark:bg-zinc-950/50"><span>{{ ucfirst($row->status) }}</span><strong>{{ $row->total }}</strong></div>
                             @empty
                                 <p class="text-sm text-slate-500">No transfers.</p>
                             @endforelse
@@ -569,7 +587,8 @@ new #[Title('ERP Dashboard')] class extends Component {
             </div>
         </section>
 
-        <section class="grid gap-4 xl:grid-cols-2">
+        <!-- Recent Activity -->
+        <section class="grid gap-5 xl:grid-cols-2">
             @foreach ([
                 'Latest Sales Invoices' => [$this->recentActivity['sales'], fn ($row) => [$row->invoice_number, $row->customer?->customer_name ?? 'Walk-in', number_format((float) $row->net_total, 2).' EGP', $row->created_at?->format('Y-m-d H:i')]],
                 'Latest Online Orders' => [$this->recentActivity['orders'], fn ($row) => [$row->order_number, $row->customer_name, ucfirst($row->status), $row->created_at?->format('Y-m-d H:i')]],
@@ -578,23 +597,23 @@ new #[Title('ERP Dashboard')] class extends Component {
                 'Latest Sales Returns' => [$this->recentActivity['sales_returns'], fn ($row) => [$row->return_number, $row->invoice?->customer?->customer_name ?? 'Unknown', number_format((float) $row->return_amount, 2).' EGP', ucfirst($row->status)]],
                 'Latest Supplier Payments' => [$this->recentActivity['supplier_payments'], fn ($row) => [$row->payment_number, $row->supplier?->supplier_name ?? 'Unknown', number_format((float) $row->amount, 2).' EGP', $row->payment_date?->format('Y-m-d')]],
             ] as $title => [$rows, $mapper])
-                <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-                    <h2 class="text-lg font-bold">{{ $title }}</h2>
-                    <div class="mt-4 divide-y divide-slate-100 dark:divide-zinc-800">
+                <div class="rounded-2xl border border-white/20 bg-white/70 p-6 shadow-lg backdrop-blur-md dark:border-zinc-800/50 dark:bg-zinc-900/80">
+                    <h2 class="text-lg font-bold flex items-center gap-2"><span class="h-2 w-2 rounded-full bg-slate-500"></span> {{ $title }}</h2>
+                    <div class="mt-4 divide-y divide-slate-100/70 dark:divide-zinc-800/50">
                         @forelse ($rows as $row)
                             @php([$primary, $secondary, $meta, $date] = $mapper($row))
-                            <div class="grid grid-cols-[1fr_auto] gap-4 py-3 text-sm">
+                            <div class="grid grid-cols-[1fr_auto] gap-4 py-4 text-sm">
                                 <div>
-                                    <p class="font-bold">{{ $primary }}</p>
-                                    <p class="text-slate-500">{{ $secondary }}</p>
+                                    <p class="font-semibold text-slate-800 dark:text-white">{{ $primary }}</p>
+                                    <p class="text-slate-500 dark:text-slate-400">{{ $secondary }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="font-semibold">{{ $meta }}</p>
-                                    <p class="text-xs text-slate-400">{{ $date }}</p>
+                                    <p class="font-semibold text-slate-700 dark:text-slate-200">{{ $meta }}</p>
+                                    <p class="text-xs text-slate-400 dark:text-slate-500">{{ $date }}</p>
                                 </div>
                             </div>
                         @empty
-                            <p class="rounded-xl border border-dashed border-slate-200 p-5 text-center text-sm text-slate-500 dark:border-zinc-800">No activity for the selected filters.</p>
+                            <p class="py-6 text-center text-sm text-slate-500 dark:text-slate-400">No activity for the selected filters.</p>
                         @endforelse
                     </div>
                 </div>
@@ -602,6 +621,7 @@ new #[Title('ERP Dashboard')] class extends Component {
         </section>
     </div>
 
+    <!-- Chart.js Script (unchanged) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         window.dashboardChartData = @json($this->chartPayload);
@@ -611,7 +631,7 @@ new #[Title('ERP Dashboard')] class extends Component {
             window.dashboardChartsReady = true;
             const charts = window.dashboardCharts || {};
             window.dashboardCharts = charts;
-            const colors = ['#2563eb', '#10b981', '#f43f5e', '#8b5cf6', '#f59e0b', '#06b6d4', '#64748b', '#ef4444'];
+            const colors = ['#6366f1', '#10b981', '#f43f5e', '#8b5cf6', '#f59e0b', '#06b6d4', '#64748b', '#ef4444'];
 
             function chartOptions(horizontal = false) {
                 return {
@@ -638,7 +658,7 @@ new #[Title('ERP Dashboard')] class extends Component {
                         datasets: [{
                             data: values,
                             borderColor: colors[0],
-                            backgroundColor: type === 'line' ? 'rgba(37,99,235,.14)' : colors,
+                            backgroundColor: type === 'line' ? 'rgba(99,102,241,.14)' : colors,
                             fill: type === 'line',
                             tension: .35,
                             borderWidth: 2,
