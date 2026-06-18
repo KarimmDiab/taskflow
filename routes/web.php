@@ -34,7 +34,7 @@ Route::get('/collections/{slug}', [CollectionController::class, 'show'])
     ->name('collection.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::view('dashboard', 'dashboard')
+    Route::livewire('dashboard', 'pages::dashboard.index')
         ->middleware('permission:dashboard.view')
         ->name('dashboard');
 });
