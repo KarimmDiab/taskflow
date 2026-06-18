@@ -12,6 +12,7 @@ class SalesInvoiceService
 {
     public function __construct(
         private readonly InventoryService $inventory,
+        private readonly StockMovementService $stockMovements,
         private readonly SalesActivityLogger $logger,
     ) {}
 
@@ -42,8 +43,16 @@ class SalesInvoiceService
 
             foreach ($items as $item) {
                 $this->assertStock((int) $item['product_variant_id'], (int) $data['branch_id'], (int) $item['quantity']);
-                $this->createDetail($invoice, $item);
-                $this->inventory->adjust((int) $item['product_variant_id'], (int) $data['branch_id'], -((int) $item['quantity']));
+                $detail = $this->createDetail($invoice, $item);
+                $this->stockMovements->recordSale(
+                    (int) $data['branch_id'],
+                    (int) $item['product_variant_id'],
+                    (int) $item['quantity'],
+                    (float) $item['unit_price'],
+                    $invoice,
+                    "Sale line #{$detail->id} for invoice {$invoice->invoice_number}",
+                    true,
+                );
             }
 
             $this->logger->invoice($invoice, 'created', 'Sales invoice created.');
@@ -64,7 +73,15 @@ class SalesInvoiceService
             $newBranchId = (int) $data['branch_id'];
 
             foreach ($invoice->salesInvoiceDetails as $detail) {
-                $this->inventory->adjust((int) $detail->product_variant_id, $oldBranchId, (int) $detail->product_quantity);
+                $this->stockMovements->recordAdjustment(
+                    $oldBranchId,
+                    (int) $detail->product_variant_id,
+                    (int) $detail->product_quantity,
+                    'in',
+                    $invoice,
+                    "Stock restored before editing invoice {$invoice->invoice_number}",
+                    true,
+                );
             }
 
             $totals = $this->calculateTotals($items, (float) ($data['discount_amount'] ?? $data['deduction'] ?? 0), (float) ($data['tax_amount'] ?? 0));
@@ -93,8 +110,16 @@ class SalesInvoiceService
             $invoice->salesInvoiceDetails()->delete();
 
             foreach ($items as $item) {
-                $this->createDetail($invoice, $item);
-                $this->inventory->adjust((int) $item['product_variant_id'], $newBranchId, -((int) $item['quantity']));
+                $detail = $this->createDetail($invoice, $item);
+                $this->stockMovements->recordSale(
+                    $newBranchId,
+                    (int) $item['product_variant_id'],
+                    (int) $item['quantity'],
+                    (float) $item['unit_price'],
+                    $invoice,
+                    "Sale line #{$detail->id} after editing invoice {$invoice->invoice_number}",
+                    true,
+                );
             }
 
             $this->logger->invoice($invoice, 'updated', 'Sales invoice updated.');
@@ -113,7 +138,15 @@ class SalesInvoiceService
             $invoice->load('salesInvoiceDetails');
 
             foreach ($invoice->salesInvoiceDetails as $detail) {
-                $this->inventory->adjust((int) $detail->product_variant_id, (int) $invoice->branch_id, (int) $detail->product_quantity);
+                $this->stockMovements->recordAdjustment(
+                    (int) $invoice->branch_id,
+                    (int) $detail->product_variant_id,
+                    (int) $detail->product_quantity,
+                    'in',
+                    $invoice,
+                    "Stock restored when cancelling invoice {$invoice->invoice_number}",
+                    true,
+                );
             }
 
             $invoice->update([

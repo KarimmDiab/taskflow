@@ -16,6 +16,7 @@ return [
         'delete' => 'Delete',
         'print' => 'Print',
         'approve' => 'Approve',
+        'export' => 'Export',
     ],
 
     'modules' => [
@@ -41,6 +42,8 @@ return [
         'pos_system' => 'POS System',
         'sales' => 'Sales Management',
         'sales.return' => 'Sales Returns',
+        'stock_movements' => 'Stock Movements',
+        'inventory_adjustments' => 'Inventory Adjustments',
     ],
 
     'default_role_permissions' => [
@@ -74,6 +77,7 @@ return [
             'sales.print',
             'sales.return.create',
             'sales.return.view',
+            'stock_movements.view',
         ],
     ],
 
@@ -106,6 +110,8 @@ return [
         'sales.reports' => 'sales.view',
         'sales.print' => 'sales.print',
         'sales.returns.print' => 'sales.print',
+        'stock-movements.index' => 'stock_movements.view',
+        'inventory-adjustments.index' => 'inventory_adjustments.view',
         'admin.notifications' => 'notifications.view',
         'roles-permissions.index' => 'users.update',
         'user-roles.index' => 'users.update',

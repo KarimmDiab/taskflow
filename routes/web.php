@@ -52,6 +52,8 @@ Route::livewire('payment_methods', 'pages::payment_method.index')->middleware(['
 Route::livewire('shipping', 'pages::shipping.index')->middleware(['auth', 'permission:shipping_governorates.view'])->name('shipping');
 Route::livewire('all_collections', 'pages::collection.index')->middleware(['auth', 'permission:collections.view'])->name('all_collections');
 Route::livewire('pos_system', 'pages::pos_system.index')->middleware(['auth', 'permission:pos_system.view'])->name('pos_system');
+Route::livewire('stock-movements', 'pages::stock_movements.index')->middleware(['auth', 'permission:stock_movements.view'])->name('stock-movements.index');
+Route::livewire('inventory-adjustments', 'pages::inventory_adjustments.index')->middleware(['auth', 'permission:inventory_adjustments.view'])->name('inventory-adjustments.index');
 Route::middleware(['auth'])->group(function () {
     Route::livewire('sales', 'pages::sales.index')->middleware('permission:sales.view')->name('sales.index');
     Route::livewire('sales/{invoice}', 'pages::sales.show')->middleware('permission:sales.view')->name('sales.show');

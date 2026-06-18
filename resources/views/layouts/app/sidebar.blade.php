@@ -321,6 +321,16 @@
 
             <!-- Products & Inventory -->
             <flux:sidebar.group :heading="__('إدارة المنتجات والمخزون')" class="sidebar-group-enhanced mb-6">
+                @can('stock_movements.view')
+                    <flux:sidebar.item icon="arrows-right-left" :href="route('stock-movements.index')"
+                        :current="request()->routeIs('stock-movements.index')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Stock Movements') }}</flux:sidebar.item>
+                @endcan
+                @can('inventory_adjustments.view')
+                    <flux:sidebar.item icon="clipboard-document-check" :href="route('inventory-adjustments.index')"
+                        :current="request()->routeIs('inventory-adjustments.index')" wire:navigate class="sidebar-item-enhanced">
+                        {{ __('Inventory Adjustments') }}</flux:sidebar.item>
+                @endcan
                 @can('products.view')
                     <flux:sidebar.item icon="cube" :href="route('products')" :current="request()->routeIs('products')"
                         wire:navigate class="sidebar-item-enhanced">{{ __('المنتجات') }}</flux:sidebar.item>

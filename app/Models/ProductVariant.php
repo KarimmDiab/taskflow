@@ -53,4 +53,14 @@ class ProductVariant extends Model
     {
         return $this->hasOne(Inventory::class);
     }
+
+    public function stockMovements()
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
+    public function inventoryAdjustments()
+    {
+        return $this->hasMany(InventoryAdjustment::class);
+    }
 }

@@ -16,6 +16,7 @@ use App\Models\SalesInvoice;
 use App\Models\SalesInvoiceDetail;
 use App\Models\Shipping;
 use App\Models\User;
+use App\Services\StockMovementService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -129,29 +130,25 @@ class CheckoutController extends Controller
             ]);
 
             foreach ($cart as $item) {
-                $inventory = Inventory::query()
-                    ->where('branch_id', $branchId)
-                    ->where('product_variant_id', $item['variant_id'])
-                    ->lockForUpdate()
-                    ->first();
-
-                if (! $inventory || $inventory->quantity < $item['quantity']) {
-                    throw ValidationException::withMessages([
-                        'cart' => 'Some items are not available in stock.',
-                    ]);
-                }
-
                 $variant = $variants[$item['variant_id']];
                 $unitPrice = (float) ($variant->variant_price ?: $variant->product?->product_price ?: 0);
 
-                SalesInvoiceDetail::create([
+                $detail = SalesInvoiceDetail::create([
                     'sales_invoice_id' => $invoice->id,
                     'product_variant_id' => $item['variant_id'],
                     'product_quantity' => $item['quantity'],
                     'unit_price' => $unitPrice,
                 ]);
 
-                $inventory->decrement('quantity', $item['quantity']);
+                app(StockMovementService::class)->recordSale(
+                    (int) $branchId,
+                    (int) $item['variant_id'],
+                    (int) $item['quantity'],
+                    $unitPrice,
+                    $invoice,
+                    "Online order sale line #{$detail->id} for invoice {$invoice->invoice_number}",
+                    true,
+                );
             }
 
             OnlineOrder::create([

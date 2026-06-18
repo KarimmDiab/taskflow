@@ -6,11 +6,11 @@ use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Models\Color;
 use App\Models\Size;
-use App\Models\Inventory;
 use App\Models\PurchaseInvoice;
 use App\Models\PurchaseInvoiceDetail;
 use App\Models\Supplier;
 use App\Models\Branches;
+use App\Services\StockMovementService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Computed;
@@ -703,7 +703,7 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
 
                 foreach ($this->rows as $row) {
                     // إنشاء تفاصيل الفاتورة
-                    PurchaseInvoiceDetail::create([
+                    $detail = PurchaseInvoiceDetail::create([
                         'purchase_invoice_id' => $invoice->id,
                         'product_variant_id' => $row['variant_id'],
                         'product_quantity' => $row['qty'],
@@ -711,15 +711,14 @@ new #[Title('فاتورة مشتريات جديدة')] class extends Component {
                         'branch_id' => $row['branch_id'],
                     ]);
 
-                    // تحديث المخزون حسب الـ variant والفرع
-                    Inventory::updateOrCreate(
-                        [
-                            'product_variant_id' => $row['variant_id'],
-                            'branch_id' => $row['branch_id'],
-                        ],
-                        [
-                            'quantity' => DB::raw('COALESCE(quantity, 0) + ' . $row['qty']),
-                        ],
+                    app(StockMovementService::class)->recordPurchase(
+                        (int) $row['branch_id'],
+                        (int) $row['variant_id'],
+                        (int) $row['qty'],
+                        (float) $row['cost'],
+                        $invoice,
+                        "Purchase line #{$detail->id} for invoice {$invoice->invoice_number}",
+                        true,
                     );
 
                     // تحديث سعر التكلفة وسعر البيع في الـ variant

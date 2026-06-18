@@ -10,7 +10,7 @@ use Illuminate\Validation\ValidationException;
 class SalesReturnService
 {
     public function __construct(
-        private readonly InventoryService $inventory,
+        private readonly StockMovementService $stockMovements,
         private readonly SalesActivityLogger $logger,
     ) {}
 
@@ -92,7 +92,15 @@ class SalesReturnService
             $return->load('invoice', 'items');
 
             foreach ($return->items as $item) {
-                $this->inventory->adjust((int) $item->product_variant_id, (int) $return->invoice->branch_id, (int) $item->quantity);
+                $this->stockMovements->recordSalesReturn(
+                    (int) $return->invoice->branch_id,
+                    (int) $item->product_variant_id,
+                    (int) $item->quantity,
+                    (float) $item->unit_price,
+                    $return,
+                    "Approved sales return {$return->return_number}",
+                    true,
+                );
             }
 
             $return->update([
